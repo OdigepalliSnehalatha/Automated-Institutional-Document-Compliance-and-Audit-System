@@ -1,0 +1,114 @@
+INSTITUTIONAL COMPLIANCE AUDIT REPORT
+=====================================
+
+Document ID: 19
+Document Name: UNIT-2.pdf
+Institution ID: 1
+Department ID: 1
+Document Type ID: 4
+Document Type: Course PDF - Unit 2
+Audit ID: 31
+Compliance Score: 9.09%
+
+COMPLIANCE RESULTS
+------------------
+
+Check ID: 50
+Requirement ID: 5
+Compliance Code: UNIT-002
+Requirement: Unit 2 Course Content
+Status: Non-Compliant
+Evidence: No structural validation rule is configured for this requirement.
+
+-----------------------------------
+
+Check ID: 51
+Requirement ID: 42
+Compliance Code: U2-001
+Requirement: Institution Header
+Status: Non-Compliant
+Evidence: Matched: None. Missing: abc college of engineering. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 52
+Requirement ID: 43
+Compliance Code: U2-002
+Requirement: Course Information
+Status: Non-Compliant
+Evidence: Matched: None. Missing: programme, course code, course name, semester, academic year, credits. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 53
+Requirement ID: 44
+Compliance Code: U2-003
+Requirement: Unit Identification
+Status: Non-Compliant
+Evidence: Matched: None. Missing: unit ii. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 54
+Requirement ID: 45
+Compliance Code: U2-004
+Requirement: Unit Objectives
+Status: Non-Compliant
+Evidence: Matched: None. Missing: unit objectives. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 55
+Requirement ID: 46
+Compliance Code: U2-005
+Requirement: Unit Content
+Status: Non-Compliant
+Evidence: Matched: None. Missing: unit content. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 56
+Requirement ID: 47
+Compliance Code: U2-006
+Requirement: Important Concepts
+Status: Non-Compliant
+Evidence: Matched: None. Missing: important concepts. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 57
+Requirement ID: 48
+Compliance Code: U2-007
+Requirement: Topics and Subtopics
+Status: Non-Compliant
+Evidence: Matched: None. Missing: topics / subtopics, topics/subtopics, topics, subtopics. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 58
+Requirement ID: 49
+Compliance Code: U2-008
+Requirement: References
+Status: Non-Compliant
+Evidence: Matched: None. Missing: references. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 59
+Requirement ID: 50
+Compliance Code: U2-009
+Requirement: Approval Section
+Status: Non-Compliant
+Evidence: Matched: None. Missing: prepared by, verified by, hod approval. Match percentage: 0.0%.
+
+-----------------------------------
+
+Check ID: 60
+Requirement ID: 51
+Compliance Code: U2-010
+Requirement: Date
+Status: Compliant
+Evidence: All required structural elements were found. Matched: date. Match percentage: 100.0%.
+
+-----------------------------------
+

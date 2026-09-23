@@ -11,6 +11,8 @@ class InstitutionCreate(BaseModel):
     name: str
     email: str 
 class LoginRequest(BaseModel):
+    institution_name:str
+    role:str
     email: str
     password: str
 app = FastAPI()
@@ -1502,7 +1504,7 @@ def delete_user(
         "message": "User deleted successfully",
         "id": row[0]
     }
-@app.post("/login")
+app.post("/login")
 def login_user(login: LoginRequest):
     connection = get_connection()
 

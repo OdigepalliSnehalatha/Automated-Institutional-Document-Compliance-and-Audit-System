@@ -1,0 +1,199 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+}
+
+/* Login */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  width: 420px;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.login-box h1 {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 26px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+.login-box label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Dashboard */
+
+.dashboard {
+  min-height: 100vh;
+  padding: 40px;
+}
+
+.dashboard h1 {
+  margin-bottom: 8px;
+}
+
+.dashboard > p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.dashboard-card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card h2 {
+  margin-top: 0;
+}
+
+.dashboard-card p {
+  color: #666;
+}
+/* ================================
+   Document Analysis Results
+================================ */
+
+.analysis-result {
+  margin-top: 30px;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.analysis-result h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.analysis-result h3 {
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+
+.analysis-result p {
+  margin: 8px 0;
+}
+
+.compliance-result {
+  margin-top: 15px;
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f8f9fa;
+}
+
+.compliance-result p {
+  margin: 7px 0;
+}
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.status-badge.compliant {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.non-compliant {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.score-card {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.score-card h3 {
+  margin: 0 0 10px;
+}
+
+.score-value {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 10px 0;
+  color: #2563eb;
+}
+
+.score-card p {
+  margin: 0;
+  color: #64748b;
+}
+.report-info {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.report-info h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.report-info p {
+  margin: 8px 0;
+  word-break: break-word;
+}
