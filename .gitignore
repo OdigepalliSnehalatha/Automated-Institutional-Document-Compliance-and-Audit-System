@@ -2,22 +2,29 @@
 .env.*
 !.env.example
 
+# Python
 __pycache__/
-*.py[cod]
+*.pyc
 .venv/
 venv/
 env/
 
+# React / Node
 node_modules/
 dist/
 build/
 
+# Uploaded PDFs and documents
 uploads/
 *.pdf
 
+# Logs
+*.log
+
+# IDE
 .vscode/
 .idea/
 
-*.log
+# OS
 .DS_Store
 Thumbs.db
