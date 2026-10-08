@@ -34,8 +34,15 @@ function AuditorDashboard({ user }) {
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [pdfModalData, setPdfModalData] = useState({ id: null, name: "", isAccepted: false });
 
+  // Search & Filter state
+  const [subSearchQuery, setSubSearchQuery] = useState("");
+  const [subStatusFilter, setSubStatusFilter] = useState("ALL");
+  const [subDeptFilter, setSubDeptFilter] = useState("ALL");
+  const [formatSearchQuery, setFormatSearchQuery] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ error: "", success: "" });
+
 
   useEffect(() => {
     loadDashboardData();
@@ -573,50 +580,118 @@ function AuditorDashboard({ user }) {
       {activeTab === "formats" && (
         <div className="panel">
           <div className="panel-header">
-            <h3>Defined Structural Formats ({formats.length})</h3>
+            <div>
+              <h3>Defined Structural Formats</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Active templates: {formats.length}
+              </span>
+            </div>
             <button className="btn btn-primary btn-sm" onClick={() => setActiveTab("builder")}>
               + Create New Format
             </button>
           </div>
 
+          {formats.length > 0 && (
+            <div className="dashboard-toolbar">
+              <div className="toolbar-controls">
+                <div className="search-input-wrapper">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search format name, document type, department..."
+                    value={formatSearchQuery}
+                    onChange={(e) => setFormatSearchQuery(e.target.value)}
+                  />
+                </div>
+                {formatSearchQuery && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setFormatSearchQuery("")}
+                    title="Clear search"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
+              <span className="toolbar-count">
+                Showing{" "}
+                {
+                  formats.filter((fmt) => {
+                    const q = formatSearchQuery.toLowerCase();
+                    return (
+                      !q ||
+                      fmt.format_name.toLowerCase().includes(q) ||
+                      (fmt.document_type_name && fmt.document_type_name.toLowerCase().includes(q)) ||
+                      (fmt.department_code && fmt.department_code.toLowerCase().includes(q))
+                    );
+                  }).length
+                }{" "}
+                of {formats.length}
+              </span>
+            </div>
+          )}
+
           {formats.length === 0 ? (
             <p className="empty-state">No structural formats defined yet. Click 'Create New Format' to build one.</p>
           ) : (
-            <div className="table-wrapper">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Format Name</th>
-                    <th>Document Type</th>
-                    <th>Department</th>
-                    <th>Rules Count</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formats.map((fmt) => (
-                    <tr key={fmt.id}>
-                      <td><strong>{fmt.format_name}</strong></td>
-                      <td>{fmt.document_type_name}</td>
-                      <td>{fmt.department_code || "Institution-Wide"}</td>
-                      <td>{fmt.requirements?.length || 0} rules</td>
-                      <td>{new Date(fmt.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteFormat(fmt.id)}
-                          >
-                            🗑️ Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            (() => {
+              const filteredFormats = formats.filter((fmt) => {
+                const q = formatSearchQuery.toLowerCase();
+                return (
+                  !q ||
+                  fmt.format_name.toLowerCase().includes(q) ||
+                  (fmt.document_type_name && fmt.document_type_name.toLowerCase().includes(q)) ||
+                  (fmt.department_code && fmt.department_code.toLowerCase().includes(q))
+                );
+              });
+
+              if (filteredFormats.length === 0) {
+                return <p className="empty-state">No structural formats match your search criteria.</p>;
+              }
+
+              return (
+                <div className="table-wrapper">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Format Name</th>
+                        <th>Document Type</th>
+                        <th>Department</th>
+                        <th>Rules Count</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredFormats.map((fmt) => (
+                        <tr key={fmt.id}>
+                          <td><strong>{fmt.format_name}</strong></td>
+                          <td>{fmt.document_type_name}</td>
+                          <td>
+                            <span className="branch-pill">
+                              {fmt.department_code || "Institution-Wide"}
+                            </span>
+                          </td>
+                          <td>{fmt.requirements?.length || 0} rules</td>
+                          <td>{new Date(fmt.created_at).toLocaleDateString()}</td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDeleteFormat(fmt.id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           )}
         </div>
       )}
@@ -625,71 +700,184 @@ function AuditorDashboard({ user }) {
       {activeTab === "submissions" && (
         <div className="panel">
           <div className="panel-header">
-            <h3>All Institutional Submitted Documents</h3>
+            <div>
+              <h3>All Institutional Submitted Documents</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Total submissions across all branches: {recentSubmissions.length}
+              </span>
+            </div>
             <button className="btn btn-secondary btn-sm" onClick={loadDashboardData}>
               ↻ Refresh
             </button>
           </div>
 
+          {/* Submissions Search & Filters Toolbar */}
+          {recentSubmissions.length > 0 && (
+            <div className="dashboard-toolbar">
+              <div className="toolbar-controls">
+                <div className="search-input-wrapper">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search document, type, faculty..."
+                    value={subSearchQuery}
+                    onChange={(e) => setSubSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <select
+                  className="toolbar-filter-select"
+                  value={subStatusFilter}
+                  onChange={(e) => setSubStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">All Decisions</option>
+                  <option value="ACCEPTED">✓ Accepted</option>
+                  <option value="REJECTED">✕ Rejected</option>
+                  <option value="PENDING">⏳ Pending</option>
+                </select>
+
+                <select
+                  className="toolbar-filter-select"
+                  value={subDeptFilter}
+                  onChange={(e) => setSubDeptFilter(e.target.value)}
+                >
+                  <option value="ALL">All Branches</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.code}>
+                      {d.code} ({d.name})
+                    </option>
+                  ))}
+                </select>
+
+                {(subSearchQuery || subStatusFilter !== "ALL" || subDeptFilter !== "ALL") && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => {
+                      setSubSearchQuery("");
+                      setSubStatusFilter("ALL");
+                      setSubDeptFilter("ALL");
+                    }}
+                    title="Clear filters"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
+
+              <span className="toolbar-count">
+                Showing{" "}
+                {
+                  recentSubmissions.filter((doc) => {
+                    const q = subSearchQuery.toLowerCase();
+                    const matchesSearch =
+                      !q ||
+                      doc.file_name.toLowerCase().includes(q) ||
+                      (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                      (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                    const matchesStatus =
+                      subStatusFilter === "ALL" ||
+                      doc.analysis_status === subStatusFilter ||
+                      (subStatusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+                    const matchesDept =
+                      subDeptFilter === "ALL" ||
+                      doc.department_code === subDeptFilter;
+                    return matchesSearch && matchesStatus && matchesDept;
+                  }).length
+                }{" "}
+                of {recentSubmissions.length}
+              </span>
+            </div>
+          )}
+
           {recentSubmissions.length === 0 ? (
             <p className="empty-state">No submissions available.</p>
           ) : (
-            <div className="table-wrapper">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document Name</th>
-                    <th>Type</th>
-                    <th>Department</th>
-                    <th>Uploaded By</th>
-                    <th>Uploaded At</th>
-                    <th>Decision</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentSubmissions.map((doc) => (
-                    <tr key={doc.id}>
-                      <td><strong>{doc.file_name}</strong></td>
-                      <td>{doc.document_type_name}</td>
-                      <td>{doc.department_code || doc.department_name}</td>
-                      <td>{doc.uploaded_by_name}</td>
-                      <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
-                      <td><StatusBadge status={doc.analysis_status} /></td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => {
-                              setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
-                              setPdfModalOpen(true);
-                            }}
-                          >
-                            👁️ View PDF
-                          </button>
-                          {doc.analysis_status && doc.analysis_status !== "PENDING" && (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => openComparisonModal(doc.id)}
-                            >
-                              🔍 Comparison
-                            </button>
-                          )}
-                          {doc.analysis_status === "ACCEPTED" && (
-                            <button
-                              className="btn btn-success btn-sm"
-                              onClick={() => handleDownload(doc.id, doc.file_name)}
-                            >
-                              📥 Download
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            (() => {
+              const filtered = recentSubmissions.filter((doc) => {
+                const q = subSearchQuery.toLowerCase();
+                const matchesSearch =
+                  !q ||
+                  doc.file_name.toLowerCase().includes(q) ||
+                  (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                  (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                const matchesStatus =
+                  subStatusFilter === "ALL" ||
+                  doc.analysis_status === subStatusFilter ||
+                  (subStatusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+                const matchesDept =
+                  subDeptFilter === "ALL" ||
+                  doc.department_code === subDeptFilter;
+                return matchesSearch && matchesStatus && matchesDept;
+              });
+
+              if (filtered.length === 0) {
+                return <p className="empty-state">No documents match the specified search or filter criteria.</p>;
+              }
+
+              return (
+                <div className="table-wrapper">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Document Name</th>
+                        <th>Type</th>
+                        <th>Branch</th>
+                        <th>Uploaded By</th>
+                        <th>Uploaded At</th>
+                        <th>Decision</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((doc) => (
+                        <tr key={doc.id}>
+                          <td><strong>{doc.file_name}</strong></td>
+                          <td>{doc.document_type_name}</td>
+                          <td>
+                            <span className="branch-pill">
+                              {doc.department_code || doc.department_name || "Institution"}
+                            </span>
+                          </td>
+                          <td>{doc.uploaded_by_name}</td>
+                          <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
+                          <td><StatusBadge status={doc.analysis_status} /></td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
+                                  setPdfModalOpen(true);
+                                }}
+                              >
+                                👁️ View PDF
+                              </button>
+                              {doc.analysis_status && doc.analysis_status !== "PENDING" && (
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => openComparisonModal(doc.id)}
+                                >
+                                  🔍 Comparison
+                                </button>
+                              )}
+                              {doc.analysis_status === "ACCEPTED" && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => handleDownload(doc.id, doc.file_name)}
+                                >
+                                  📥 Download
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           )}
         </div>
       )}
@@ -698,63 +886,157 @@ function AuditorDashboard({ user }) {
       {activeTab === "accepted" && (
         <div className="panel">
           <div className="panel-header">
-            <h3>Verified & Accepted Official Documents</h3>
+            <div>
+              <h3>Verified & Accepted Official Documents</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Auditor-approved documents: {recentSubmissions.filter((d) => d.analysis_status === "ACCEPTED").length}
+              </span>
+            </div>
             <button className="btn btn-secondary btn-sm" onClick={loadDashboardData}>
               ↻ Refresh
             </button>
           </div>
 
+          {recentSubmissions.filter((d) => d.analysis_status === "ACCEPTED").length > 0 && (
+            <div className="dashboard-toolbar">
+              <div className="toolbar-controls">
+                <div className="search-input-wrapper">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search verified file, type, submitter..."
+                    value={subSearchQuery}
+                    onChange={(e) => setSubSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <select
+                  className="toolbar-filter-select"
+                  value={subDeptFilter}
+                  onChange={(e) => setSubDeptFilter(e.target.value)}
+                >
+                  <option value="ALL">All Branches</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.code}>
+                      {d.code} ({d.name})
+                    </option>
+                  ))}
+                </select>
+
+                {(subSearchQuery || subDeptFilter !== "ALL") && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => {
+                      setSubSearchQuery("");
+                      setSubDeptFilter("ALL");
+                    }}
+                    title="Clear filters"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
+
+              <span className="toolbar-count">
+                Showing{" "}
+                {
+                  recentSubmissions
+                    .filter((d) => d.analysis_status === "ACCEPTED")
+                    .filter((doc) => {
+                      const q = subSearchQuery.toLowerCase();
+                      const matchesSearch =
+                        !q ||
+                        doc.file_name.toLowerCase().includes(q) ||
+                        (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                        (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                      const matchesDept =
+                        subDeptFilter === "ALL" ||
+                        doc.department_code === subDeptFilter;
+                      return matchesSearch && matchesDept;
+                    }).length
+                }{" "}
+                of {recentSubmissions.filter((d) => d.analysis_status === "ACCEPTED").length}
+              </span>
+            </div>
+          )}
+
           {recentSubmissions.filter((d) => d.analysis_status === "ACCEPTED").length === 0 ? (
             <p className="empty-state">No documents have reached ACCEPTED status yet.</p>
           ) : (
-            <div className="table-wrapper">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document Name</th>
-                    <th>Type</th>
-                    <th>Department</th>
-                    <th>Uploaded By</th>
-                    <th>Analyzed At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentSubmissions
-                    .filter((d) => d.analysis_status === "ACCEPTED")
-                    .map((doc) => (
-                      <tr key={doc.id}>
-                        <td><strong>{doc.file_name}</strong></td>
-                        <td>{doc.document_type_name}</td>
-                        <td>{doc.department_code || doc.department_name}</td>
-                        <td>{doc.uploaded_by_name}</td>
-                        <td>{doc.analyzed_at ? new Date(doc.analyzed_at).toLocaleString() : "-"}</td>
-                        <td><StatusBadge status="ACCEPTED" /></td>
-                        <td>
-                          <div className="table-actions">
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => {
-                                setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: true });
-                                setPdfModalOpen(true);
-                              }}
-                            >
-                              👁️ View PDF
-                            </button>
-                            <button
-                              className="btn btn-success btn-sm"
-                              onClick={() => handleDownload(doc.id, doc.file_name)}
-                            >
-                              📥 Download PDF
-                            </button>
-                          </div>
-                        </td>
+            (() => {
+              const filtered = recentSubmissions
+                .filter((d) => d.analysis_status === "ACCEPTED")
+                .filter((doc) => {
+                  const q = subSearchQuery.toLowerCase();
+                  const matchesSearch =
+                    !q ||
+                    doc.file_name.toLowerCase().includes(q) ||
+                    (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                    (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                  const matchesDept =
+                    subDeptFilter === "ALL" ||
+                    doc.department_code === subDeptFilter;
+                  return matchesSearch && matchesDept;
+                });
+
+              if (filtered.length === 0) {
+                return <p className="empty-state">No verified documents match the specified search or filter criteria.</p>;
+              }
+
+              return (
+                <div className="table-wrapper">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Document Name</th>
+                        <th>Type</th>
+                        <th>Branch</th>
+                        <th>Uploaded By</th>
+                        <th>Analyzed At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {filtered.map((doc) => (
+                        <tr key={doc.id}>
+                          <td><strong>{doc.file_name}</strong></td>
+                          <td>{doc.document_type_name}</td>
+                          <td>
+                            <span className="branch-pill">
+                              {doc.department_code || doc.department_name}
+                            </span>
+                          </td>
+                          <td>{doc.uploaded_by_name}</td>
+                          <td>{doc.analyzed_at ? new Date(doc.analyzed_at).toLocaleString() : "-"}</td>
+                          <td><StatusBadge status="ACCEPTED" /></td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: true });
+                                  setPdfModalOpen(true);
+                                }}
+                              >
+                                👁️ View PDF
+                              </button>
+                              <button
+                                className="btn btn-success btn-sm"
+                                onClick={() => handleDownload(doc.id, doc.file_name)}
+                              >
+                                📥 Download PDF
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           )}
         </div>
       )}

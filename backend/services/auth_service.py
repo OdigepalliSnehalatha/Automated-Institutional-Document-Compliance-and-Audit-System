@@ -93,14 +93,14 @@ def require_roles(*roles):
 
 def check_department_access(current_user: dict, target_department_id: int | None):
     """
-    Auditor has institution-wide access (target_department_id allowed).
-    HOD and Faculty can only access their assigned department.
+    Auditor has institution-wide access.
+    Faculty can submit and access documents across all branches/departments in their institution.
+    HOD is department-specific and oversees their assigned department.
     """
     role = current_user.get("role")
     user_dept_id = current_user.get("department_id")
 
-    if role == "Auditor":
-        # Auditor is institution-level; can view or manage all departments in their institution
+    if role in {"Auditor", "Faculty"}:
         return
 
     if user_dept_id is None:

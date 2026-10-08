@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "./api";
 import Navbar from "./components/Navbar";
+import LogoutModal from "./components/LogoutModal";
 import LoginPage from "./pages/LoginPage";
 import AuditorDashboard from "./pages/AuditorDashboard";
 import HodDashboard from "./pages/HodDashboard";
@@ -9,6 +10,8 @@ import FacultyDashboard from "./pages/FacultyDashboard";
 function App() {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutFeedback, setLogoutFeedback] = useState("");
 
   useEffect(() => {
     restoreSession();
@@ -23,20 +26,21 @@ function App() {
         setUser(null);
       }
     } catch (error) {
-      // 401 is expected when the user is not logged in yet.
       setUser(null);
     } finally {
       setInitializing(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleConfirmLogout = async () => {
     try {
       await api.post("/logout");
     } catch (e) {
       // Session may already be expired
     }
+    setLogoutModalOpen(false);
     setUser(null);
+    setLogoutFeedback("You have securely signed out of your institutional session.");
   };
 
   if (initializing) {
@@ -51,16 +55,31 @@ function App() {
   }
 
   if (!user) {
-    return <LoginPage onLoginSuccess={(authenticatedUser) => setUser(authenticatedUser)} />;
+    return (
+      <LoginPage
+        onLoginSuccess={(authenticatedUser) => {
+          setLogoutFeedback("");
+          setUser(authenticatedUser);
+        }}
+        initialInfo={logoutFeedback}
+      />
+    );
   }
 
   return (
     <div className="app-layout">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} onRequestLogout={() => setLogoutModalOpen(true)} />
 
       {user.role === "Auditor" && <AuditorDashboard user={user} />}
       {user.role === "HOD" && <HodDashboard user={user} />}
       {user.role === "Faculty" && <FacultyDashboard user={user} />}
+
+      <LogoutModal
+        isOpen={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+        user={user}
+      />
     </div>
   );
 }

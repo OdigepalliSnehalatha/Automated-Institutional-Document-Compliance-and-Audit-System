@@ -25,6 +25,11 @@ function FacultyDashboard({ user }) {
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [pdfModalData, setPdfModalData] = useState({ id: null, name: "", isAccepted: false });
 
+  // Filter & Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+
   useEffect(() => {
     loadMyDocuments();
     loadDocumentTypes();
@@ -224,74 +229,167 @@ function FacultyDashboard({ user }) {
       {/* MY DOCUMENTS PANEL */}
       <div className="panel">
         <div className="panel-header">
-          <h3>My Submitted Documents ({documents.length})</h3>
+          <div>
+            <h3>My Submitted Documents</h3>
+            <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+              Total uploads: {documents.length}
+            </span>
+          </div>
           <button className="btn btn-secondary btn-sm" onClick={loadMyDocuments}>
             ↻ Refresh
           </button>
         </div>
 
+        {/* Toolbar: Search & Status Filter */}
+        {documents.length > 0 && (
+          <div className="dashboard-toolbar">
+            <div className="toolbar-controls">
+              <div className="search-input-wrapper">
+                <span className="search-icon">🔍</span>
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Search file, document type, branch..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <select
+                className="toolbar-filter-select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="ACCEPTED">✓ Accepted Only</option>
+                <option value="REJECTED">✕ Rejected Only</option>
+                <option value="PENDING">⏳ Pending Only</option>
+              </select>
+
+              {(searchQuery || statusFilter !== "ALL") && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("ALL");
+                  }}
+                  title="Clear filters"
+                >
+                  ✕ Reset
+                </button>
+              )}
+            </div>
+
+            <span className="toolbar-count">
+              Showing{" "}
+              {
+                documents.filter((doc) => {
+                  const q = searchQuery.toLowerCase();
+                  const matchesSearch =
+                    !q ||
+                    doc.file_name.toLowerCase().includes(q) ||
+                    (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                    (doc.department_code && doc.department_code.toLowerCase().includes(q));
+                  const matchesStatus =
+                    statusFilter === "ALL" ||
+                    doc.analysis_status === statusFilter ||
+                    (statusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+                  return matchesSearch && matchesStatus;
+                }).length
+              }{" "}
+              of {documents.length}
+            </span>
+          </div>
+        )}
+
         {documents.length === 0 ? (
           <p className="empty-state">You have not uploaded any documents yet.</p>
         ) : (
-          <div className="table-wrapper">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>File Name</th>
-                  <th>Document Type</th>
-                  <th>Branch / Department</th>
-                  <th>Upload Date</th>
-                  <th>Structural Decision</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documents.map((doc) => (
-                  <tr key={doc.id}>
-                    <td><strong>{doc.file_name}</strong></td>
-                    <td>{doc.document_type_name || "-"}</td>
-                    <td>
-                      <span style={{ fontWeight: "600", color: "var(--primary)" }}>
-                        {doc.department_code || doc.department_name || "General"}
-                      </span>
-                    </td>
-                    <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
-                    <td><StatusBadge status={doc.analysis_status} /></td>
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
-                            setPdfModalOpen(true);
-                          }}
-                        >
-                          👁️ View PDF
-                        </button>
+          (() => {
+            const filtered = documents.filter((doc) => {
+              const q = searchQuery.toLowerCase();
+              const matchesSearch =
+                !q ||
+                doc.file_name.toLowerCase().includes(q) ||
+                (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                (doc.department_code && doc.department_code.toLowerCase().includes(q));
+              const matchesStatus =
+                statusFilter === "ALL" ||
+                doc.analysis_status === statusFilter ||
+                (statusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+              return matchesSearch && matchesStatus;
+            });
 
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={analyzingId === doc.id}
-                          onClick={() => triggerAnalysis(doc.id)}
-                        >
-                          {analyzingId === doc.id ? "Analyzing..." : "⚡ Re-Analyze"}
-                        </button>
+            if (filtered.length === 0) {
+              return (
+                <p className="empty-state">
+                  No documents match your search or filter criteria.
+                </p>
+              );
+            }
 
-                        {doc.analysis_status && doc.analysis_status !== "PENDING" && (
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => openComparisonModal(doc.id)}
-                          >
-                            🔍 Breakdown
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            return (
+              <div className="table-wrapper">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>File Name</th>
+                      <th>Document Type</th>
+                      <th>Branch</th>
+                      <th>Upload Date</th>
+                      <th>Structural Decision</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((doc) => (
+                      <tr key={doc.id}>
+                        <td><strong>{doc.file_name}</strong></td>
+                        <td>{doc.document_type_name || "-"}</td>
+                        <td>
+                          <span className="branch-pill">
+                            {doc.department_code || doc.department_name || "General"}
+                          </span>
+                        </td>
+                        <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
+                        <td><StatusBadge status={doc.analysis_status} /></td>
+                        <td>
+                          <div className="table-actions">
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => {
+                                setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
+                                setPdfModalOpen(true);
+                              }}
+                            >
+                              👁️ View PDF
+                            </button>
+
+                            <button
+                              className="btn btn-primary btn-sm"
+                              disabled={analyzingId === doc.id}
+                              onClick={() => triggerAnalysis(doc.id)}
+                            >
+                              {analyzingId === doc.id ? "Analyzing..." : "⚡ Re-Analyze"}
+                            </button>
+
+                            {doc.analysis_status && doc.analysis_status !== "PENDING" && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => openComparisonModal(doc.id)}
+                              >
+                                🔍 Breakdown
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()
         )}
       </div>
 

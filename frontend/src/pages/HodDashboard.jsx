@@ -16,6 +16,11 @@ function HodDashboard({ user }) {
   const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [pdfModalData, setPdfModalData] = useState({ id: null, name: "", isAccepted: false });
 
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+
   useEffect(() => {
     loadDepartmentDocuments();
     loadAcceptedDocuments();
@@ -110,69 +115,160 @@ function HodDashboard({ user }) {
       {activeTab === "all" && (
         <div className="panel">
           <div className="panel-header">
-            <h3>Faculty Document Submissions</h3>
+            <div>
+              <h3>Faculty Document Submissions</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Total submissions: {documents.length}
+              </span>
+            </div>
             <button className="btn btn-secondary btn-sm" onClick={loadDepartmentDocuments} disabled={loading}>
               ↻ Refresh
             </button>
           </div>
 
+          {/* Search & Filter Toolbar */}
+          {documents.length > 0 && (
+            <div className="dashboard-toolbar">
+              <div className="toolbar-controls">
+                <div className="search-input-wrapper">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search document name, type, faculty..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <select
+                  className="toolbar-filter-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">All Decisions</option>
+                  <option value="ACCEPTED">✓ Accepted Only</option>
+                  <option value="REJECTED">✕ Rejected Only</option>
+                  <option value="PENDING">⏳ Pending Only</option>
+                </select>
+
+                {(searchQuery || statusFilter !== "ALL") && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setStatusFilter("ALL");
+                    }}
+                    title="Clear filters"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
+
+              <span className="toolbar-count">
+                Showing{" "}
+                {
+                  documents.filter((doc) => {
+                    const q = searchQuery.toLowerCase();
+                    const matchesSearch =
+                      !q ||
+                      doc.file_name.toLowerCase().includes(q) ||
+                      (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                      (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                    const matchesStatus =
+                      statusFilter === "ALL" ||
+                      doc.analysis_status === statusFilter ||
+                      (statusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+                    return matchesSearch && matchesStatus;
+                  }).length
+                }{" "}
+                of {documents.length}
+              </span>
+            </div>
+          )}
+
           {documents.length === 0 ? (
             <p className="empty-state">No documents submitted in this department yet.</p>
           ) : (
-            <div className="table-wrapper">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document</th>
-                    <th>Document Type</th>
-                    <th>Submitted By</th>
-                    <th>Uploaded Date</th>
-                    <th>Structural Decision</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {documents.map((doc) => (
-                    <tr key={doc.id}>
-                      <td><strong>{doc.file_name}</strong></td>
-                      <td>{doc.document_type_name || "-"}</td>
-                      <td>{doc.uploaded_by_name || "Faculty Member"}</td>
-                      <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
-                      <td><StatusBadge status={doc.analysis_status} /></td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => {
-                              setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
-                              setPdfModalOpen(true);
-                            }}
-                          >
-                            👁️ View PDF
-                          </button>
-                          {doc.analysis_status && doc.analysis_status !== "PENDING" && (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => openComparisonModal(doc.id)}
-                            >
-                              🔍 Comparison
-                            </button>
-                          )}
-                          {doc.analysis_status === "ACCEPTED" && (
-                            <button
-                              className="btn btn-success btn-sm"
-                              onClick={() => handleDownload(doc.id, doc.file_name)}
-                            >
-                              📥 Download
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            (() => {
+              const filtered = documents.filter((doc) => {
+                const q = searchQuery.toLowerCase();
+                const matchesSearch =
+                  !q ||
+                  doc.file_name.toLowerCase().includes(q) ||
+                  (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                  (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q));
+                const matchesStatus =
+                  statusFilter === "ALL" ||
+                  doc.analysis_status === statusFilter ||
+                  (statusFilter === "PENDING" && (!doc.analysis_status || doc.analysis_status === "PENDING"));
+                return matchesSearch && matchesStatus;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <p className="empty-state">No documents match your search or filter criteria.</p>
+                );
+              }
+
+              return (
+                <div className="table-wrapper">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Document</th>
+                        <th>Document Type</th>
+                        <th>Submitted By</th>
+                        <th>Uploaded Date</th>
+                        <th>Structural Decision</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((doc) => (
+                        <tr key={doc.id}>
+                          <td><strong>{doc.file_name}</strong></td>
+                          <td>{doc.document_type_name || "-"}</td>
+                          <td>{doc.uploaded_by_name || "Faculty Member"}</td>
+                          <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
+                          <td><StatusBadge status={doc.analysis_status} /></td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: doc.analysis_status === "ACCEPTED" });
+                                  setPdfModalOpen(true);
+                                }}
+                              >
+                                👁️ View PDF
+                              </button>
+                              {doc.analysis_status && doc.analysis_status !== "PENDING" && (
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => openComparisonModal(doc.id)}
+                                >
+                                  🔍 Comparison
+                                </button>
+                              )}
+                              {doc.analysis_status === "ACCEPTED" && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => handleDownload(doc.id, doc.file_name)}
+                                >
+                                  📥 Download
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           )}
         </div>
       )}
@@ -180,59 +276,126 @@ function HodDashboard({ user }) {
       {activeTab === "accepted" && (
         <div className="panel">
           <div className="panel-header">
-            <h3>Department Accepted & Compliant Documents</h3>
+            <div>
+              <h3>Department Accepted & Compliant Documents</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Verified files available for official download: {acceptedDocs.length}
+              </span>
+            </div>
             <button className="btn btn-secondary btn-sm" onClick={loadAcceptedDocuments}>
               ↻ Refresh
             </button>
           </div>
 
+          {/* Search Toolbar for Accepted */}
+          {acceptedDocs.length > 0 && (
+            <div className="dashboard-toolbar">
+              <div className="toolbar-controls">
+                <div className="search-input-wrapper">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search verified file, type, submitter..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                {searchQuery && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setSearchQuery("")}
+                    title="Clear search"
+                  >
+                    ✕ Reset
+                  </button>
+                )}
+              </div>
+              <span className="toolbar-count">
+                Showing{" "}
+                {
+                  acceptedDocs.filter((doc) => {
+                    const q = searchQuery.toLowerCase();
+                    return (
+                      !q ||
+                      doc.file_name.toLowerCase().includes(q) ||
+                      (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                      (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q))
+                    );
+                  }).length
+                }{" "}
+                of {acceptedDocs.length}
+              </span>
+            </div>
+          )}
+
           {acceptedDocs.length === 0 ? (
             <p className="empty-state">No accepted documents for this department yet.</p>
           ) : (
-            <div className="table-wrapper">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document</th>
-                    <th>Document Type</th>
-                    <th>Submitted By</th>
-                    <th>Analyzed At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {acceptedDocs.map((doc) => (
-                    <tr key={doc.id}>
-                      <td><strong>{doc.file_name}</strong></td>
-                      <td>{doc.document_type_name}</td>
-                      <td>{doc.uploaded_by_name}</td>
-                      <td>{doc.analyzed_at ? new Date(doc.analyzed_at).toLocaleString() : "-"}</td>
-                      <td><StatusBadge status="ACCEPTED" /></td>
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => {
-                              setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: true });
-                              setPdfModalOpen(true);
-                            }}
-                          >
-                            👁️ View PDF
-                          </button>
-                          <button
-                            className="btn btn-success btn-sm"
-                            onClick={() => handleDownload(doc.id, doc.file_name)}
-                          >
-                            📥 Download PDF
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            (() => {
+              const filtered = acceptedDocs.filter((doc) => {
+                const q = searchQuery.toLowerCase();
+                return (
+                  !q ||
+                  doc.file_name.toLowerCase().includes(q) ||
+                  (doc.document_type_name && doc.document_type_name.toLowerCase().includes(q)) ||
+                  (doc.uploaded_by_name && doc.uploaded_by_name.toLowerCase().includes(q))
+                );
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <p className="empty-state">No verified documents match your search query.</p>
+                );
+              }
+
+              return (
+                <div className="table-wrapper">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Document</th>
+                        <th>Document Type</th>
+                        <th>Submitted By</th>
+                        <th>Analyzed At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((doc) => (
+                        <tr key={doc.id}>
+                          <td><strong>{doc.file_name}</strong></td>
+                          <td>{doc.document_type_name}</td>
+                          <td>{doc.uploaded_by_name}</td>
+                          <td>{doc.analyzed_at ? new Date(doc.analyzed_at).toLocaleString() : "-"}</td>
+                          <td><StatusBadge status="ACCEPTED" /></td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setPdfModalData({ id: doc.id, name: doc.file_name, isAccepted: true });
+                                  setPdfModalOpen(true);
+                                }}
+                              >
+                                👁️ View PDF
+                              </button>
+                              <button
+                                className="btn btn-success btn-sm"
+                                onClick={() => handleDownload(doc.id, doc.file_name)}
+                              >
+                                📥 Download PDF
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           )}
         </div>
       )}

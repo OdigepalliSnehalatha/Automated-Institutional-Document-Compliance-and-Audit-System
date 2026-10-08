@@ -26,7 +26,7 @@ def login(data: LoginRequest):
     )
 
     # 2. Generate and store hashed OTP, dispatch email / log
-    create_and_send_otp(
+    otp = create_and_send_otp(
         institution_name=user["institution_name"],
         email=user["email"],
         role=user["role"]
@@ -36,7 +36,8 @@ def login(data: LoginRequest):
         "message": "OTP has been sent to your registered email.",
         "requires_otp": True,
         "email": user["email"],
-        "institution": user["institution_name"]
+        "institution": user["institution_name"],
+        "dev_otp": otp
     }
 
 @router.post("/verify-otp")

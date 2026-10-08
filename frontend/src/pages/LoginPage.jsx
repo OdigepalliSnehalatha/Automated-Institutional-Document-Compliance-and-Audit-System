@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import api from "../api";
 
-function LoginPage({ onLoginSuccess }) {
+function LoginPage({ onLoginSuccess, initialInfo }) {
   const [step, setStep] = useState("credentials"); // "credentials" | "otp"
   const [formData, setFormData] = useState({
     institution_name: "Anantha Lakshmi Institute of Technology and Sciences",
@@ -12,7 +12,7 @@ function LoginPage({ onLoginSuccess }) {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [info, setInfo] = useState("");
+  const [info, setInfo] = useState(initialInfo || "");
 
   const handleChange = (e) => {
     setFormData({
