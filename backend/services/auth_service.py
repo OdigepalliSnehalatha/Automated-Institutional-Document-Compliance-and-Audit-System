@@ -2,7 +2,7 @@ import bcrypt
 from fastapi import HTTPException, Request, Depends
 from backend.database import get_db_cursor
 
-ALLOWED_ROLES = {"Auditor", "HOD", "Faculty"}
+ALLOWED_ROLES = {"Admin", "Auditor", "HOD", "Faculty"}
 
 def verify_password(plain_password: str, stored_hash: str) -> bool:
     try:
@@ -39,7 +39,8 @@ def validate_user_login(institution_name: str, role: str, email: str, password: 
                 u.department_id,
                 d.name AS department_name,
                 i.id AS institution_id,
-                i.name AS institution_name
+                i.name AS institution_name,
+                i.logo_url AS institution_logo
             FROM users u
             JOIN institution i ON i.id = u.institution_id
             LEFT JOIN departments d ON d.id = u.department_id
@@ -70,6 +71,7 @@ def build_session_user(user_record: dict) -> dict:
         "institution_id": user_record["institution_id"],
         "institution_name": user_record["institution_name"],
         "institution": user_record["institution_name"],
+        "institution_logo": user_record.get("institution_logo") or user_record.get("logo_url"),
         "department_id": user_record.get("department_id"),
         "department_name": user_record.get("department_name"),
         "department": user_record.get("department_name")
@@ -93,14 +95,14 @@ def require_roles(*roles):
 
 def check_department_access(current_user: dict, target_department_id: int | None):
     """
-    Auditor has institution-wide access.
+    Admin and Auditor have institution-wide access.
     Faculty can submit and access documents across all branches/departments in their institution.
     HOD is department-specific and oversees their assigned department.
     """
     role = current_user.get("role")
     user_dept_id = current_user.get("department_id")
 
-    if role in {"Auditor", "Faculty"}:
+    if role in {"Admin", "Auditor", "Faculty"}:
         return
 
     if user_dept_id is None:

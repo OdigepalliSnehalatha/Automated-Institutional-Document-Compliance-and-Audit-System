@@ -4,7 +4,13 @@ import StatusBadge from "../components/StatusBadge";
 import ComparisonModal from "../components/ComparisonModal";
 import PdfViewerModal from "../components/PdfViewerModal";
 
-function FacultyDashboard({ user }) {
+function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
+  const [internalActiveTab, setInternalActiveTab] = useState("upload"); // upload | submissions | guidelines
+  const activeTab = propActiveTab || internalActiveTab;
+  const setActiveTab = (tab) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
   const [documents, setDocuments] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -165,68 +171,71 @@ function FacultyDashboard({ user }) {
       {feedback.success && <div className="alert-message alert-success">✓ {feedback.success}</div>}
 
       {/* UPLOAD FORM PANEL */}
-      <div className="panel">
-        <div className="panel-header">
-          <h3>Upload Institutional PDF Document</h3>
+      {(activeTab === "upload" || activeTab === "overview") && (
+        <div className="panel">
+          <div className="panel-header">
+            <h3>Upload Institutional PDF Document</h3>
+          </div>
+
+          <form onSubmit={handleUploadSubmit}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+              <div className="form-group">
+                <label>Document Type *</label>
+                <select
+                  className="form-select"
+                  value={selectedDocTypeId}
+                  onChange={(e) => setSelectedDocTypeId(e.target.value)}
+                  required
+                >
+                  {documentTypes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Branch / Department *</label>
+                <select
+                  className="form-select"
+                  value={selectedDeptId}
+                  onChange={(e) => setSelectedDeptId(e.target.value)}
+                  required
+                >
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.code} - {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Select PDF File *</label>
+              <input
+                id="pdf-file-input"
+                type="file"
+                className="form-input"
+                accept=".pdf,application/pdf"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                required
+              />
+              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
+                Original PDF is securely preserved. File is structurally evaluated against required sections, questions, and marks.
+              </p>
+            </div>
+
+            <button type="submit" className="btn btn-primary" disabled={uploading || !selectedFile}>
+              {uploading ? "Uploading & Analyzing..." : "📤 Upload & Run Structural Analysis"}
+            </button>
+          </form>
         </div>
-
-        <form onSubmit={handleUploadSubmit}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-            <div className="form-group">
-              <label>Document Type *</label>
-              <select
-                className="form-select"
-                value={selectedDocTypeId}
-                onChange={(e) => setSelectedDocTypeId(e.target.value)}
-                required
-              >
-                {documentTypes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Branch / Department *</label>
-              <select
-                className="form-select"
-                value={selectedDeptId}
-                onChange={(e) => setSelectedDeptId(e.target.value)}
-                required
-              >
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.code} - {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Select PDF File *</label>
-            <input
-              id="pdf-file-input"
-              type="file"
-              className="form-input"
-              accept=".pdf,application/pdf"
-              onChange={(e) => setSelectedFile(e.target.files[0])}
-              required
-            />
-            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>
-              Original PDF is securely preserved. File is structurally evaluated against required sections, questions, and marks.
-            </p>
-          </div>
-
-          <button type="submit" className="btn btn-primary" disabled={uploading || !selectedFile}>
-            {uploading ? "Uploading & Analyzing..." : "📤 Upload & Run Structural Analysis"}
-          </button>
-        </form>
-      </div>
+      )}
 
       {/* MY DOCUMENTS PANEL */}
+      {(activeTab === "submissions" || activeTab === "overview" || activeTab === "upload") && (
       <div className="panel">
         <div className="panel-header">
           <div>
@@ -392,6 +401,64 @@ function FacultyDashboard({ user }) {
           })()
         )}
       </div>
+      )}
+
+      {/* VIEW 3: COMPLIANCE GUIDELINES PANEL */}
+      {(activeTab === "guidelines" || activeTab === "rules") && (
+        <div className="panel">
+          <div className="panel-header">
+            <div>
+              <h3>Institutional Document Compliance Rules & Checklist</h3>
+              <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                Follow these strict structural formatting requirements to ensure 100% automated verification
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
+            {/* Question Paper Checklist */}
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📄</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Question Paper Requirements</h4>
+              </div>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
+                <li><strong>Header</strong>: Institute Name, Semester, Branch, Subject Name & Code, Max Marks, Time.</li>
+                <li><strong>Mid Examination</strong>: Part A must have exactly 5 questions (2 marks each); Part B must have 6 questions (10 marks each).</li>
+                <li><strong>Semester Examination</strong>: Part A must have 10 questions (2M); Part B must have 10 questions (10M).</li>
+                <li><strong>Strict Boolean Decision</strong>: Any missing question number or marks pattern results in instant <code>REJECTED</code>.</li>
+              </ul>
+            </div>
+
+            {/* Course Structure Checklist */}
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📚</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Course Structure Requirements</h4>
+              </div>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
+                <li><strong>Header</strong>: Institution & Department Heading, Course Name, Course Code.</li>
+                <li><strong>Curriculum Units</strong>: All 5 structural sections must be present: Unit 1, Unit 2, Unit 3, Unit 4, Unit 5.</li>
+                <li><strong>Topic Sections</strong>: Each unit must be followed by its respective syllabus topic body.</li>
+                <li><strong>Order</strong>: Units must appear in chronological sequential order.</li>
+              </ul>
+            </div>
+
+            {/* Question Bank Checklist */}
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📑</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Question Bank Requirements</h4>
+              </div>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
+                <li><strong>Header</strong>: College Name, Course Name, Course Code, Semester.</li>
+                <li><strong>Units 1 to 5</strong>: Each unit must contain both Part A (10 x 2M questions) and Part B (10 x 10M questions).</li>
+                <li><strong>Marks Annotation</strong>: Marks pattern must be clearly indicated for each question.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Comparison Modal */}
       <ComparisonModal

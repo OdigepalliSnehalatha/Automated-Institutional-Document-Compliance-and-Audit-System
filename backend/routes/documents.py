@@ -149,11 +149,11 @@ def view_document_pdf(document_id: int, current_user: dict = Depends(get_current
 
 @router.get("/{document_id}/download")
 def download_accepted_pdf(document_id: int, current_user: dict = Depends(get_current_user)):
-    # Only Auditor and HOD can download accepted documents
-    if current_user["role"] not in {"Auditor", "HOD"}:
+    # Admin, Auditor, and HOD can download accepted documents
+    if current_user["role"] not in {"Auditor", "HOD", "Admin"}:
         raise HTTPException(
             status_code=403,
-            detail="Forbidden: Only Auditor and HOD have download authorization for accepted documents."
+            detail="Forbidden: Only Admin, Auditor and HOD have download authorization for accepted documents."
         )
 
     with get_db_cursor() as cursor:

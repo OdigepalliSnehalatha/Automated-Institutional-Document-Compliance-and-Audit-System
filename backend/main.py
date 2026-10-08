@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from backend.routes import auth, auditor, hod, faculty, documents
+from backend.routes import auth, auditor, hod, faculty, documents, admin, ai_chat
 from backend.database import get_db_cursor
 
 SESSION_SECRET = os.getenv(
@@ -57,10 +57,12 @@ app.add_middleware(
 # Register Routers
 # -------------------------------------------------------------
 app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(auditor.router)
 app.include_router(hod.router)
 app.include_router(faculty.router)
 app.include_router(documents.router)
+app.include_router(ai_chat.router)
 
 @app.get("/")
 def root():

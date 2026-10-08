@@ -4,8 +4,13 @@ import StatusBadge from "../components/StatusBadge";
 import ComparisonModal from "../components/ComparisonModal";
 import PdfViewerModal from "../components/PdfViewerModal";
 
-function AuditorDashboard({ user }) {
-  const [activeTab, setActiveTab] = useState("overview"); // overview | formats | submissions | accepted
+function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
+  const [internalActiveTab, setInternalActiveTab] = useState("overview"); // overview | builder | formats | submissions | accepted
+  const activeTab = propActiveTab || internalActiveTab;
+  const setActiveTab = (tab) => {
+    setInternalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
   const [stats, setStats] = useState(null);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
   const [formats, setFormats] = useState([]);
@@ -252,39 +257,6 @@ function AuditorDashboard({ user }) {
 
   return (
     <div className="main-content">
-      <div className="tab-nav">
-        <button
-          className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
-          onClick={() => setActiveTab("overview")}
-        >
-          📊 Overview & Stats
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "builder" ? "active" : ""}`}
-          onClick={() => setActiveTab("builder")}
-        >
-          ⚙️ Format Builder
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "formats" ? "active" : ""}`}
-          onClick={() => setActiveTab("formats")}
-        >
-          📑 Master Formats ({formats.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "submissions" ? "active" : ""}`}
-          onClick={() => setActiveTab("submissions")}
-        >
-          📄 Submitted Documents
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "accepted" ? "active" : ""}`}
-          onClick={() => setActiveTab("accepted")}
-        >
-          ✓ Accepted PDFs
-        </button>
-      </div>
-
       {feedback.error && <div className="alert-message alert-danger">⚠️ {feedback.error}</div>}
       {feedback.success && <div className="alert-message alert-success">✓ {feedback.success}</div>}
 
