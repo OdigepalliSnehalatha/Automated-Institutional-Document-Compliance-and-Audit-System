@@ -33,10 +33,11 @@ def login(data: LoginRequest):
     )
 
     return {
-        "message": "OTP has been sent to your registered email.",
+        "message": "OTP generated. Prototype code: 123456",
         "requires_otp": True,
         "email": user["email"],
-        "institution": user["institution_name"]
+        "institution": user["institution_name"],
+        "prototype_otp": "123456"
     }
 
 @router.post("/verify-otp")

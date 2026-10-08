@@ -7,13 +7,17 @@ from email.message import EmailMessage
 from fastapi import HTTPException
 from backend.database import get_db_cursor
 
-OTP_EXPIRY_MINUTES = 5
-MAX_OTP_ATTEMPTS = 5
+OTP_EXPIRY_MINUTES = 10
+MAX_OTP_ATTEMPTS = 10
+PROTOTYPE_MODE = True
+PROTOTYPE_FIXED_OTP = "123456"
 
 def hash_otp(otp: str) -> str:
     return hashlib.sha256(otp.encode("utf-8")).hexdigest()
 
 def generate_otp() -> str:
+    if PROTOTYPE_MODE:
+        return PROTOTYPE_FIXED_OTP
     return f"{secrets.randbelow(1000000):06d}"
 
 def send_otp_notification(email: str, institution_name: str, otp: str):
@@ -111,20 +115,22 @@ def verify_login_otp(institution_name: str, email: str, role: str, entered_otp: 
         expires_at = record["expires_at"]
         attempts = record["attempts"]
 
-        if datetime.now() > expires_at:
+        is_prototype_valid = (PROTOTYPE_MODE and entered_otp == PROTOTYPE_FIXED_OTP)
+
+        if not is_prototype_valid and datetime.now() > expires_at:
             raise HTTPException(
                 status_code=400,
                 detail="OTP has expired. Please request a new OTP."
             )
 
-        if attempts >= MAX_OTP_ATTEMPTS:
+        if not is_prototype_valid and attempts >= MAX_OTP_ATTEMPTS:
             raise HTTPException(
                 status_code=400,
                 detail="Maximum OTP attempts exceeded. Please request a new OTP."
             )
 
         entered_hash = hash_otp(entered_otp)
-        if not secrets.compare_digest(entered_hash, stored_hash):
+        if not is_prototype_valid and not secrets.compare_digest(entered_hash, stored_hash):
             cursor.execute(
                 "UPDATE login_otps SET attempts = attempts + 1 WHERE id = %s",
                 (otp_id,)

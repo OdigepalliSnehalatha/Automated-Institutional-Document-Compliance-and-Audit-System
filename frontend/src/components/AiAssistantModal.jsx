@@ -165,24 +165,89 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
           className="ai-floating-trigger-btn"
           onClick={onOpen}
           title="Open AI Compliance Assistant"
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 18px",
+            borderRadius: "50px",
+            background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+            color: "#ffffff",
+            boxShadow: "0 8px 24px rgba(37, 99, 235, 0.45)",
+            border: "2px solid rgba(255, 255, 255, 0.2)",
+            cursor: "pointer",
+          }}
         >
-          <span className="ai-fab-icon">🤖</span>
-          <span className="ai-fab-label">AI Assistant</span>
-          <span className="ai-fab-pulse"></span>
+          <div style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #60a5fa 0%, #a855f7 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.25)"
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+              <rect x="4" y="8" width="16" height="12" rx="4"/>
+              <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
+              <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
+              <path d="M9 17h6"/>
+            </svg>
+          </div>
+          <span style={{ fontWeight: "700", fontSize: "14px", letterSpacing: "0.2px" }}>AI Assistant</span>
+          <span style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: "#22c55e",
+            boxShadow: "0 0 8px #22c55e"
+          }}></span>
         </button>
       )}
 
-      {/* Floating Chat Modal Window */}
+      {/* Floating Chat Modal Window (Docked at bottom right) */}
       {isOpen && (
-        <div className={`ai-chat-window ${minimized ? "minimized" : ""}`}>
+        <div
+          className={`ai-chat-window ${minimized ? "minimized" : ""}`}
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            zIndex: 9999,
+          }}
+        >
           {/* Header */}
           <div className="ai-chat-header">
             <div className="ai-chat-header-info">
-              <div className="ai-chat-avatar">🤖</div>
+              <div style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                flexShrink: 0
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+                  <rect x="4" y="8" width="16" height="12" rx="4"/>
+                  <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
+                  <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
+                  <path d="M9 17h6"/>
+                </svg>
+              </div>
               <div>
                 <h3 className="ai-chat-title">AI Compliance Assistant</h3>
                 <span className="ai-chat-role-badge">
-                  {user?.role} Assistant • Live Data
+                  Online • Ready to help
                 </span>
               </div>
             </div>

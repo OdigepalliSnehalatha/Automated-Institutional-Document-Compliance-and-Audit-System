@@ -51,16 +51,6 @@ function Topbar({
           <span>System Operational</span>
         </div>
 
-        {/* AI Assistant Quick Trigger */}
-        <button
-          className="topbar-ai-btn"
-          onClick={onOpenAiChat}
-          title="Open AI Compliance Assistant"
-        >
-          <span>🤖</span>
-          <span className="topbar-ai-label">Ask AI</span>
-        </button>
-
         {/* Notifications Icon & Popover */}
         <div className="notifications-wrapper" style={{ position: "relative" }}>
           <button

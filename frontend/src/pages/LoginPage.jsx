@@ -84,11 +84,11 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       if (response.data.requires_otp) {
         setStep("otp");
         setTimerSeconds(300);
-        setCanResend(false);
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(`A 6-digit verification code has been dispatched to ${formData.email}. Please check your registered email.`);
+        setCanResend(true);
+        setOtpDigits(["1", "2", "3", "4", "5", "6"]);
+        setInfo("🔑 Prototype Mode: Code 123456 auto-filled! Click Verify to sign in.");
         setTimeout(() => {
-          otpInputRefs.current[0]?.focus();
+          otpInputRefs.current[5]?.focus();
         }, 150);
       }
     } catch (err) {
@@ -366,6 +366,11 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
           ) : (
             /* STEP 2: 6-DIGIT OTP VERIFICATION FORM */
             <form onSubmit={handleVerifyOtp} className="login-form-body">
+              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1e40af", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: "600", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span>💡 Prototype Code: <strong style={{ letterSpacing: "2px" }}>123456</strong></span>
+                <button type="button" onClick={() => setOtpDigits(["1","2","3","4","5","6"])} style={{ background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer", fontWeight: "600" }}>Auto-Fill</button>
+              </div>
+
               <div className="otp-boxes-wrapper" onPaste={handleOtpPaste}>
                 <label className="form-label" style={{ display: "block", marginBottom: "12px", textAlign: "center" }}>
                   Enter 6-Digit One-Time Passcode

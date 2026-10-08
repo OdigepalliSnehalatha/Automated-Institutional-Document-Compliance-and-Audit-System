@@ -139,7 +139,6 @@ function App() {
         activeTab={activeTab}
         onSelectTab={(tabId) => setActiveTab(tabId)}
         onRequestLogout={() => setLogoutModalOpen(true)}
-        onOpenAiChat={() => setAiModalOpen(true)}
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
       />
@@ -152,7 +151,6 @@ function App() {
           title={headerInfo.title}
           subtitle={headerInfo.subtitle}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onOpenAiChat={() => setAiModalOpen(true)}
           notifications={notifications}
         />
 

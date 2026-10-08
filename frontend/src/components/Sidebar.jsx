@@ -137,23 +137,6 @@ function Sidebar({
               </button>
             );
           })}
-
-          {/* AI Assistant Navigation Shortcut */}
-          <div className="sidebar-nav-group-title" style={{ marginTop: "16px" }}>
-            INTELLIGENCE
-          </div>
-          <button
-            className={`sidebar-nav-item ai-assistant-nav-btn ${activeTab === "ai" ? "active" : ""}`}
-            onClick={() => {
-              if (onOpenAiChat) onOpenAiChat();
-              else onSelectTab("ai");
-              onCloseMobile();
-            }}
-          >
-            <span className="nav-item-icon">🤖</span>
-            <span className="nav-item-label">AI Assistant</span>
-            <span className="ai-nav-chip">Role-Aware</span>
-          </button>
         </nav>
 
         {/* Sidebar Footer with User Profile and Sign Out */}
