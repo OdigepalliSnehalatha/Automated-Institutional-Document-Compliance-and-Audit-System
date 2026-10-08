@@ -51,7 +51,8 @@ function LoginPage({ onLoginSuccess }) {
 
       if (response.data.requires_otp) {
         setStep("otp");
-        setInfo(`6-digit OTP dispatched to ${formData.email}.`);
+        const devOtpHint = response.data.dev_otp ? ` [Code: ${response.data.dev_otp}]` : "";
+        setInfo(`6-digit OTP dispatched to ${formData.email}.${devOtpHint}`);
       }
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed. Please verify credentials and institution.");
@@ -94,13 +95,14 @@ function LoginPage({ onLoginSuccess }) {
     setInfo("");
     setLoading(true);
     try {
-      await api.post("/login", {
+      const res = await api.post("/login", {
         institution_name: formData.institution_name.trim(),
         role: formData.role,
         email: formData.email.trim(),
         password: formData.password,
       });
-      setInfo("A new OTP has been dispatched to your email.");
+      const devOtpHint = res.data.dev_otp ? ` [New Code: ${res.data.dev_otp}]` : "";
+      setInfo(`A new OTP has been dispatched to your email.${devOtpHint}`);
     } catch (err) {
       setError("Unable to resend OTP. Please re-enter credentials.");
     } finally {
@@ -147,9 +149,9 @@ function LoginPage({ onLoginSuccess }) {
                 }}
                 required
               >
-                <option value="Auditor">Auditor (Defines Structure, Reviews All)</option>
-                <option value="HOD">HOD (Department Oversight, Accepted PDFs)</option>
-                <option value="Faculty">Faculty (Uploads & Verifies PDFs)</option>
+                <option value="Auditor">Auditor</option>
+                <option value="HOD">HOD</option>
+                <option value="Faculty">Faculty</option>
               </select>
             </div>
 
