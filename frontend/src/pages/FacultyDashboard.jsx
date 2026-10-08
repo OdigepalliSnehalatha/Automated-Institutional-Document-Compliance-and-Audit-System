@@ -7,9 +7,13 @@ import PdfViewerModal from "../components/PdfViewerModal";
 function FacultyDashboard({ user }) {
   const [documents, setDocuments] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
+  const [departments, setDepartments] = useState([]);
 
   // Upload state
   const [selectedDocTypeId, setSelectedDocTypeId] = useState("");
+  const [selectedDeptId, setSelectedDeptId] = useState(
+    user.department_id ? String(user.department_id) : "1"
+  );
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [analyzingId, setAnalyzingId] = useState(null);
@@ -24,6 +28,7 @@ function FacultyDashboard({ user }) {
   useEffect(() => {
     loadMyDocuments();
     loadDocumentTypes();
+    loadDepartments();
   }, []);
 
   const loadMyDocuments = async () => {
@@ -43,7 +48,19 @@ function FacultyDashboard({ user }) {
         setSelectedDocTypeId(String(res.data[0].id));
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load document types:", err);
+    }
+  };
+
+  const loadDepartments = async () => {
+    try {
+      const res = await api.get("/departments");
+      setDepartments(res.data);
+      if (res.data.length > 0 && !selectedDeptId) {
+        setSelectedDeptId(String(res.data[0].id));
+      }
+    } catch (err) {
+      console.error("Failed to load departments:", err);
     }
   };
 
@@ -64,9 +81,7 @@ function FacultyDashboard({ user }) {
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("document_type_id", selectedDocTypeId);
-    if (user.department_id) {
-      formData.append("department_id", user.department_id);
-    }
+    formData.append("department_id", selectedDeptId || "1");
 
     setUploading(true);
     try {
@@ -137,7 +152,7 @@ function FacultyDashboard({ user }) {
       <div style={{ marginBottom: "24px" }}>
         <h2 style={{ fontSize: "22px", fontWeight: "700" }}>Faculty Document Upload & Verification</h2>
         <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
-          Department: <strong>{user.department_name || "General"}</strong> | Upload PDFs to run instant structural validation against Auditor-defined formats.
+          Support for all institutional branches (CSE, CSD, CSM, CSE-AIML, ECE, ME, CE) | Upload PDFs for instant structural compliance checking.
         </p>
       </div>
 
@@ -169,13 +184,19 @@ function FacultyDashboard({ user }) {
             </div>
 
             <div className="form-group">
-              <label>Department</label>
-              <input
-                type="text"
-                className="form-input"
-                value={user.department_name ? `${user.department_name}` : "Assigned Department"}
-                disabled
-              />
+              <label>Branch / Department *</label>
+              <select
+                className="form-select"
+                value={selectedDeptId}
+                onChange={(e) => setSelectedDeptId(e.target.value)}
+                required
+              >
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.code} - {d.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -218,6 +239,7 @@ function FacultyDashboard({ user }) {
                 <tr>
                   <th>File Name</th>
                   <th>Document Type</th>
+                  <th>Branch / Department</th>
                   <th>Upload Date</th>
                   <th>Structural Decision</th>
                   <th>Actions</th>
@@ -228,6 +250,11 @@ function FacultyDashboard({ user }) {
                   <tr key={doc.id}>
                     <td><strong>{doc.file_name}</strong></td>
                     <td>{doc.document_type_name || "-"}</td>
+                    <td>
+                      <span style={{ fontWeight: "600", color: "var(--primary)" }}>
+                        {doc.department_code || doc.department_name || "General"}
+                      </span>
+                    </td>
                     <td>{new Date(doc.uploaded_at).toLocaleString()}</td>
                     <td><StatusBadge status={doc.analysis_status} /></td>
                     <td>
@@ -273,7 +300,7 @@ function FacultyDashboard({ user }) {
         isOpen={comparisonModalOpen}
         onClose={() => setComparisonModalOpen(false)}
         data={comparisonData}
-        canDownload={false} // Faculty views status only; download is reserved for Auditor & HOD
+        canDownload={false}
       />
 
       {/* PDF Viewer Modal */}
