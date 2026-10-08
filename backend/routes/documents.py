@@ -45,6 +45,82 @@ def list_documents(current_user: dict = Depends(get_current_user)):
         cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
+@router.get("/by-department/code/{code}")
+def get_documents_by_dept_code(code: str, current_user: dict = Depends(get_current_user)):
+    inst_id = current_user["institution_id"]
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT id, code, name FROM departments WHERE UPPER(code) = UPPER(%s) AND institution_id = %s", (code.strip(), inst_id))
+        dept = cursor.fetchone()
+        if not dept:
+            raise HTTPException(status_code=404, detail=f"Department code '{code}' not found.")
+
+        cursor.execute(
+            """
+            SELECT 
+                d.id,
+                d.file_name,
+                d.uploaded_at,
+                d.analysis_status,
+                d.analyzed_at,
+                dt.name AS document_type_name,
+                dept.name AS department_name,
+                dept.code AS department_code,
+                u.name AS uploaded_by_name,
+                u.email AS uploaded_by_email
+            FROM documents d
+            LEFT JOIN document_types dt ON dt.id = d.document_type_id
+            LEFT JOIN departments dept ON dept.id = d.department_id
+            LEFT JOIN users u ON u.id = d.uploaded_by
+            WHERE d.department_id = %s AND d.institution_id = %s
+            ORDER BY d.uploaded_at DESC
+            """,
+            (dept["id"], inst_id)
+        )
+        docs = cursor.fetchall()
+
+        return {
+            "department": dept,
+            "documents": docs
+        }
+
+@router.get("/by-department/{department_id}")
+def get_documents_by_dept_id(department_id: int, current_user: dict = Depends(get_current_user)):
+    inst_id = current_user["institution_id"]
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT id, code, name FROM departments WHERE id = %s AND institution_id = %s", (department_id, inst_id))
+        dept = cursor.fetchone()
+        if not dept:
+            raise HTTPException(status_code=404, detail="Department not found.")
+
+        cursor.execute(
+            """
+            SELECT 
+                d.id,
+                d.file_name,
+                d.uploaded_at,
+                d.analysis_status,
+                d.analyzed_at,
+                dt.name AS document_type_name,
+                dept.name AS department_name,
+                dept.code AS department_code,
+                u.name AS uploaded_by_name,
+                u.email AS uploaded_by_email
+            FROM documents d
+            LEFT JOIN document_types dt ON dt.id = d.document_type_id
+            LEFT JOIN departments dept ON dept.id = d.department_id
+            LEFT JOIN users u ON u.id = d.uploaded_by
+            WHERE d.department_id = %s AND d.institution_id = %s
+            ORDER BY d.uploaded_at DESC
+            """,
+            (department_id, inst_id)
+        )
+        docs = cursor.fetchall()
+
+        return {
+            "department": dept,
+            "documents": docs
+        }
+
 @router.get("/{document_id}")
 def get_document_details(document_id: int, current_user: dict = Depends(get_current_user)):
     with get_db_cursor() as cursor:

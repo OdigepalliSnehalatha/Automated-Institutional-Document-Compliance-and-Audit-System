@@ -3,6 +3,7 @@ import api from "../api";
 import StatusBadge from "../components/StatusBadge";
 import ComparisonModal from "../components/ComparisonModal";
 import PdfViewerModal from "../components/PdfViewerModal";
+import DepartmentDocumentsView from "../components/DepartmentDocumentsView";
 
 function HodDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   const [internalActiveTab, setInternalActiveTab] = useState("overview"); // "overview" | "all" | "accepted" | "branches"
@@ -14,6 +15,7 @@ function HodDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   const [documents, setDocuments] = useState([]);
   const [acceptedDocs, setAcceptedDocs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedDept, setSelectedDept] = useState(null);
 
   // Modals state
   const [comparisonModalOpen, setComparisonModalOpen] = useState(false);
@@ -165,34 +167,78 @@ function HodDashboard({ user, activeTab: propActiveTab, onTabChange }) {
 
       {/* VIEW 4: BRANCHES & GUIDELINES */}
       {activeTab === "branches" && (
-        <div className="panel">
-          <div className="panel-header">
-            <div>
-              <h3>Institutional Department & Branch Guidelines</h3>
-              <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                Overview of supported branches in the compliance system
-              </p>
+        selectedDept ? (
+          <DepartmentDocumentsView
+            department={selectedDept}
+            onBack={() => setSelectedDept(null)}
+            user={user}
+          />
+        ) : (
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Institutional Department & Branch Guidelines</h3>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                  Click on any department to view its uploaded compliance documents, question papers, and syllabi.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px", marginBottom: "20px" }}>
+              {[
+                { id: 10, code: "CAI", name: "Computer Artificial Intelligence" },
+                { id: 1, code: "CSE", name: "Computer Science and Engineering" },
+                { id: 2, code: "CSD", name: "Computer Science and Design" },
+                { id: 3, code: "CSM", name: "CSE (AI & Machine Learning)" },
+                { id: 4, code: "CSE-AIML", name: "CSE - AI & ML Specialization" },
+                { id: 5, code: "ECE", name: "Electronics & Communication Eng." },
+                { id: 6, code: "ME", name: "Mechanical Engineering" },
+                { id: 7, code: "CE", name: "Civil Engineering" },
+              ].map((b) => (
+                <div
+                  key={b.code}
+                  onClick={() => setSelectedDept(b)}
+                  style={{
+                    padding: "18px",
+                    background: "#ffffff",
+                    borderRadius: "10px",
+                    border: "1.5px solid #e2e8f0",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                    transition: "all 0.2s ease-in-out",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#2563eb";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 8px 16px rgba(37,99,235,0.12)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#e2e8f0";
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.04)";
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="branch-pill">{b.code}</span>
+                      <span style={{ fontSize: "18px" }}>📁</span>
+                    </div>
+                    <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: "700", color: "#0f172a" }}>
+                      {b.name}
+                    </p>
+                  </div>
+                  <div style={{ marginTop: "14px", paddingTop: "10px", borderTop: "1px dashed #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "12px", color: "#2563eb", fontWeight: "700" }}>View Uploaded Files →</span>
+                    <span style={{ fontSize: "11px", color: "#64748b" }}>Click to open</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px", marginBottom: "20px" }}>
-            {[
-              { code: "CAI", name: "Computer Artificial Intelligence" },
-              { code: "CSE", name: "Computer Science and Engineering" },
-              { code: "CSD", name: "Computer Science and Design" },
-              { code: "CSM", name: "CSE (AI & Machine Learning)" },
-              { code: "CSE-AIML", name: "CSE - AI & ML Specialization" },
-              { code: "ECE", name: "Electronics & Communication Eng." },
-              { code: "ME", name: "Mechanical Engineering" },
-              { code: "CE", name: "Civil Engineering" },
-            ].map((b) => (
-              <div key={b.code} style={{ padding: "14px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <span className="branch-pill" style={{ marginBottom: "6px" }}>{b.code}</span>
-                <p style={{ margin: "4px 0 0", fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{b.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )
       )}
 
       {activeTab === "all" && (

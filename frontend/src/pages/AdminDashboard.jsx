@@ -4,6 +4,7 @@ import StatusBadge from "../components/StatusBadge";
 import ComparisonModal from "../components/ComparisonModal";
 import PdfViewerModal from "../components/PdfViewerModal";
 import InstitutionLogo from "../components/InstitutionLogo";
+import DepartmentDocumentsView from "../components/DepartmentDocumentsView";
 
 function AdminDashboard({ user, activeTab = "overview" }) {
   const [data, setData] = useState(null);
@@ -11,6 +12,7 @@ function AdminDashboard({ user, activeTab = "overview" }) {
   const [usersList, setUsersList] = useState([]);
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [personnelSearch, setPersonnelSearch] = useState("");
+  const [selectedDept, setSelectedDept] = useState(null);
 
   // Institution settings form
   const [instForm, setInstForm] = useState({
@@ -443,49 +445,74 @@ function AdminDashboard({ user, activeTab = "overview" }) {
 
       {/* VIEW 4: DEPARTMENTS & BRANCHES */}
       {activeTab === "departments" && (
-        <div className="panel">
-          <div className="panel-header">
-            <div>
-              <h3>Institutional Engineering Branches ({departments.length})</h3>
-              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                Overview of branches including CAI, CSE, ECE, CSD, CSM, CSE-AIML, ME, and CE
-              </span>
+        selectedDept ? (
+          <DepartmentDocumentsView
+            department={selectedDept}
+            onBack={() => setSelectedDept(null)}
+            user={user}
+          />
+        ) : (
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Institutional Engineering Branches ({departments.length})</h3>
+                <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                  Click on any branch to inspect all uploaded compliance documents, question papers, and syllabi.
+                </span>
+              </div>
+            </div>
+
+            <div className="table-wrapper">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Branch Code</th>
+                    <th>Department / Branch Name</th>
+                    <th>Faculty Count</th>
+                    <th>Uploaded Documents</th>
+                    <th>Accepted Records</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departments.map((d) => (
+                    <tr
+                      key={d.id}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setSelectedDept(d)}
+                      title={`Click to open ${d.name} uploaded documents`}
+                    >
+                      <td>
+                        <span className="branch-pill" style={{ fontSize: "12px", fontWeight: "800" }}>
+                          {d.code}
+                        </span>
+                      </td>
+                      <td><strong>{d.name}</strong></td>
+                      <td>{d.faculty_count} registered faculty</td>
+                      <td>{d.document_count} total uploads</td>
+                      <td>
+                        <span style={{ color: "var(--success)", fontWeight: "700" }}>
+                          {d.accepted_count} accepted
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDept(d);
+                          }}
+                        >
+                          📁 View Documents →
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div className="table-wrapper">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Branch Code</th>
-                  <th>Department / Branch Name</th>
-                  <th>Faculty Count</th>
-                  <th>Uploaded Documents</th>
-                  <th>Accepted Records</th>
-                </tr>
-              </thead>
-              <tbody>
-                {departments.map((d) => (
-                  <tr key={d.id}>
-                    <td>
-                      <span className="branch-pill" style={{ fontSize: "12px", fontWeight: "800" }}>
-                        {d.code}
-                      </span>
-                    </td>
-                    <td><strong>{d.name}</strong></td>
-                    <td>{d.faculty_count} registered faculty</td>
-                    <td>{d.document_count} total uploads</td>
-                    <td>
-                      <span style={{ color: "var(--success)", fontWeight: "700" }}>
-                        {d.accepted_count} accepted
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        )
       )}
 
       {/* VIEW 5: AUDIT DOCUMENTS */}

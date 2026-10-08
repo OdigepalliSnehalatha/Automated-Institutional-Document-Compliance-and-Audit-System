@@ -6,6 +6,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [quickInput, setQuickInput] = useState("");
   const messagesEndRef = useRef(null);
 
   // Define role-specific suggested questions
@@ -81,6 +82,11 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
     const text = textToSend || inputMessage;
     if (!text.trim() || loading) return;
 
+    if (!isOpen) {
+      onOpen();
+    }
+    setMinimized(false);
+
     const userMsg = {
       id: Date.now().toString(),
       role: "user",
@@ -90,6 +96,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
+    setQuickInput("");
     setLoading(true);
 
     try {
@@ -123,7 +130,6 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
   const renderFormattedContent = (content) => {
     const lines = content.split("\n");
     return lines.map((line, i) => {
-      // Bold replacement
       let formatted = line;
       const boldRegex = /\*\*(.*?)\*\*/g;
       const parts = [];
@@ -159,59 +165,72 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
   return (
     <>
-      {/* Floating Action Button (Always available in bottom-right) */}
+      {/* 1. DOCKED WIDGET AT BOTTOM RIGHT (When chat is closed or minimized) */}
       {!isOpen && (
-        <button
-          className="ai-floating-trigger-btn"
-          onClick={onOpen}
-          title="Open AI Compliance Assistant"
-          style={{
-            position: "fixed",
-            bottom: "24px",
-            right: "24px",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 18px",
-            borderRadius: "50px",
-            background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
-            color: "#ffffff",
-            boxShadow: "0 8px 24px rgba(37, 99, 235, 0.45)",
-            border: "2px solid rgba(255, 255, 255, 0.2)",
-            cursor: "pointer",
-          }}
-        >
-          <div style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #60a5fa 0%, #a855f7 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.25)"
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
-              <rect x="4" y="8" width="16" height="12" rx="4"/>
-              <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
-              <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
-              <path d="M9 17h6"/>
-            </svg>
+        <div className="ai-dock-widget">
+          {/* Picture Type Illusion */}
+          <div
+            className="ai-illusion-avatar-wrapper"
+            onClick={onOpen}
+            title="Click to open AI Assistant chat"
+          >
+            <div className="ai-illusion-bubble">
+              ✨ Ask AI Assistant
+            </div>
+            <div className="ai-illusion-character">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+                <rect x="4" y="8" width="16" height="12" rx="4"/>
+                <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
+                <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
+                <path d="M9 17h6"/>
+              </svg>
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: "1px",
+                  right: "1px",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                  border: "2px solid #ffffff",
+                }}
+              />
+            </div>
           </div>
-          <span style={{ fontWeight: "700", fontSize: "14px", letterSpacing: "0.2px" }}>AI Assistant</span>
-          <span style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "#22c55e",
-            boxShadow: "0 0 8px #22c55e"
-          }}></span>
-        </button>
+
+          {/* Below that: Rectangle Bar to Chat */}
+          <form
+            className="ai-rectangle-chat-bar"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (quickInput.trim()) {
+                handleSendMessage(quickInput.trim());
+              } else {
+                onOpen();
+              }
+            }}
+          >
+            <span style={{ fontSize: "15px", marginRight: "6px" }}>💬</span>
+            <input
+              type="text"
+              className="ai-rectangle-input"
+              placeholder={`Ask AI as ${user?.role || "User"}...`}
+              value={quickInput}
+              onChange={(e) => setQuickInput(e.target.value)}
+              onClick={() => {
+                if (!isOpen) onOpen();
+              }}
+            />
+            <button type="submit" className="ai-rectangle-send-btn">
+              Chat ➤
+            </button>
+          </form>
+        </div>
       )}
 
-      {/* Floating Chat Modal Window (Docked at bottom right) */}
+      {/* 2. EXPANDED CONVERSATION WINDOW AT BOTTOM RIGHT */}
       {isOpen && (
         <div
           className={`ai-chat-window ${minimized ? "minimized" : ""}`}
@@ -222,20 +241,10 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
             zIndex: 9999,
           }}
         >
-          {/* Header */}
+          {/* Header with Picture Illusion Character */}
           <div className="ai-chat-header">
             <div className="ai-chat-header-info">
-              <div style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                flexShrink: 0
-              }}>
+              <div className="ai-illusion-character" style={{ width: "38px", height: "38px" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
                   <rect x="4" y="8" width="16" height="12" rx="4"/>
@@ -247,7 +256,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
               <div>
                 <h3 className="ai-chat-title">AI Compliance Assistant</h3>
                 <span className="ai-chat-role-badge">
-                  Online • Ready to help
+                  {user?.role} Mode • Live Database
                 </span>
               </div>
             </div>
@@ -308,7 +317,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
               {/* Suggested Questions Chips */}
               <div className="ai-chat-suggestions">
-                <span className="suggestions-label">Suggestions:</span>
+                <span className="suggestions-label">Suggested Prompts:</span>
                 <div className="suggestions-scroll">
                   {currentSuggestions.map((sug, idx) => (
                     <button
@@ -323,7 +332,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
                 </div>
               </div>
 
-              {/* Input Footer */}
+              {/* Rectangle Bar to Chat (at Bottom) */}
               <form
                 className="ai-chat-footer"
                 onSubmit={(e) => {
