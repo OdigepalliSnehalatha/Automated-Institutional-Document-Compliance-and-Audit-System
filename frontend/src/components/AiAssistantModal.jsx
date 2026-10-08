@@ -199,34 +199,6 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
               />
             </div>
           </div>
-
-          {/* Below that: Rectangle Bar to Chat */}
-          <form
-            className="ai-rectangle-chat-bar"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (quickInput.trim()) {
-                handleSendMessage(quickInput.trim());
-              } else {
-                onOpen();
-              }
-            }}
-          >
-            <span style={{ fontSize: "15px", marginRight: "6px" }}>💬</span>
-            <input
-              type="text"
-              className="ai-rectangle-input"
-              placeholder={`Ask AI as ${user?.role || "User"}...`}
-              value={quickInput}
-              onChange={(e) => setQuickInput(e.target.value)}
-              onClick={() => {
-                if (!isOpen) onOpen();
-              }}
-            />
-            <button type="submit" className="ai-rectangle-send-btn">
-              Chat ➤
-            </button>
-          </form>
         </div>
       )}
 

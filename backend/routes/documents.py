@@ -45,6 +45,18 @@ def list_documents(current_user: dict = Depends(get_current_user)):
         cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
+from backend.data.jntua_syllabus import get_jntua_subjects_for_department
+
+@router.get("/jntua-subjects/{code}")
+def get_jntua_subjects(code: str):
+    subjects = get_jntua_subjects_for_department(code)
+    return {
+        "branch_code": code.upper(),
+        "total_subjects": len(subjects),
+        "regulation": "JNTUA R20 / R23",
+        "subjects": subjects
+    }
+
 @router.get("/by-department/code/{code}")
 def get_documents_by_dept_code(code: str, current_user: dict = Depends(get_current_user)):
     inst_id = current_user["institution_id"]
@@ -77,10 +89,12 @@ def get_documents_by_dept_code(code: str, current_user: dict = Depends(get_curre
             (dept["id"], inst_id)
         )
         docs = cursor.fetchall()
+        jntua_subs = get_jntua_subjects_for_department(dept["code"])
 
         return {
             "department": dept,
-            "documents": docs
+            "documents": docs,
+            "jntua_subjects": jntua_subs
         }
 
 @router.get("/by-department/{department_id}")
@@ -115,10 +129,12 @@ def get_documents_by_dept_id(department_id: int, current_user: dict = Depends(ge
             (department_id, inst_id)
         )
         docs = cursor.fetchall()
+        jntua_subs = get_jntua_subjects_for_department(dept["code"])
 
         return {
             "department": dept,
-            "documents": docs
+            "documents": docs,
+            "jntua_subjects": jntua_subs
         }
 
 @router.get("/{document_id}")
