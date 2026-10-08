@@ -90,6 +90,7 @@ def verify_otp(data: VerifyOTPRequest, request: Request):
     }
 
 @router.get("/auth/me")
+@router.get("/me")
 def auth_me(request: Request):
     user = get_current_user(request)
     return {
