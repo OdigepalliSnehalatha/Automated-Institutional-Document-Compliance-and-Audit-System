@@ -6,19 +6,19 @@ import PdfViewerModal from "../components/PdfViewerModal";
 
 function DepartmentDocumentsView({ department, onBack, user }) {
   const [documents, setDocuments] = useState([]);
-  const [jntuaSubjects, setJntuaSubjects] = useState([]);
+  const [curriculum, setCurriculum] = useState([]);
   const [deptInfo, setDeptInfo] = useState(department || {});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeSubTab, setActiveSubTab] = useState("subjects"); // "subjects" | "documents"
+  const [activeSubTab, setActiveSubTab] = useState("curriculum"); // "curriculum" | "documents"
+
+  // Semester filtering & search for curriculum
+  const [selectedSemester, setSelectedSemester] = useState("ALL"); // "ALL" | 1..8
+  const [curriculumSearch, setCurriculumSearch] = useState("");
 
   // Search & Filter for Documents
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-
-  // Search & Filter for Subjects
-  const [subjectSearch, setSubjectSearch] = useState("");
-  const [expandedUnitCode, setExpandedUnitCode] = useState(null);
 
   // Modals
   const [comparisonModalOpen, setComparisonModalOpen] = useState(false);
@@ -43,7 +43,7 @@ function DepartmentDocumentsView({ department, onBack, user }) {
         res = await api.get("/documents");
       }
       setDocuments(res.data.documents || []);
-      setJntuaSubjects(res.data.jntua_subjects || []);
+      setCurriculum(res.data.curriculum || []);
       if (res.data.department) {
         setDeptInfo(res.data.department);
       }
@@ -65,7 +65,7 @@ function DepartmentDocumentsView({ department, onBack, user }) {
     }
   };
 
-  const handleDownload = (docId, fileName) => {
+  const handleDownload = (docId) => {
     window.open(`http://localhost:8000/documents/${docId}/download`, "_blank");
   };
 
@@ -89,20 +89,48 @@ function DepartmentDocumentsView({ department, onBack, user }) {
     return matchesSearch && matchesStatus;
   });
 
-  const filteredSubjects = jntuaSubjects.filter((s) => {
-    const q = subjectSearch.toLowerCase();
-    return (
-      !q ||
-      s.name.toLowerCase().includes(q) ||
-      s.code.toLowerCase().includes(q) ||
-      s.semester.toLowerCase().includes(q)
-    );
-  });
+  // Filter curriculum semesters and search query
+  const qCurriculum = curriculumSearch.toLowerCase().trim();
+
+  const filteredCurriculum = curriculum
+    .filter((sem) => {
+      if (selectedSemester !== "ALL" && sem.semester_num !== Number(selectedSemester)) {
+        return false;
+      }
+      if (!qCurriculum) return true;
+
+      const hasMatchingSubject = sem.subjects.some((s) => s.toLowerCase().includes(qCurriculum));
+      const hasMatchingLab = sem.labs.some((l) => l.toLowerCase().includes(qCurriculum));
+      const hasMatchingLabel = sem.semester_label.toLowerCase().includes(qCurriculum);
+
+      return hasMatchingSubject || hasMatchingLab || hasMatchingLabel;
+    })
+    .map((sem) => {
+      if (!qCurriculum) return sem;
+      return {
+        ...sem,
+        subjects: sem.subjects.filter((s) => s.toLowerCase().includes(qCurriculum)),
+        labs: sem.labs.filter((l) => l.toLowerCase().includes(qCurriculum)),
+      };
+    });
+
+  // Total counts across all 8 semesters
+  const totalSubjectsCount = curriculum.reduce((acc, sem) => acc + (sem.subjects?.length || 0), 0);
+  const totalLabsCount = curriculum.reduce((acc, sem) => acc + (sem.labs?.length || 0), 0);
 
   return (
     <div className="panel" style={{ animation: "fadeIn 0.25s ease-out" }}>
-      {/* Top Breadcrumb & Back Navigation */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px", borderBottom: "1px solid var(--border-color)", paddingBottom: "14px" }}>
+      {/* Top Navigation & Breadcrumb */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "18px",
+          borderBottom: "1px solid var(--border-color)",
+          paddingBottom: "14px",
+        }}
+      >
         <button
           className="btn btn-secondary btn-sm"
           onClick={onBack}
@@ -112,7 +140,7 @@ function DepartmentDocumentsView({ department, onBack, user }) {
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="branch-pill" style={{ fontSize: "13px", padding: "4px 12px" }}>
+          <span className="branch-pill" style={{ fontSize: "13px", padding: "4px 12px", fontWeight: "800" }}>
             {deptInfo.code || department?.code}
           </span>
           <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
@@ -128,7 +156,7 @@ function DepartmentDocumentsView({ department, onBack, user }) {
             🏛️ {deptInfo.name || department?.name} ({deptInfo.code || department?.code})
           </h2>
           <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>
-            Official JNTUA Curriculum (R20/R23 Regulations) & Uploaded Compliance Audit Records
+            Official 4-Year JNTUA Academic Curriculum (Semesters 1 to 8: All Subjects & Labs)
           </p>
         </div>
         <button className="btn btn-secondary btn-sm" onClick={loadDepartmentData} disabled={loading}>
@@ -136,17 +164,17 @@ function DepartmentDocumentsView({ department, onBack, user }) {
         </button>
       </div>
 
-      {/* Sub-Tabs: JNTUA Subjects vs Uploaded Documents */}
+      {/* Sub-Tabs: Curriculum (Semesters 1-8) vs Uploaded Documents */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px", borderBottom: "2px solid #e2e8f0" }}>
         <button
           type="button"
-          onClick={() => setActiveSubTab("subjects")}
+          onClick={() => setActiveSubTab("curriculum")}
           style={{
             padding: "10px 18px",
             border: "none",
             background: "none",
-            borderBottom: activeSubTab === "subjects" ? "3px solid #2563eb" : "3px solid transparent",
-            color: activeSubTab === "subjects" ? "#2563eb" : "#64748b",
+            borderBottom: activeSubTab === "curriculum" ? "3px solid #2563eb" : "3px solid transparent",
+            color: activeSubTab === "curriculum" ? "#2563eb" : "#64748b",
             fontWeight: "700",
             fontSize: "14px",
             cursor: "pointer",
@@ -155,9 +183,18 @@ function DepartmentDocumentsView({ department, onBack, user }) {
             gap: "8px",
           }}
         >
-          <span>📚 JNTUA Syllabus & Subjects</span>
-          <span style={{ background: activeSubTab === "subjects" ? "#eff6ff" : "#f1f5f9", padding: "2px 8px", borderRadius: "12px", fontSize: "12px" }}>
-            {jntuaSubjects.length}
+          <span>📚 1st Year to 4th Year Curriculum (Sem 1 - 8)</span>
+          <span
+            style={{
+              background: activeSubTab === "curriculum" ? "#eff6ff" : "#f1f5f9",
+              color: activeSubTab === "curriculum" ? "#2563eb" : "#64748b",
+              padding: "2px 8px",
+              borderRadius: "12px",
+              fontSize: "12px",
+              fontWeight: "700",
+            }}
+          >
+            {curriculum.length} Semesters
           </span>
         </button>
 
@@ -178,113 +215,345 @@ function DepartmentDocumentsView({ department, onBack, user }) {
             gap: "8px",
           }}
         >
-          <span>📁 Uploaded Documents</span>
-          <span style={{ background: activeSubTab === "documents" ? "#eff6ff" : "#f1f5f9", padding: "2px 8px", borderRadius: "12px", fontSize: "12px" }}>
+          <span>📁 Department Uploaded Documents</span>
+          <span
+            style={{
+              background: activeSubTab === "documents" ? "#eff6ff" : "#f1f5f9",
+              color: activeSubTab === "documents" ? "#2563eb" : "#64748b",
+              padding: "2px 8px",
+              borderRadius: "12px",
+              fontSize: "12px",
+              fontWeight: "700",
+            }}
+          >
             {totalCount}
           </span>
         </button>
       </div>
 
-      {/* TAB 1: JNTUA SYLLABUS & SUBJECTS */}
-      {activeSubTab === "subjects" && (
+      {/* TAB 1: 1ST YEAR 1ST SEMESTER TO 4TH YEAR 8TH SEMESTER CURRICULUM */}
+      {activeSubTab === "curriculum" && (
         <div>
-          {/* Search bar for subjects */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+          {/* Quick Summary Banner */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: "8px",
+              padding: "12px 18px",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "13px", color: "#334155" }}>
+                Total Semesters: <strong>8 Semesters (4 Years)</strong>
+              </span>
+              <span style={{ color: "#cbd5e1" }}>•</span>
+              <span style={{ fontSize: "13px", color: "#334155" }}>
+                Theory Subjects: <strong style={{ color: "#1d4ed8" }}>{totalSubjectsCount}</strong>
+              </span>
+              <span style={{ color: "#cbd5e1" }}>•</span>
+              <span style={{ fontSize: "13px", color: "#334155" }}>
+                Laboratory Courses: <strong style={{ color: "#059669" }}>{totalLabsCount}</strong>
+              </span>
+            </div>
+            <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+              Regulation: <strong>JNTUA R20 / R23</strong>
+            </span>
+          </div>
+
+          {/* Search & Semester Pills Filter */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "18px",
+              flexWrap: "wrap",
+              gap: "12px",
+            }}
+          >
+            {/* Search Input */}
             <div className="search-input-wrapper" style={{ width: "320px" }}>
               <span className="search-icon">🔍</span>
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search subject by name, code, or semester..."
-                value={subjectSearch}
-                onChange={(e) => setSubjectSearch(e.target.value)}
+                placeholder="Search subject or lab name..."
+                value={curriculumSearch}
+                onChange={(e) => setCurriculumSearch(e.target.value)}
               />
             </div>
-            <span style={{ fontSize: "13px", color: "#64748b", fontWeight: "600" }}>
-              Curriculum Regulation: <strong style={{ color: "#0f172a" }}>JNTUA R20 / R23</strong>
-            </span>
+
+            {/* Semester Quick Filter Buttons */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedSemester("ALL")}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: selectedSemester === "ALL" ? "1.5px solid #2563eb" : "1px solid #e2e8f0",
+                  background: selectedSemester === "ALL" ? "#eff6ff" : "#ffffff",
+                  color: selectedSemester === "ALL" ? "#1d4ed8" : "#475569",
+                  fontSize: "12px",
+                  fontWeight: selectedSemester === "ALL" ? "700" : "500",
+                  cursor: "pointer",
+                }}
+              >
+                All 8 Semesters
+              </button>
+
+              {[
+                { num: 1, label: "I-I (Sem 1)" },
+                { num: 2, label: "I-II (Sem 2)" },
+                { num: 3, label: "II-I (Sem 3)" },
+                { num: 4, label: "II-II (Sem 4)" },
+                { num: 5, label: "III-I (Sem 5)" },
+                { num: 6, label: "III-II (Sem 6)" },
+                { num: 7, label: "IV-I (Sem 7)" },
+                { num: 8, label: "IV-II (Sem 8)" },
+              ].map((s) => (
+                <button
+                  key={s.num}
+                  type="button"
+                  onClick={() => setSelectedSemester(s.num)}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    border: selectedSemester === s.num ? "1.5px solid #2563eb" : "1px solid #e2e8f0",
+                    background: selectedSemester === s.num ? "#eff6ff" : "#ffffff",
+                    color: selectedSemester === s.num ? "#1d4ed8" : "#475569",
+                    fontSize: "12px",
+                    fontWeight: selectedSemester === s.num ? "700" : "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Curriculum List (Semesters 1 through 8) */}
           {loading ? (
-            <p className="empty-state">Loading JNTUA subjects...</p>
-          ) : filteredSubjects.length === 0 ? (
-            <p className="empty-state">No JNTUA subjects matched your search.</p>
+            <p className="empty-state">Loading JNTUA curriculum...</p>
+          ) : filteredCurriculum.length === 0 ? (
+            <div className="empty-state">
+              <span className="empty-icon" style={{ fontSize: "36px" }}>🔍</span>
+              <p style={{ margin: "8px 0 0", color: "#64748b" }}>
+                No subjects or labs matched "{curriculumSearch}".
+              </p>
+            </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px" }}>
-              {filteredSubjects.map((sub) => {
-                const isExpanded = expandedUnitCode === sub.code;
-                return (
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              {filteredCurriculum.map((sem) => (
+                <div
+                  key={sem.semester_num}
+                  style={{
+                    background: "#ffffff",
+                    borderRadius: "10px",
+                    border: "1.5px solid #e2e8f0",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Semester Card Header */}
                   <div
-                    key={sub.code}
                     style={{
-                      background: "#ffffff",
-                      borderRadius: "10px",
-                      border: "1.5px solid #e2e8f0",
-                      padding: "18px",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                      background: "#f8fafc",
+                      padding: "14px 20px",
+                      borderBottom: "1px solid #e2e8f0",
                       display: "flex",
-                      flexDirection: "column",
                       justifyContent: "space-between",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: "10px",
                     }}
                   >
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                        <span style={{ background: "#eff6ff", color: "#1d4ed8", padding: "3px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", letterSpacing: "0.5px" }}>
-                          {sub.code}
-                        </span>
-                        <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
-                          {sub.credits} Credits
-                        </span>
-                      </div>
-
-                      <h4 style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a", margin: "4px 0 6px" }}>
-                        {sub.name}
-                      </h4>
-
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "11px", background: "#f8fafc", color: "#475569", padding: "2px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
-                          📅 {sub.semester}
-                        </span>
-                        <span style={{ fontSize: "11px", background: "#f8fafc", color: "#475569", padding: "2px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
-                          🏷️ {sub.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Units breakdown */}
-                    <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: "10px" }}>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedUnitCode(isExpanded ? null : sub.code)}
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span
                         style={{
-                          background: "none",
-                          border: "none",
-                          color: "#2563eb",
+                          background: "#2563eb",
+                          color: "#ffffff",
                           fontSize: "12px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          padding: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
+                          fontWeight: "800",
+                          padding: "3px 10px",
+                          borderRadius: "6px",
+                          letterSpacing: "0.5px",
                         }}
                       >
-                        <span>{isExpanded ? "▲ Hide Units Syllabus" : "▼ View 5-Unit Syllabus (JNTUA Outline)"}</span>
-                      </button>
+                        Sem {sem.semester_num}
+                      </span>
+                      <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", margin: 0 }}>
+                        {sem.semester_label}
+                      </h3>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          background: "#e2e8f0",
+                          color: "#475569",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {sem.year}
+                      </span>
+                    </div>
 
-                      {isExpanded && sub.units && (
-                        <div style={{ marginTop: "10px", background: "#f8fafc", padding: "10px 12px", borderRadius: "6px", fontSize: "12px", color: "#334155" }}>
-                          {sub.units.map((u, uIdx) => (
-                            <p key={uIdx} style={{ margin: "4px 0", lineHeight: "1.4" }}>
-                              <strong>• </strong>{u}
-                            </p>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          background: "#eff6ff",
+                          color: "#1d4ed8",
+                          padding: "3px 10px",
+                          borderRadius: "12px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        📘 {sem.subjects?.length || 0} Theory Subjects
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          background: "#ecfdf5",
+                          color: "#059669",
+                          padding: "3px 10px",
+                          borderRadius: "12px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        🧪 {sem.labs?.length || 0} Labs
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Semester Content: Subjects and Labs with Names Only */}
+                  <div
+                    style={{
+                      padding: "18px 20px",
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                      gap: "20px",
+                    }}
+                  >
+                    {/* Column 1: Theory Subjects (Names Only) */}
+                    <div
+                      style={{
+                        background: "#fafafa",
+                        border: "1px solid #f1f5f9",
+                        borderRadius: "8px",
+                        padding: "16px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "12px",
+                          paddingBottom: "8px",
+                          borderBottom: "1.5px solid #e2e8f0",
+                        }}
+                      >
+                        <span style={{ fontSize: "16px" }}>📖</span>
+                        <h4 style={{ fontSize: "14px", fontWeight: "800", color: "#1e293b", margin: 0 }}>
+                          Theory Subjects (Names Only)
+                        </h4>
+                      </div>
+
+                      {(!sem.subjects || sem.subjects.length === 0) ? (
+                        <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>No subjects listed.</p>
+                      ) : (
+                        <ol
+                          style={{
+                            margin: 0,
+                            paddingLeft: "20px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          {sem.subjects.map((subjName, idx) => (
+                            <li
+                              key={idx}
+                              style={{
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                color: "#1e293b",
+                                lineHeight: "1.4",
+                              }}
+                            >
+                              {subjName}
+                            </li>
                           ))}
-                        </div>
+                        </ol>
+                      )}
+                    </div>
+
+                    {/* Column 2: Laboratories (Names Only) */}
+                    <div
+                      style={{
+                        background: "#f0fdf4",
+                        border: "1px solid #dcfce7",
+                        borderRadius: "8px",
+                        padding: "16px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "12px",
+                          paddingBottom: "8px",
+                          borderBottom: "1.5px solid #bbf7d0",
+                        }}
+                      >
+                        <span style={{ fontSize: "16px" }}>🧪</span>
+                        <h4 style={{ fontSize: "14px", fontWeight: "800", color: "#065f46", margin: 0 }}>
+                          Laboratory Courses (Names Only)
+                        </h4>
+                      </div>
+
+                      {(!sem.labs || sem.labs.length === 0) ? (
+                        <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>No laboratory courses listed.</p>
+                      ) : (
+                        <ol
+                          style={{
+                            margin: 0,
+                            paddingLeft: "20px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          {sem.labs.map((labName, idx) => (
+                            <li
+                              key={idx}
+                              style={{
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                color: "#065f46",
+                                lineHeight: "1.4",
+                              }}
+                            >
+                              {labName}
+                            </li>
+                          ))}
+                        </ol>
                       )}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -365,12 +634,12 @@ function DepartmentDocumentsView({ department, onBack, user }) {
             <div className="empty-state" style={{ padding: "48px 20px" }}>
               <span className="empty-icon" style={{ fontSize: "42px" }}>📁</span>
               <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", margin: "10px 0 6px" }}>
-                No documents found for {deptInfo.name || department?.name}
+                No documents uploaded for {deptInfo.name || department?.name}
               </h4>
               <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
                 {searchQuery || statusFilter !== "ALL"
                   ? "Try adjusting your search query or filter options."
-                  : "No faculty members have uploaded files for this department yet."}
+                  : "All prototype test files have been removed. When faculty upload verified documents, they will appear here."}
               </p>
             </div>
           ) : (
@@ -429,7 +698,7 @@ function DepartmentDocumentsView({ department, onBack, user }) {
                           {doc.analysis_status === "ACCEPTED" && (
                             <button
                               className="btn btn-success btn-sm"
-                              onClick={() => handleDownload(doc.id, doc.file_name)}
+                              onClick={() => handleDownload(doc.id)}
                             >
                               📥 Download
                             </button>

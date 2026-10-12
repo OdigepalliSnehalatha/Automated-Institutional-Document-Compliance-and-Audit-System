@@ -45,7 +45,7 @@ def list_documents(current_user: dict = Depends(get_current_user)):
         cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
-from backend.data.jntua_syllabus import get_jntua_subjects_for_department
+from backend.data.jntua_syllabus import get_jntua_subjects_for_department, get_jntua_curriculum_for_department
 
 @router.get("/jntua-subjects/{code}")
 def get_jntua_subjects(code: str):
@@ -55,6 +55,16 @@ def get_jntua_subjects(code: str):
         "total_subjects": len(subjects),
         "regulation": "JNTUA R20 / R23",
         "subjects": subjects
+    }
+
+@router.get("/curriculum/{code}")
+def get_curriculum_by_code(code: str):
+    curriculum = get_jntua_curriculum_for_department(code)
+    return {
+        "branch_code": code.upper(),
+        "total_semesters": len(curriculum),
+        "regulation": "JNTUA R20 / R23",
+        "curriculum": curriculum
     }
 
 @router.get("/by-department/code/{code}")
@@ -90,11 +100,13 @@ def get_documents_by_dept_code(code: str, current_user: dict = Depends(get_curre
         )
         docs = cursor.fetchall()
         jntua_subs = get_jntua_subjects_for_department(dept["code"])
+        curriculum = get_jntua_curriculum_for_department(dept["code"])
 
         return {
             "department": dept,
             "documents": docs,
-            "jntua_subjects": jntua_subs
+            "jntua_subjects": jntua_subs,
+            "curriculum": curriculum
         }
 
 @router.get("/by-department/{department_id}")
@@ -130,11 +142,13 @@ def get_documents_by_dept_id(department_id: int, current_user: dict = Depends(ge
         )
         docs = cursor.fetchall()
         jntua_subs = get_jntua_subjects_for_department(dept["code"])
+        curriculum = get_jntua_curriculum_for_department(dept["code"])
 
         return {
             "department": dept,
             "documents": docs,
-            "jntua_subjects": jntua_subs
+            "jntua_subjects": jntua_subs,
+            "curriculum": curriculum
         }
 
 @router.get("/{document_id}")

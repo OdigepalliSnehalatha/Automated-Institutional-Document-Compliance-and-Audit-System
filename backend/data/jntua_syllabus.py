@@ -1,551 +1,1135 @@
 """
 JNTUA Official Curriculum and Subjects Mapping (R20 / R23 Regulations)
 For Anantha Lakshmi Institute of Technology and Sciences (Affiliated to JNTUA).
+
+Provides complete 8-semester curriculum (1st Year 1st Sem to 4th Year 8th Sem)
+with Theory Subjects and Laboratory Courses (names only) for all engineering branches:
+CSE, CAI, CSD, CSM, CSE-AIML, ECE, ME, CE.
 """
 
-JNTUA_SUBJECTS = {
-    "CAI": [
-        {
-            "code": "20A54301",
-            "name": "Discrete Mathematics & Graph Theory",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Basic Science Course (BSC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Mathematical Logic & Predicates",
-                "Unit 2: Set Theory, Relations & Functions",
-                "Unit 3: Algebraic Structures & Combinatorics",
-                "Unit 4: Recurrence Relations & Generating Functions",
-                "Unit 5: Graph Theory & Applications"
-            ]
-        },
-        {
-            "code": "20A05401T",
-            "name": "Artificial Intelligence & Intelligent Agents",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Introduction to AI & Problem Formulation",
-                "Unit 2: Search Strategies: Heuristic, A*, AO*, Adversarial Search",
-                "Unit 3: Knowledge Representation & First Order Logic",
-                "Unit 4: Planning & Reasoning under Uncertainty",
-                "Unit 5: Learning, Philosophical Foundations & Future of AI"
-            ]
-        },
-        {
-            "code": "20A05402T",
-            "name": "Python & AI Programming",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Python Fundamentals, Data Structures & OOP",
-                "Unit 2: Scientific Computing with NumPy & SciPy",
-                "Unit 3: Data Analysis & Visualization (Pandas, Matplotlib, Seaborn)",
-                "Unit 4: Building Intelligent Agents with Scikit-Learn",
-                "Unit 5: Symbolic AI & Rule-Based Engines in Python"
-            ]
-        },
-        {
-            "code": "20A05501T",
-            "name": "Knowledge Representation and Reasoning",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: First Order Logic & Automated Deduction",
-                "Unit 2: Description Logics and Ontology Engineering",
-                "Unit 3: Default Reasoning & Non-Monotonic Logic",
-                "Unit 4: Probabilistic Reasoning & Bayesian Networks",
-                "Unit 5: Temporal and Spatial Reasoning in Real-World Domains"
-            ]
-        },
-        {
-            "code": "20A05601T",
-            "name": "Neural Networks and Deep Learning",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Biological Neurons to Perceptrons & Backpropagation",
-                "Unit 2: Deep Feedforward Networks & Regularization",
-                "Unit 3: Convolutional Neural Networks (CNNs) & Visual Perception",
-                "Unit 4: Recurrent Neural Networks (RNNs) & LSTMs",
-                "Unit 5: Transformers, Autoencoders & Generative Models"
-            ]
-        },
-        {
-            "code": "20A05701T",
-            "name": "Natural Language Processing",
-            "semester": "IV B.Tech I Sem (Sem 7)",
-            "credits": 3,
-            "category": "Professional Elective Course (PEC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Regular Expressions, Tokenization & Morphology",
-                "Unit 2: N-gram Language Models & POS Tagging",
-                "Unit 3: Parsing, Syntactic Analysis & Context-Free Grammars",
-                "Unit 4: Semantic Analysis & Word Embeddings (Word2Vec, GloVe)",
-                "Unit 5: Large Language Models, Prompting & Applications"
-            ]
-        }
-    ],
+JNTUA_CURRICULUM = {
     "CSE": [
         {
-            "code": "20A05301T",
-            "name": "Data Structures & Algorithms",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Linear Data Structures: Arrays, Stacks, Queues, Linked Lists",
-                "Unit 2: Non-Linear Structures: Trees, Binary Search Trees, AVL Trees",
-                "Unit 3: Graph Algorithms: Traversals, Shortest Paths, MST",
-                "Unit 4: Sorting & Searching Techniques: Quick, Merge, Radix",
-                "Unit 5: Hashing, Collision Resolution & B-Trees"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Communicative English",
+                "Applied Physics",
+                "Basic Electrical and Electronics Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Laboratory",
+                "Applied Physics Laboratory",
+                "Basic Electrical and Electronics Engineering Lab"
             ]
         },
         {
-            "code": "20A05401T",
-            "name": "Database Management Systems",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Entity-Relationship Modeling & Relational Algebra",
-                "Unit 2: Structured Query Language (SQL) & Constraints",
-                "Unit 3: Normalization: 1NF, 2NF, 3NF, BCNF, 4NF",
-                "Unit 4: Transaction Processing, ACID Properties & Concurrency",
-                "Unit 5: Storage Structures, Indexing & NoSQL Overview"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "C Programming and Data Structures",
+                "Basic Civil and Mechanical Engineering",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Chemistry Laboratory",
+                "C Programming and Data Structures Lab",
+                "Engineering Workshop and IT Workshop Lab"
             ]
         },
         {
-            "code": "20A05402T",
-            "name": "Operating Systems",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: OS Structures, System Calls & Process Management",
-                "Unit 2: CPU Scheduling Algorithms & Process Synchronization",
-                "Unit 3: Deadlocks: Prevention, Avoidance (Banker's) & Recovery",
-                "Unit 4: Memory Management: Paging, Segmentation & Virtual Memory",
-                "Unit 5: File System Interface, Implementation & Mass Storage"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Discrete Mathematics & Graph Theory",
+                "Digital Logic Design and Computer Organization",
+                "Advanced Data Structures and Algorithms",
+                "Object Oriented Programming through Java",
+                "Probability, Statistics & Queueing Theory"
+            ],
+            "labs": [
+                "Advanced Data Structures Lab",
+                "Java Programming Lab",
+                "Digital Logic Design Lab",
+                "Python Programming Lab (Skill Course)"
             ]
         },
         {
-            "code": "20A05501T",
-            "name": "Computer Networks",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Reference Models (OSI/TCP-IP), Physical Layer & Media",
-                "Unit 2: Data Link Layer: Framing, Error Detection & Flow Control",
-                "Unit 3: Network Layer: Routing Algorithms, IPv4, IPv6 & Subnetting",
-                "Unit 4: Transport Layer: TCP, UDP & Congestion Control",
-                "Unit 5: Application Layer: DNS, HTTP, SMTP, FTP & Network Security"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Operating Systems",
+                "Database Management Systems",
+                "Software Engineering",
+                "Formal Languages and Automata Theory",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Operating Systems Lab",
+                "Database Management Systems Lab",
+                "Software Engineering & UML Lab",
+                "Web Application Development Lab (Skill Course)"
             ]
         },
         {
-            "code": "20A05502T",
-            "name": "Software Engineering & Agile Methodologies",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Software Process Models, Waterfall, Agile & Scrum",
-                "Unit 2: Requirements Engineering & Analysis Modeling",
-                "Unit 3: Architectural Design & Component-Level Design",
-                "Unit 4: Software Testing Strategies: Black-box, White-box, DevOps",
-                "Unit 5: Project Management, Risk Assessment & Quality Assurance"
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Computer Networks",
+                "Design and Analysis of Algorithms",
+                "Artificial Intelligence",
+                "Professional Elective - I (Cloud Computing / Cyber Security)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Computer Networks Lab",
+                "Artificial Intelligence and Algorithms Lab",
+                "Full Stack Web Development Lab (Skill Course)",
+                "Professional Ethics and Human Values"
             ]
         },
         {
-            "code": "20A05603T",
-            "name": "Compiler Design",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Phases of a Compiler & Lexical Analysis",
-                "Unit 2: Syntax Analysis: Top-Down & Bottom-Up Parsers, LR Parsers",
-                "Unit 3: Syntax Directed Translation & Intermediate Code Generation",
-                "Unit 4: Runtime Environments & Symbol Tables",
-                "Unit 5: Code Optimization & Target Code Generation"
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Compiler Design",
+                "Machine Learning",
+                "Cryptography and Network Security",
+                "Professional Elective - II (Big Data Analytics / Deep Learning)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Machine Learning Lab",
+                "Cryptography and Network Security Lab",
+                "Mobile Application Development Lab (Skill Course)",
+                "Intellectual Property Rights & Patents"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Deep Learning and Neural Networks",
+                "Distributed Systems and Cloud Infrastructure",
+                "Professional Elective - III (Natural Language Processing / Blockchain)",
+                "Professional Elective - IV (DevOps & CI/CD / High Performance Computing)",
+                "Open Elective - III",
+                "Humanities Elective"
+            ],
+            "labs": [
+                "Cloud Computing and Big Data Lab",
+                "DevOps and Automation Lab (Skill Course)",
+                "Industry Internship / Summer Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Autonomous Systems / Edge Computing)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Full Semester Major Project Work & Dissertation",
+                "Technical Seminar"
             ]
         }
     ],
+
+    "CAI": [
+        {
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Applied Physics",
+                "Communicative English",
+                "Basic Electrical and Electronics Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Laboratory",
+                "Applied Physics Laboratory",
+                "Basic Electrical and Electronics Engineering Lab"
+            ]
+        },
+        {
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "Problem Solving and Python Programming",
+                "Basic Civil and Mechanical Engineering",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Chemistry Laboratory",
+                "Python Programming Lab",
+                "Engineering and IT Workshop Lab"
+            ]
+        },
+        {
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Discrete Mathematics & Mathematical Logic",
+                "Data Structures and Algorithms",
+                "Object Oriented Programming using Java",
+                "Computer Organization and Architecture",
+                "Probability and Statistics for AI"
+            ],
+            "labs": [
+                "Data Structures Lab",
+                "Java Programming Lab",
+                "AI Foundations & Scripting Lab (Skill Course)"
+            ]
+        },
+        {
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Artificial Intelligence & Intelligent Agents",
+                "Database Management Systems",
+                "Operating Systems",
+                "Design and Analysis of Algorithms",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "AI & Knowledge Engineering Lab",
+                "Database Management Systems Lab",
+                "Data Science with Python Lab (Skill Course)"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Machine Learning Foundations",
+                "Knowledge Representation and Reasoning",
+                "Computer Networks",
+                "Professional Elective - I (Computer Vision / Data Mining)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Machine Learning Laboratory",
+                "Knowledge Representation Lab",
+                "Full Stack AI Application Development Lab (Skill Course)"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Deep Learning and Neural Networks",
+                "Natural Language Processing",
+                "Big Data Analytics for AI",
+                "Professional Elective - II (Reinforcement Learning / AI in Healthcare)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Deep Learning Laboratory",
+                "Natural Language Processing Lab",
+                "Generative AI & Prompt Engineering Lab (Skill Course)"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Generative AI & Large Language Models",
+                "AI Ethics, Safety & Governance",
+                "Professional Elective - III (Autonomous Systems / Explainable AI)",
+                "Professional Elective - IV (Edge AI / Conversational AI)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Generative AI & LLMOps Lab",
+                "AI Industry Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Cognitive Computing / Quantum AI)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Capstone Major Project in Artificial Intelligence",
+                "Technical Seminar"
+            ]
+        }
+    ],
+
     "CSD": [
         {
-            "code": "20A05404T",
-            "name": "Human-Computer Interaction",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Foundations of HCI & Human Information Processing",
-                "Unit 2: Interaction Design Basics, Personas & User Scenarios",
-                "Unit 3: Usability Engineering & Heuristic Evaluation",
-                "Unit 4: Screen Design, Navigation Structures & Accessibility",
-                "Unit 5: Multi-modal Interfaces, Virtual & Augmented Reality"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Communicative English",
+                "Applied Physics",
+                "Basic Electrical and Electronics Engineering",
+                "Design Drawing and Visualization"
+            ],
+            "labs": [
+                "English Language Communication Skills Lab",
+                "Applied Physics Lab",
+                "Basic Electrical and Electronics Lab"
             ]
         },
         {
-            "code": "20A05504T",
-            "name": "UI/UX Design & Prototyping",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Design Thinking Methodology & Empathy Mapping",
-                "Unit 2: Information Architecture & Wireframing with Figma",
-                "Unit 3: Visual Hierarchy, Color Theory & Modern Typography",
-                "Unit 4: Interactive Micro-Interactions & Prototyping Workflows",
-                "Unit 5: Usability Testing, Analytics & Design Systems"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "Problem Solving and Python Programming",
+                "Design Thinking and Idea Generation",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Chemistry Laboratory",
+                "Python Programming Lab",
+                "Design Studio Workshop"
             ]
         },
         {
-            "code": "20A05505T",
-            "name": "Computer Graphics and Visualization",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Graphics Hardware, Raster Algorithms & Line Drawing",
-                "Unit 2: 2D Transformations, Window-to-Viewport Mapping & Clipping",
-                "Unit 3: 3D Concepts, Transformations, Splines & Bezier Curves",
-                "Unit 4: Visible Surface Detection & Illumination Models",
-                "Unit 5: Shading, Texture Mapping & Scientific Visualization"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Discrete Mathematics",
+                "Data Structures and Algorithms",
+                "Computer Graphics and Animation",
+                "Object Oriented Programming through Java",
+                "Human Centered Design Foundations"
+            ],
+            "labs": [
+                "Data Structures Lab",
+                "Computer Graphics and Animation Lab",
+                "UI/UX Prototyping Lab (Figma / Adobe XD)"
             ]
         },
         {
-            "code": "20A05602T",
-            "name": "3D Modeling and Animation Systems",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Elective Course (PEC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Principles of 3D Geometry & Polygon Meshes",
-                "Unit 2: Lighting, Materials & Physically Based Rendering",
-                "Unit 3: Rigging, Forward and Inverse Kinematics",
-                "Unit 4: Keyframe Animation & Particle Simulation",
-                "Unit 5: Real-Time Game Engine Integration (Unity/Unreal)"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Database Management Systems",
+                "Operating Systems",
+                "Interaction Design & User Experience",
+                "Software Engineering with Agile UI Design",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Database Management Systems Lab",
+                "Interaction Design Studio Lab",
+                "Web Design & Front-End Frameworks Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Computer Networks",
+                "Design and Analysis of Algorithms",
+                "Visual Computing & Rendering",
+                "Professional Elective - I (Game Design / 3D Modeling)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Visual Computing Lab",
+                "Game Design Studio Lab",
+                "Mobile App UI/UX Development Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Augmented Reality and Virtual Reality (AR/VR)",
+                "Information Visualization",
+                "Web Security and Usability",
+                "Professional Elective - II (Motion Graphics / Digital Media)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "AR/VR Development Lab (Unity / Unreal)",
+                "Data Visualization Lab (D3.js / Tableau)",
+                "Design Portfolio Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Generative Design & Creative AI",
+                "Sound and Video Engineering",
+                "Professional Elective - III (Industrial Design / Brand Identity)",
+                "Professional Elective - IV (Accessibility Design / Metaverse Architecture)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Generative Design Lab",
+                "Design Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Design Ethics / Design Management)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Capstone Project in Computer Science and Design",
+                "Technical Seminar"
             ]
         }
     ],
+
     "CSM": [
         {
-            "code": "20A05506T",
-            "name": "Machine Learning Principles",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Introduction to Machine Learning & Concept Learning",
-                "Unit 2: Decision Trees & Regression Models",
-                "Unit 3: Bayesian Learning & Naive Bayes Classifier",
-                "Unit 4: Support Vector Machines (SVM) & Kernel Methods",
-                "Unit 5: Ensemble Learning: Bagging, Boosting, Random Forests"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Applied Physics",
+                "Communicative English",
+                "Basic Electrical and Electronics Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Lab",
+                "Applied Physics Lab",
+                "Basic Electrical & Electronics Lab"
             ]
         },
         {
-            "code": "20A54401",
-            "name": "Mathematical & Statistical Foundations for ML",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Basic Science Course (BSC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Linear Algebra: Vector Spaces, Eigenvalues & SVD",
-                "Unit 2: Multivariable Calculus, Gradients & Hessian Matrices",
-                "Unit 3: Probability Distributions & Maximum Likelihood Estimation",
-                "Unit 4: Hypothesis Testing & Statistical Significance",
-                "Unit 5: Convex Optimization, Stochastic Gradient Descent"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "Problem Solving and Python Programming",
+                "Basic Civil and Mechanical Engineering",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Chemistry Lab",
+                "Python Programming Lab",
+                "Engineering Workshop Lab"
             ]
         },
         {
-            "code": "20A05604T",
-            "name": "Unsupervised Learning & Clustering",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Dimensionality Reduction: PCA, t-SNE & UMAP",
-                "Unit 2: Partitioning Methods: K-Means, K-Medoids",
-                "Unit 3: Hierarchical Clustering & Density-Based (DBSCAN)",
-                "Unit 4: Gaussian Mixture Models & Expectation Maximization",
-                "Unit 5: Association Rule Mining (Apriori & FP-Growth)"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Discrete Mathematics & Graph Theory",
+                "Data Structures and Algorithms",
+                "Object Oriented Programming through Java",
+                "Computer Organization and Architecture",
+                "Probability and Statistics for Data Science"
+            ],
+            "labs": [
+                "Data Structures Lab",
+                "Java Programming Lab",
+                "Scientific Computing in Python Lab"
             ]
         },
         {
-            "code": "20A05605T",
-            "name": "Computer Vision & Image Intelligence",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Elective Course (PEC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Image Representation, Filtering & Edge Detection",
-                "Unit 2: Feature Detection & Matching (SIFT, SURF, ORB)",
-                "Unit 3: Object Detection: R-CNN, Fast R-CNN, YOLO",
-                "Unit 4: Semantic & Instance Segmentation",
-                "Unit 5: Optical Flow, Video Tracking & 3D Reconstruction"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Operating Systems",
+                "Database Management Systems",
+                "Foundations of Machine Learning",
+                "Design and Analysis of Algorithms",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Database Management Systems Lab",
+                "Operating Systems Lab",
+                "Machine Learning Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Supervised & Unsupervised Learning",
+                "Computer Networks",
+                "Artificial Intelligence",
+                "Professional Elective - I (Data Mining / Cloud Computing)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Advanced ML Lab",
+                "Computer Networks Lab",
+                "Full Stack AI Web Development Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Deep Learning Architectures",
+                "Natural Language Processing",
+                "Computer Vision with Deep Learning",
+                "Professional Elective - II (Big Data Analytics / Reinforcement Learning)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Deep Learning Lab",
+                "Computer Vision Lab",
+                "Model Deployment and MLOps Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Large Language Models & Generative AI",
+                "Time Series Forecasting and Analytics",
+                "Professional Elective - III (AI in Healthcare / AI in Finance)",
+                "Professional Elective - IV (Edge AI / Speech Processing)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Generative AI Lab",
+                "Industry Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Autonomous AI / Cognitive Robotics)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Capstone Project in AI & Machine Learning",
+                "Technical Seminar"
             ]
         }
     ],
+
     "CSE-AIML": [
         {
-            "code": "20A05302T",
-            "name": "Foundations of Data Science & AI",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: The Data Science Lifecycle & Exploratory Data Analysis",
-                "Unit 2: Data Wrangling, Cleaning & Imputation",
-                "Unit 3: Statistical Inference & Feature Engineering",
-                "Unit 4: Supervised Learning Workflows with Cross-Validation",
-                "Unit 5: Model Evaluation Metrics: ROC-AUC, Precision-Recall, F1"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Communicative English",
+                "Applied Physics",
+                "Basic Electrical and Electronics Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Lab",
+                "Applied Physics Lab",
+                "Basic Electrical and Electronics Lab"
             ]
         },
         {
-            "code": "20A05607T",
-            "name": "Deep Learning Architectures",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Optimization in Deep Networks: Adam, RMSProp, AdaGrad",
-                "Unit 2: CNN Architectures: ResNet, Inception, EfficientNet",
-                "Unit 3: Sequence Modeling: GRUs, Bi-directional LSTMs, Attention",
-                "Unit 4: Self-Attention & Transformer Architecture",
-                "Unit 5: Generative Adversarial Networks (GANs) & Diffusion Models"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "C and Python Programming",
+                "Basic Civil and Mechanical Engineering",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Chemistry Lab",
+                "C and Python Programming Lab",
+                "Engineering Workshop Lab"
             ]
         },
         {
-            "code": "20A05704T",
-            "name": "Robotics & Intelligent Autonomous Systems",
-            "semester": "IV B.Tech I Sem (Sem 7)",
-            "credits": 3,
-            "category": "Professional Elective Course (PEC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Robot Kinematics, Coordinates & Actuation",
-                "Unit 2: Sensor Perception: LiDAR, Sonar & Depth Cameras",
-                "Unit 3: Simultaneous Localization and Mapping (SLAM)",
-                "Unit 4: Motion Planning & Collision Avoidance",
-                "Unit 5: ROS (Robot Operating System) & Autonomous Navigation"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Discrete Mathematics & Logic",
+                "Data Structures and Algorithms",
+                "Computer Organization and Architecture",
+                "Object Oriented Programming in Java",
+                "Probability and Statistics for AI"
+            ],
+            "labs": [
+                "Data Structures Lab",
+                "Java Programming Lab",
+                "Python for Data Science Lab"
+            ]
+        },
+        {
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Operating Systems",
+                "Database Management Systems",
+                "Principles of Artificial Intelligence",
+                "Design and Analysis of Algorithms",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Database Management Systems Lab",
+                "Artificial Intelligence Lab",
+                "Linux and Shell Scripting Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Machine Learning",
+                "Computer Networks",
+                "Software Engineering with DevOps",
+                "Professional Elective - I (Cloud Computing / Big Data)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Machine Learning Lab",
+                "Computer Networks Lab",
+                "Web Application Development Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Deep Learning",
+                "Natural Language Processing",
+                "Computer Vision",
+                "Professional Elective - II (Reinforcement Learning / IoT Analytics)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Deep Learning Lab",
+                "Computer Vision Lab",
+                "MLOps & Model Deployment Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Generative AI & Transformer Models",
+                "AI Ethics, Explainability and Safety",
+                "Professional Elective - III (Robotics & AI / Speech Recognition)",
+                "Professional Elective - IV (AI Security / Edge Computing)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Generative AI Lab",
+                "Summer Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Cognitive Systems / AI for Automation)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Capstone Project",
+                "Technical Seminar"
             ]
         }
     ],
+
     "ECE": [
         {
-            "code": "20A04301T",
-            "name": "Signals and Systems",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Continuous & Discrete Time Signals & Systems",
-                "Unit 2: Fourier Series & Continuous Time Fourier Transform",
-                "Unit 3: Laplace Transforms & System Transfer Functions",
-                "Unit 4: Sampling Theorem & Aliasing Effects",
-                "Unit 5: Z-Transforms & Discrete LTI Systems"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Applied Physics",
+                "Communicative English",
+                "Basic Electrical Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Lab",
+                "Applied Physics Lab",
+                "Basic Electrical Engineering Lab"
             ]
         },
         {
-            "code": "20A04401T",
-            "name": "Analog and Digital Communications",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Amplitude Modulation & Demodulation Techniques",
-                "Unit 2: Frequency & Phase Modulation (Angle Modulation)",
-                "Unit 3: Pulse Modulation: PAM, PWM, PPM & PCM",
-                "Unit 4: Digital Bandpass Modulation: ASK, FSK, PSK, QAM",
-                "Unit 5: Noise in Communication Systems & Information Theory"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Chemistry",
+                "C Programming and Data Structures",
+                "Basic Civil and Mechanical Engineering",
+                "Network Analysis"
+            ],
+            "labs": [
+                "Chemistry Lab",
+                "C Programming Lab",
+                "Network Analysis Lab"
             ]
         },
         {
-            "code": "20A04501T",
-            "name": "Digital Signal Processing",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Discrete Fourier Transform (DFT) & Properties",
-                "Unit 2: Fast Fourier Transform (FFT) Algorithms (DIT & DIF)",
-                "Unit 3: IIR Digital Filter Design: Butterworth & Chebyshev",
-                "Unit 4: FIR Digital Filter Design: Windowing & Frequency Sampling",
-                "Unit 5: Finite Word Length Effects & Multirate Signal Processing"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Electronic Devices and Circuits",
+                "Signals and Systems",
+                "Digital Logic Design",
+                "Probability Theory and Stochastic Processes",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Electronic Devices and Circuits Lab",
+                "Digital Logic Design Lab",
+                "Basic Simulation Lab (MATLAB)"
             ]
         },
         {
-            "code": "20A04601T",
-            "name": "VLSI Design & Fabrication",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: MOS Transistor Theory & CMOS Fabrication Process",
-                "Unit 2: CMOS Inverter Characteristics & Switching Delays",
-                "Unit 3: Combinational and Sequential MOS Logic Circuits",
-                "Unit 4: Dynamic Logic & Semiconductor Memory Structures",
-                "Unit 5: FPGA Architectures & Verilog HDL Implementation"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Analog Circuits",
+                "Electromagnetic Waves and Transmission Lines",
+                "Analog and Digital Communications",
+                "Control Systems",
+                "Computer Architecture and Organization"
+            ],
+            "labs": [
+                "Analog Circuits Lab",
+                "Communication Systems Lab",
+                "PCB Design and Circuit Simulation Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Microprocessors and Microcontrollers",
+                "Digital Signal Processing",
+                "Antennas and Wave Propagation",
+                "Professional Elective - I (Cellular Communications / Electronic Measurements)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Microprocessors and Microcontrollers Lab",
+                "Digital Signal Processing Lab",
+                "Embedded C and ARM Programming Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "VLSI Design",
+                "Microwave Engineering and Optical Communications",
+                "Internet of Things (IoT)",
+                "Professional Elective - II (Radar Systems / Embedded Systems)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "VLSI Design Lab (Cadence / Xilinx)",
+                "Microwave and Optical Communications Lab",
+                "IoT and Sensor Interfacing Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Wireless Communications & 5G Networks",
+                "Satellite Communications",
+                "Professional Elective - III (DSP Processors / Biomedical Electronics)",
+                "Professional Elective - IV (RF IC Design / Low Power VLSI)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Advanced Communications and Wireless Lab",
+                "Industry Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Optical Networks / Smart Antennas)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Project Work & Dissertation",
+                "Technical Seminar"
             ]
         }
     ],
+
     "ME": [
         {
-            "code": "20A03301T",
-            "name": "Thermodynamics",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Zeroth Law, Work, Heat & First Law of Thermodynamics",
-                "Unit 2: Second Law: Kelvin-Planck, Clausius Statements & Entropy",
-                "Unit 3: Pure Substances, Steam Tables & Mollier Charts",
-                "Unit 4: Gas Power Cycles: Otto, Diesel, Dual & Brayton",
-                "Unit 5: Vapor Power Cycles: Rankine Cycle & Reheat/Regeneration"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Engineering Physics",
+                "Communicative English",
+                "Basic Electrical and Electronics Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Lab",
+                "Engineering Physics Lab",
+                "Engineering Workshop Practice Lab"
             ]
         },
         {
-            "code": "20A03302T",
-            "name": "Fluid Mechanics and Hydraulic Machinery",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Fluid Properties, Pressure Measurement & Hydrostatics",
-                "Unit 2: Fluid Kinematics & Dynamics: Bernoulli's Equation",
-                "Unit 3: Flow Through Pipes, Major/Minor Losses & Boundary Layers",
-                "Unit 4: Impact of Jets & Hydraulic Turbines (Pelton, Francis, Kaplan)",
-                "Unit 5: Centrifugal & Reciprocating Pumps"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Engineering Chemistry",
+                "Problem Solving and Python Programming",
+                "Engineering Mechanics",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Engineering Chemistry Lab",
+                "Python Programming Lab",
+                "Computer Aided Drafting (CAD) Lab"
             ]
         },
         {
-            "code": "20A03501T",
-            "name": "Heat Transfer",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Conduction: Fourier's Law, Steady 1D Conduction & Fins",
-                "Unit 2: Transient Heat Conduction & Lumped Capacity Analysis",
-                "Unit 3: Convection: Forced & Natural Convection Correlations",
-                "Unit 4: Thermal Radiation: Blackbody Laws, Shape Factors & Shields",
-                "Unit 5: Heat Exchangers: LMTD & NTU Methods"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Thermodynamics",
+                "Mechanics of Solids",
+                "Material Science and Metallurgy",
+                "Manufacturing Processes",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Mechanics of Solids Lab",
+                "Material Science & Metallurgy Lab",
+                "Manufacturing Technology Lab - I"
             ]
         },
         {
-            "code": "20A03601T",
-            "name": "CAD / CAM & Automation",
-            "semester": "III B.Tech II Sem (Sem 6)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Fundamentals of CAD/CAM, Coordinate Systems & Transformations",
-                "Unit 2: Geometric Modeling: Wireframe, Surface & Solid Modeling",
-                "Unit 3: CNC Machine Tools & CNC Part Programming (G & M Codes)",
-                "Unit 4: Group Technology, Cellular Manufacturing & FMS",
-                "Unit 5: Computer Integrated Manufacturing (CIM) & Additive Manufacturing"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Fluid Mechanics and Hydraulic Machinery",
+                "Applied Thermodynamics",
+                "Kinematics of Machinery",
+                "Machine Drawing",
+                "Probability and Statistics for Engineers"
+            ],
+            "labs": [
+                "Fluid Mechanics and Hydraulic Machines Lab",
+                "Thermal Engineering Lab - I",
+                "Manufacturing Technology Lab - II"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Dynamics of Machinery",
+                "Design of Machine Elements - I",
+                "Heat Transfer",
+                "Professional Elective - I (Automobile Engineering / Turbo Machinery)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Heat Transfer Lab",
+                "Dynamics and Vibrations Lab",
+                "Computer Aided Design & Modeling Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Design of Machine Elements - II",
+                "Operations Research",
+                "Metrology and Measurements",
+                "Professional Elective - II (Finite Element Analysis / Robotics)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Metrology and Instrumentation Lab",
+                "Finite Element Analysis (FEA/ANSYS) Lab",
+                "CNC and Machine Tools Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "CAD/CAM and CIM",
+                "Refrigeration and Air Conditioning",
+                "Professional Elective - III (Renewable Energy Systems / Additive Manufacturing)",
+                "Professional Elective - IV (Power Plant Engineering / Computational Fluid Dynamics)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "CAD/CAM and 3D Printing Lab",
+                "Industrial Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Total Quality Management / Supply Chain Management)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Project Work & Dissertation",
+                "Technical Seminar"
             ]
         }
     ],
+
     "CE": [
         {
-            "code": "20A01301T",
-            "name": "Strength of Materials",
-            "semester": "II B.Tech I Sem (Sem 3)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Simple Stresses and Strains, Hooke's Law & Elastic Moduli",
-                "Unit 2: Shear Force and Bending Moment Diagrams for Beams",
-                "Unit 3: Flexural and Shear Stresses in Beams",
-                "Unit 4: Torsion of Circular Shafts & Springs",
-                "Unit 5: Principal Stresses, Mohr's Circle & Theories of Failure"
+            "year": "1st Year",
+            "semester_num": 1,
+            "semester_label": "1st Year - 1st Semester (I-I)",
+            "subjects": [
+                "Linear Algebra and Calculus",
+                "Engineering Physics",
+                "Communicative English",
+                "Basic Electrical and Mechanical Engineering",
+                "Engineering Graphics"
+            ],
+            "labs": [
+                "Communicative English Lab",
+                "Engineering Physics Lab",
+                "Civil Engineering Workshop Practice"
             ]
         },
         {
-            "code": "20A01402T",
-            "name": "Concrete Technology",
-            "semester": "II B.Tech II Sem (Sem 4)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Cement Chemistry, Manufacturing & Hydration",
-                "Unit 2: Aggregates Properties & Quality Requirements",
-                "Unit 3: Fresh Concrete: Workability, Segregation & Bleeding",
-                "Unit 4: Hardened Concrete: Compressive Strength, Creep & Shrinkage",
-                "Unit 5: IS 10262 Concrete Mix Design & Special Concretes"
+            "year": "1st Year",
+            "semester_num": 2,
+            "semester_label": "1st Year - 2nd Semester (I-II)",
+            "subjects": [
+                "Differential Equations and Vector Calculus",
+                "Engineering Chemistry",
+                "Problem Solving and Python Programming",
+                "Engineering Mechanics",
+                "Universal Human Values"
+            ],
+            "labs": [
+                "Engineering Chemistry Lab",
+                "Python Programming Lab",
+                "Computer Aided Drafting (AutoCAD) Lab"
             ]
         },
         {
-            "code": "20A01501T",
-            "name": "Geotechnical Engineering",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Soil Origin, 3-Phase System & Index Properties",
-                "Unit 2: Soil Classification (ISCS) & Soil Compaction",
-                "Unit 3: Permeability, Seepage Analysis & Effective Stress Concept",
-                "Unit 4: Consolidation Settlement & Terzaghi's 1D Theory",
-                "Unit 5: Shear Strength of Soils: Direct Shear, Triaxial & Vane Shear"
+            "year": "2nd Year",
+            "semester_num": 3,
+            "semester_label": "2nd Year - 1st Semester (II-I)",
+            "subjects": [
+                "Strength of Materials - I",
+                "Fluid Mechanics",
+                "Surveying and Geomatics",
+                "Building Materials and Construction Practice",
+                "Managerial Economics and Financial Analysis"
+            ],
+            "labs": [
+                "Strength of Materials Lab",
+                "Surveying Field Work Lab",
+                "Building Planning & CAD Lab"
             ]
         },
         {
-            "code": "20A01502T",
-            "name": "Environmental Engineering",
-            "semester": "III B.Tech I Sem (Sem 5)",
-            "credits": 3,
-            "category": "Professional Core Course (PCC)",
-            "regulation": "JNTUA R20",
-            "units": [
-                "Unit 1: Water Demand, Population Forecasting & Sources of Water",
-                "Unit 2: Water Quality Parameters & Standards (IS 10500)",
-                "Unit 3: Water Treatment: Coagulation, Flocculation, Filtration & Chlorination",
-                "Unit 4: Sewage Collection, Characteristics & BOD/COD Kinetics",
-                "Unit 5: Wastewater Treatment: Activated Sludge Process & Trickling Filters"
+            "year": "2nd Year",
+            "semester_num": 4,
+            "semester_label": "2nd Year - 2nd Semester (II-II)",
+            "subjects": [
+                "Strength of Materials - II",
+                "Hydraulics and Hydraulic Machinery",
+                "Concrete Technology",
+                "Structural Analysis - I",
+                "Probability and Statistics for Engineers"
+            ],
+            "labs": [
+                "Fluid Mechanics and Hydraulic Machinery Lab",
+                "Concrete Technology Lab",
+                "Total Station and GIS Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 5,
+            "semester_label": "3rd Year - 1st Semester (III-I)",
+            "subjects": [
+                "Design of Reinforced Concrete Structures",
+                "Structural Analysis - II",
+                "Geotechnical Engineering",
+                "Professional Elective - I (Hydrology & Water Resources / Traffic Engineering)",
+                "Open Elective - I"
+            ],
+            "labs": [
+                "Geotechnical Engineering Lab",
+                "Structural Detailing (STAAD.Pro) Lab",
+                "Environmental Engineering Lab"
+            ]
+        },
+        {
+            "year": "3rd Year",
+            "semester_num": 6,
+            "semester_label": "3rd Year - 2nd Semester (III-II)",
+            "subjects": [
+                "Design of Steel Structures",
+                "Environmental Engineering",
+                "Transportation Engineering",
+                "Professional Elective - II (Foundation Engineering / Remote Sensing & GIS)",
+                "Open Elective - II"
+            ],
+            "labs": [
+                "Transportation Engineering Lab",
+                "Environmental Engineering Analysis Lab",
+                "Advanced Civil Engineering Modeling Lab"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 7,
+            "semester_label": "4th Year - 1st Semester (IV-I)",
+            "subjects": [
+                "Estimation, Costing and Valuation",
+                "Construction Technology and Project Management",
+                "Professional Elective - III (Earthquake Resistant Structures / Urban Hydrology)",
+                "Professional Elective - IV (Ground Improvement Techniques / Pavement Analysis)",
+                "Open Elective - III"
+            ],
+            "labs": [
+                "Quantity Surveying & Estimation Software Lab",
+                "Industry Internship Evaluation"
+            ]
+        },
+        {
+            "year": "4th Year",
+            "semester_num": 8,
+            "semester_label": "4th Year - 2nd Semester (IV-II)",
+            "subjects": [
+                "Professional Elective - V (Bridge Engineering / Smart Cities & Infrastructure)",
+                "Open Elective - IV",
+                "Comprehensive Viva Voce"
+            ],
+            "labs": [
+                "Major Project Work & Dissertation",
+                "Technical Seminar"
             ]
         }
     ]
 }
+
+# Flat subjects list generator for backward compatibility
+def _build_flat_subjects():
+    flat_map = {}
+    for branch, semesters in JNTUA_CURRICULUM.items():
+        sub_list = []
+        for sem in semesters:
+            sem_label = sem["semester_label"]
+            for sub_name in sem["subjects"]:
+                sub_list.append({
+                    "code": f"{branch}-{sem['semester_num']}-{len(sub_list)+1:02d}",
+                    "name": sub_name,
+                    "semester": sem_label,
+                    "type": "Theory",
+                    "category": "Theory Subject",
+                    "credits": 3,
+                    "regulation": "JNTUA R20 / R23"
+                })
+            for lab_name in sem["labs"]:
+                sub_list.append({
+                    "code": f"{branch}-L{sem['semester_num']}-{len(sub_list)+1:02d}",
+                    "name": lab_name,
+                    "semester": sem_label,
+                    "type": "Lab",
+                    "category": "Laboratory Course",
+                    "credits": 1.5,
+                    "regulation": "JNTUA R20 / R23"
+                })
+        flat_map[branch] = sub_list
+    return flat_map
+
+JNTUA_SUBJECTS = _build_flat_subjects()
+
+def get_jntua_curriculum_for_department(dept_code: str):
+    code_upper = (dept_code or "").upper().strip()
+    return JNTUA_CURRICULUM.get(code_upper, JNTUA_CURRICULUM.get("CSE", []))
 
 def get_jntua_subjects_for_department(dept_code: str):
     code_upper = (dept_code or "").upper().strip()
