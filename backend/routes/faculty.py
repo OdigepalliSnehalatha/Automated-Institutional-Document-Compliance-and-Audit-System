@@ -20,7 +20,7 @@ async def upload_document(
     file: UploadFile = File(...),
     document_type_id: int = Form(...),
     department_id: int | None = Form(None),
-    current_user: dict = Depends(require_roles("Faculty"))
+    current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin"))
 ):
     # 1. Validate file extension
     if not file.filename.lower().endswith(".pdf"):
@@ -73,7 +73,7 @@ async def upload_document(
     }
 
 @router.get("/faculty/documents")
-def get_faculty_documents(current_user: dict = Depends(require_roles("Faculty"))):
+def get_faculty_documents(current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin"))):
     with get_db_cursor() as cursor:
         cursor.execute(
             """

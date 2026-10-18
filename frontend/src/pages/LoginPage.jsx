@@ -7,8 +7,8 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   const [step, setStep] = useState("credentials"); // "credentials" | "otp"
   const [formData, setFormData] = useState({
     institution_name: "Anantha Lakshmi Institute of Technology and Sciences",
-    role: "Auditor",
-    email: "auditor@alitsprototype.test",
+    role: "Faculty",
+    email: "",
     password: "",
   });
 
@@ -22,23 +22,16 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   const [showPassword, setShowPassword] = useState(false);
 
   // Countdown timer for OTP expiry (5 minutes = 300 seconds)
+  // Cooldown timer for OTP resend (60 seconds)
   const [timerSeconds, setTimerSeconds] = useState(300);
-  const [canResend, setCanResend] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   useEffect(() => {
     let timer;
     if (step === "otp" && timerSeconds > 0) {
       timer = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (prev <= 1) {
-            setCanResend(true);
-            return 0;
-          }
-          if (prev <= 270) {
-            setCanResend(true); // Allow resend after 30 seconds
-          }
-          return prev - 1;
-        });
+        setTimerSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+        setCooldownSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
       }, 1000);
     }
     return () => clearInterval(timer);
@@ -53,17 +46,10 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   };
 
   const handleRoleSelect = (selectedRole) => {
-    let defaultEmail = "";
-    if (selectedRole === "Admin") defaultEmail = "admin@alitsprototype.test";
-    else if (selectedRole === "Auditor") defaultEmail = "auditor@alitsprototype.test";
-    else if (selectedRole === "HOD") defaultEmail = "hod.cse@alitsprototype.test";
-    else if (selectedRole === "Faculty") defaultEmail = "faculty.cse@alitsprototype.test";
-
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       role: selectedRole,
-      email: defaultEmail,
-    });
+    }));
     setError("");
   };
 
@@ -78,21 +64,21 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
         institution_name: formData.institution_name.trim(),
         role: formData.role,
         email: formData.email.trim(),
-        password: formData.password,
+        password: formData.password || undefined,
       });
 
       if (response.data.requires_otp) {
         setStep("otp");
-        setTimerSeconds(300);
-        setCanResend(true);
-        setOtpDigits(["1", "2", "3", "4", "5", "6"]);
-        setInfo("🔑 Prototype Mode: Code 123456 auto-filled! Click Verify to sign in.");
+        setTimerSeconds(300); // 5 minutes
+        setCooldownSeconds(60); // 60 seconds cooldown
+        setOtpDigits(["", "", "", "", "", ""]);
+        setInfo(response.data.message || `A verification passcode has been dispatched to ${formData.email.trim()}.`);
         setTimeout(() => {
-          otpInputRefs.current[5]?.focus();
+          otpInputRefs.current[0]?.focus();
         }, 150);
       }
     } catch (err) {
-      setError(err.response?.data?.detail || "Authentication failed. Please verify credentials and institution.");
+      setError(err.response?.data?.detail || "Authentication failed. Please verify your credentials and institution.");
     } finally {
       setLoading(false);
     }
@@ -179,27 +165,26 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   };
 
   const handleResendOtp = async () => {
-    if (!canResend || loading) return;
+    if (cooldownSeconds > 0 || loading) return;
     setError("");
     setInfo("");
     setLoading(true);
 
     try {
-      await api.post("/login", {
+      const res = await api.post("/login", {
         institution_name: formData.institution_name.trim(),
         role: formData.role,
         email: formData.email.trim(),
-        password: formData.password,
       });
       setTimerSeconds(300);
-      setCanResend(false);
+      setCooldownSeconds(60);
       setOtpDigits(["", "", "", "", "", ""]);
-      setInfo(`A new verification code has been dispatched to ${formData.email}.`);
+      setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${formData.email}.`);
       setTimeout(() => {
         otpInputRefs.current[0]?.focus();
       }, 100);
     } catch (err) {
-      setError("Unable to resend code. Please return to login and re-enter your credentials.");
+      setError(err.response?.data?.detail || "Unable to resend code. Please return to login and re-enter your credentials.");
     } finally {
       setLoading(false);
     }
@@ -332,45 +317,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    className="form-input"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                    title={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? "🙈" : "👁️"}
-                  </button>
-                </div>
-              </div>
-
               <button
                 type="submit"
                 className="btn btn-primary btn-block btn-lg"
-                disabled={loading}
+                disabled={loading || !formData.email.trim()}
               >
-                {loading ? "Authenticating..." : "Send Verification OTP →"}
+                {loading ? "Verifying Email & Sending OTP..." : "Send Verification OTP →"}
               </button>
             </form>
           ) : (
             /* STEP 2: 6-DIGIT OTP VERIFICATION FORM */
             <form onSubmit={handleVerifyOtp} className="login-form-body">
-              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1e40af", padding: "10px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: "600", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span>💡 Prototype Code: <strong style={{ letterSpacing: "2px" }}>123456</strong></span>
-                <button type="button" onClick={() => setOtpDigits(["1","2","3","4","5","6"])} style={{ background: "#2563eb", color: "#fff", border: "none", borderRadius: "4px", padding: "4px 10px", fontSize: "12px", cursor: "pointer", fontWeight: "600" }}>Auto-Fill</button>
-              </div>
-
               <div className="otp-boxes-wrapper" onPaste={handleOtpPaste}>
                 <label className="form-label" style={{ display: "block", marginBottom: "12px", textAlign: "center" }}>
                   Enter 6-Digit One-Time Passcode
@@ -410,7 +367,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
               <button
                 type="submit"
                 className="btn btn-primary btn-block btn-lg"
-                disabled={loading || fullOtp.length !== 6}
+                disabled={loading || fullOtp.length !== 6 || timerSeconds === 0}
                 style={{ marginTop: "16px" }}
               >
                 {loading ? "Verifying Passcode..." : "Verify & Access Dashboard"}
@@ -421,9 +378,9 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={handleResendOtp}
-                  disabled={loading || !canResend}
+                  disabled={loading || cooldownSeconds > 0}
                 >
-                  ↻ Resend Passcode
+                  {cooldownSeconds > 0 ? `↻ Resend in ${cooldownSeconds}s` : "↻ Resend Passcode"}
                 </button>
                 <button
                   type="button"

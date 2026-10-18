@@ -25,7 +25,7 @@ def login(data: LoginRequest):
         password=data.password
     )
 
-    # 2. Generate and store hashed OTP, dispatch email / log
+    # 2. Generate and store hashed OTP, dispatch via real email service
     create_and_send_otp(
         institution_name=user["institution_name"],
         email=user["email"],
@@ -33,11 +33,11 @@ def login(data: LoginRequest):
     )
 
     return {
-        "message": "OTP generated. Prototype code: 123456",
+        "message": f"A 6-digit verification code has been dispatched to {user['email']}.",
         "requires_otp": True,
         "email": user["email"],
         "institution": user["institution_name"],
-        "prototype_otp": "123456"
+        "role": user["role"]
     }
 
 @router.post("/verify-otp")
@@ -60,6 +60,7 @@ def verify_otp(data: VerifyOTPRequest, request: Request):
                 u.email,
                 u.role,
                 u.department_id,
+                u.is_active,
                 d.name AS department_name,
                 i.id AS institution_id,
                 i.name AS institution_name,
@@ -69,15 +70,18 @@ def verify_otp(data: VerifyOTPRequest, request: Request):
             LEFT JOIN departments d ON d.id = u.department_id
             WHERE LOWER(u.email) = %s
               AND u.role = %s
-              AND LOWER(i.name) = LOWER(%s)
+            ORDER BY u.id DESC
             LIMIT 1
             """,
-            (data.email.strip().lower(), data.role.strip(), data.institution_name.strip())
+            (data.email.strip().lower(), data.role.strip())
         )
         user = cursor.fetchone()
 
     if not user:
         raise HTTPException(status_code=401, detail="User record not found.")
+
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Account is deactivated. Access denied.")
 
     session_user = build_session_user(user)
 

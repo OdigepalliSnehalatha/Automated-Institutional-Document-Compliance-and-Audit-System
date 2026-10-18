@@ -58,12 +58,105 @@ function AdminDashboard({ user, activeTab = "overview" }) {
     }
   };
 
+  // User Management Modals & Forms
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    name: "",
+    email: "",
+    role: "Faculty",
+    department_id: "",
+    is_active: true,
+  });
+  const [userActionFeedback, setUserActionFeedback] = useState({ error: "", success: "" });
+
+  const [editUserModalOpen, setEditUserModalOpen] = useState(false);
+  const [editUserData, setEditUserData] = useState({
+    id: null,
+    name: "",
+    email: "",
+    role: "Faculty",
+    department_id: "",
+  });
+
   const loadUsers = async () => {
     try {
       const res = await api.get("/admin/users");
       setUsersList(res.data);
     } catch (err) {
       console.error("Failed to load users:", err);
+    }
+  };
+
+  const handleAddUserSubmit = async (e) => {
+    e.preventDefault();
+    setUserActionFeedback({ error: "", success: "" });
+    try {
+      const res = await api.post("/admin/users", {
+        name: newUserForm.name.trim(),
+        email: newUserForm.email.trim(),
+        role: newUserForm.role,
+        department_id: newUserForm.department_id ? parseInt(newUserForm.department_id, 10) : null,
+        is_active: newUserForm.is_active,
+      });
+      setUserActionFeedback({ error: "", success: res.data.message || `User ${newUserForm.name} added successfully!` });
+      setNewUserForm({ name: "", email: "", role: "Faculty", department_id: "", is_active: true });
+      setAddUserModalOpen(false);
+      loadUsers();
+      loadDashboardData();
+    } catch (err) {
+      setUserActionFeedback({ error: err.response?.data?.detail || "Failed to create user.", success: "" });
+    }
+  };
+
+  const handleUpdateUserRole = async (e) => {
+    e.preventDefault();
+    setUserActionFeedback({ error: "", success: "" });
+    try {
+      const res = await api.put(`/admin/users/${editUserData.id}/role`, {
+        role: editUserData.role,
+        department_id: editUserData.department_id ? parseInt(editUserData.department_id, 10) : null,
+      });
+      setUserActionFeedback({ error: "", success: res.data.message || `Role updated successfully!` });
+      setEditUserModalOpen(false);
+      loadUsers();
+      loadDashboardData();
+    } catch (err) {
+      setUserActionFeedback({ error: err.response?.data?.detail || "Failed to update role.", success: "" });
+    }
+  };
+
+  const handleToggleUserStatus = async (targetUser) => {
+    const nextStatus = !targetUser.is_active;
+    const confirmMsg = nextStatus
+      ? `Activate access for ${targetUser.name}?`
+      : `Deactivate ${targetUser.name}? They will be denied system access immediately.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setUserActionFeedback({ error: "", success: "" });
+    try {
+      const res = await api.put(`/admin/users/${targetUser.id}/status`, { is_active: nextStatus });
+      setUserActionFeedback({
+        error: "",
+        success: res.data.message || `User ${targetUser.name} has been ${nextStatus ? "activated" : "deactivated"}.`,
+      });
+      loadUsers();
+      loadDashboardData();
+    } catch (err) {
+      setUserActionFeedback({ error: err.response?.data?.detail || "Failed to update status.", success: "" });
+    }
+  };
+
+  const handleDeleteUser = async (targetUser) => {
+    if (!window.confirm(`Are you sure you want to delete or deactivate account for ${targetUser.name} (${targetUser.email})?`)) return;
+
+    setUserActionFeedback({ error: "", success: "" });
+    try {
+      const res = await api.delete(`/admin/users/${targetUser.id}`);
+      setUserActionFeedback({ error: "", success: res.data.message || "User account updated successfully." });
+      loadUsers();
+      loadDashboardData();
+    } catch (err) {
+      setUserActionFeedback({ error: err.response?.data?.detail || "Failed to remove user account.", success: "" });
     }
   };
 
@@ -347,10 +440,33 @@ function AdminDashboard({ user, activeTab = "overview" }) {
                 Registered faculty, HODs, auditors, and administrators: {usersList.length}
               </span>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={loadUsers}>
-              ↻ Refresh
-            </button>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setUserActionFeedback({ error: "", success: "" });
+                  setAddUserModalOpen(true);
+                }}
+              >
+                + Add Personnel
+              </button>
+              <button className="btn btn-secondary btn-sm" onClick={loadUsers}>
+                ↻ Refresh
+              </button>
+            </div>
           </div>
+
+          {/* User action feedback */}
+          {userActionFeedback.error && (
+            <div className="alert-message alert-danger" style={{ margin: "12px 0" }}>
+              ⚠️ {userActionFeedback.error}
+            </div>
+          )}
+          {userActionFeedback.success && (
+            <div className="alert-message alert-success" style={{ margin: "12px 0" }}>
+              ✓ {userActionFeedback.success}
+            </div>
+          )}
 
           {/* Search & Filter Toolbar */}
           <div className="dashboard-toolbar">
@@ -415,6 +531,8 @@ function AdminDashboard({ user, activeTab = "overview" }) {
                   <th>Official Email</th>
                   <th>System Role</th>
                   <th>Assigned Department</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -435,6 +553,54 @@ function AdminDashboard({ user, activeTab = "overview" }) {
                         <span className={`role-tag role-${u.role}`}>{u.role}</span>
                       </td>
                       <td>{u.department_name ? `${u.department_code} - ${u.department_name}` : "Institution-Wide"}</td>
+                      <td>
+                        {u.is_active ? (
+                          <span style={{ background: "#dcfce7", color: "#15803d", padding: "3px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "600" }}>
+                            Active
+                          </span>
+                        ) : (
+                          <span style={{ background: "#fee2e2", color: "#b91c1c", padding: "3px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "600" }}>
+                            Deactivated
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <div style={{ display: "inline-flex", gap: "6px" }}>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            title="Edit Role / Department"
+                            onClick={() => {
+                              setUserActionFeedback({ error: "", success: "" });
+                              setEditUserData({
+                                id: u.id,
+                                name: u.name,
+                                email: u.email,
+                                role: u.role,
+                                department_id: u.department_id || "",
+                              });
+                              setEditUserModalOpen(true);
+                            }}
+                          >
+                            ✎ Role
+                          </button>
+                          <button
+                            className={`btn btn-sm ${u.is_active ? "btn-secondary" : "btn-success"}`}
+                            title={u.is_active ? "Deactivate Account" : "Activate Account"}
+                            onClick={() => handleToggleUserStatus(u)}
+                          >
+                            {u.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                          {u.id !== user?.id && (
+                            <button
+                              className="btn btn-danger btn-sm"
+                              title="Delete or Archive Account"
+                              onClick={() => handleDeleteUser(u)}
+                            >
+                              🗑️
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
               </tbody>
@@ -682,6 +848,151 @@ function AdminDashboard({ user, activeTab = "overview" }) {
         canDownload={true}
         onDownload={handleDownload}
       />
+      {/* Add User Modal */}
+      {addUserModalOpen && (
+        <div className="modal-overlay" onClick={() => setAddUserModalOpen(false)}>
+          <div className="modal-container" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Add New Personnel</h3>
+              <button className="modal-close" onClick={() => setAddUserModalOpen(false)}>✕</button>
+            </div>
+            <form onSubmit={handleAddUserSubmit} style={{ padding: "20px" }}>
+              <div className="form-group" style={{ marginBottom: "16px" }}>
+                <label className="form-label">Full Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  required
+                  placeholder="e.g. Dr. Ramesh Kumar"
+                  value={newUserForm.name}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: "16px" }}>
+                <label className="form-label">Official Email Address</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  required
+                  placeholder="name@institution.edu"
+                  value={newUserForm.email}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: "16px" }}>
+                <label className="form-label">Institutional Role</label>
+                <select
+                  className="form-input"
+                  value={newUserForm.role}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                >
+                  <option value="Faculty">Faculty</option>
+                  <option value="HOD">HOD (Head of Department)</option>
+                  <option value="Auditor">Auditor</option>
+                  <option value="Admin">Administrator</option>
+                </select>
+              </div>
+
+              {(newUserForm.role === "Faculty" || newUserForm.role === "HOD") && (
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <label className="form-label">Assigned Department</label>
+                  <select
+                    className="form-input"
+                    required
+                    value={newUserForm.department_id}
+                    onChange={(e) => setNewUserForm({ ...newUserForm, department_id: e.target.value })}
+                  >
+                    <option value="">-- Select Department --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.code} - {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setAddUserModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Create Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Role Modal */}
+      {editUserModalOpen && (
+        <div className="modal-overlay" onClick={() => setEditUserModalOpen(false)}>
+          <div className="modal-container" style={{ maxWidth: "500px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Edit Personnel Role & Department</h3>
+              <button className="modal-close" onClick={() => setEditUserModalOpen(false)}>✕</button>
+            </div>
+            <form onSubmit={handleUpdateUserRole} style={{ padding: "20px" }}>
+              <p style={{ margin: "0 0 16px", fontSize: "14px", color: "var(--text-muted)" }}>
+                Editing permissions for <strong>{editUserData.name}</strong> (<code>{editUserData.email}</code>)
+              </p>
+
+              <div className="form-group" style={{ marginBottom: "16px" }}>
+                <label className="form-label">System Role</label>
+                <select
+                  className="form-input"
+                  value={editUserData.role}
+                  onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
+                >
+                  <option value="Faculty">Faculty</option>
+                  <option value="HOD">HOD (Head of Department)</option>
+                  <option value="Auditor">Auditor</option>
+                  <option value="Admin">Administrator</option>
+                </select>
+              </div>
+
+              {(editUserData.role === "Faculty" || editUserData.role === "HOD") && (
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <label className="form-label">Assigned Department</label>
+                  <select
+                    className="form-input"
+                    required
+                    value={editUserData.department_id}
+                    onChange={(e) => setEditUserData({ ...editUserData, department_id: e.target.value })}
+                  >
+                    <option value="">-- Select Department --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.code} - {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditUserModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

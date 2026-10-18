@@ -5,13 +5,27 @@ class LoginRequest(BaseModel):
     institution_name: str
     role: str
     email: str
-    password: str
+    password: Optional[str] = None
 
 class VerifyOTPRequest(BaseModel):
     institution_name: str
     role: str
     email: str
     otp: str
+
+class UserCreateRequest(BaseModel):
+    name: str
+    email: str
+    role: str
+    department_id: Optional[int] = None
+    is_active: bool = True
+
+class UserRoleUpdateRequest(BaseModel):
+    role: str
+    department_id: Optional[int] = None
+
+class UserStatusUpdateRequest(BaseModel):
+    is_active: bool
 
 class FormatRequirementItem(BaseModel):
     id: Optional[int] = None
