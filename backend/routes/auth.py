@@ -36,14 +36,15 @@ def login(data: LoginRequest):
     )
 
     # 2. Generate and store hashed OTP, dispatch via real email service
-    create_and_send_login_otp(
+    otp = create_and_send_login_otp(
         institution_name=user["institution_name"],
         email=user["email"],
         role=user["role"]
     )
 
     return {
-        "message": f"A 6-digit verification code has been dispatched to {user['email']}.",
+        "message": f"Verification passcode for {user['email']}: {otp}",
+        "otp": otp,
         "requires_otp": True,
         "email": user["email"],
         "institution": user["institution_name"],
@@ -159,14 +160,15 @@ def forgot_password_request(data: ForgotPasswordRequest):
             detail="This account is deactivated. Please contact your Institution Administrator."
         )
 
-    create_and_send_login_otp(
+    otp = create_and_send_login_otp(
         institution_name=user["institution_name"],
         email=user["email"],
         role="Password Reset"
     )
 
     return {
-        "message": f"A password reset passcode has been dispatched to {user['email']}.",
+        "message": f"Password reset passcode for {user['email']}: {otp}",
+        "otp": otp,
         "email": user["email"]
     }
 

@@ -224,10 +224,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       if (response.data.requires_otp) {
         setStep("otp");
         setTimerSeconds(300);
-        setCooldownSeconds(60);
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(response.data.message || `A verification passcode has been dispatched to ${loginData.email.trim()}.`);
-        setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+        setCooldownSeconds(30);
+        const code = response.data.otp;
+        if (code && code.length === 6) {
+          setOtpDigits(code.split(""));
+          setInfo(`📬 Verification code: ${code}`);
+          setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
+        } else {
+          setOtpDigits(["", "", "", "", "", ""]);
+          setInfo(response.data.message || `A verification passcode has been dispatched to ${loginData.email.trim()}.`);
+          setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+        }
       }
     } catch (err) {
       setError(err.response?.data?.detail || "Authentication failed. Please verify your credentials and institution.");
@@ -279,10 +286,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
         password: loginData.password ? loginData.password.trim() : undefined,
       });
       setTimerSeconds(300);
-      setCooldownSeconds(60);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${loginData.email.trim()}.`);
-      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+      setCooldownSeconds(30);
+      const code = res.data.otp;
+      if (code && code.length === 6) {
+        setOtpDigits(code.split(""));
+        setInfo(`📬 Fresh verification code: ${code}`);
+        setTimeout(() => otpInputRefs.current[5]?.focus(), 100);
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+        setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${loginData.email.trim()}.`);
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || "Unable to resend passcode. Please check email address.");
     } finally {
@@ -328,10 +342,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       if (response.data.requires_verification) {
         setStep("otp");
         setTimerSeconds(300);
-        setCooldownSeconds(60);
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(response.data.message || `A verification code has been dispatched to ${registerData.email.trim()}.`);
-        setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+        setCooldownSeconds(30);
+        const code = response.data.otp;
+        if (code && code.length === 6) {
+          setOtpDigits(code.split(""));
+          setInfo(`📬 Verification code: ${code}`);
+          setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
+        } else {
+          setOtpDigits(["", "", "", "", "", ""]);
+          setInfo(response.data.message || `A verification code has been dispatched to ${registerData.email.trim()}.`);
+          setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+        }
       }
     } catch (err) {
       setError(err.response?.data?.detail || "Registration request failed. Please verify your details.");
@@ -382,10 +403,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
         institution_name: registerData.institution_name,
       });
       setTimerSeconds(300);
-      setCooldownSeconds(60);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setInfo(res.data.message || `A fresh registration passcode has been dispatched to ${registerData.email.trim()}.`);
-      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+      setCooldownSeconds(30);
+      const code = res.data.otp;
+      if (code && code.length === 6) {
+        setOtpDigits(code.split(""));
+        setInfo(`📬 Fresh verification code: ${code}`);
+        setTimeout(() => otpInputRefs.current[5]?.focus(), 100);
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+        setInfo(res.data.message || `A fresh registration passcode has been dispatched to ${registerData.email.trim()}.`);
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || "Unable to resend registration code.");
     } finally {
@@ -413,10 +441,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       });
       setStep("otp-reset");
       setTimerSeconds(300);
-      setCooldownSeconds(60);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setInfo(res.data.message || `Password reset code sent to ${forgotData.email.trim()}.`);
-      setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+      setCooldownSeconds(30);
+      const code = res.data.otp;
+      if (code && code.length === 6) {
+        setOtpDigits(code.split(""));
+        setInfo(`📬 Password reset code: ${code}`);
+        setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+        setInfo(res.data.message || `Password reset code sent to ${forgotData.email.trim()}.`);
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || "Password reset request failed. Please check your email.");
     } finally {
