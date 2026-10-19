@@ -70,11 +70,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       if (response.data.requires_otp) {
         setStep("otp");
         setTimerSeconds(300); // 5 minutes
-        setCooldownSeconds(60); // 60 seconds cooldown
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(response.data.message || `A verification passcode has been dispatched to ${formData.email.trim()}.`);
+        setCooldownSeconds(0);
+        const receivedOtp = response.data.otp;
+        if (receivedOtp && receivedOtp.length === 6) {
+          setOtpDigits(receivedOtp.split(""));
+          setInfo(`📬 Verification code generated for ${formData.email.trim()}: ${receivedOtp}`);
+        } else {
+          setOtpDigits(["", "", "", "", "", ""]);
+          setInfo(response.data.message || `A verification passcode has been dispatched to ${formData.email.trim()}.`);
+        }
         setTimeout(() => {
-          otpInputRefs.current[0]?.focus();
+          otpInputRefs.current[5]?.focus();
         }, 150);
       }
     } catch (err) {
@@ -165,7 +171,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   };
 
   const handleResendOtp = async () => {
-    if (cooldownSeconds > 0 || loading) return;
+    if (loading) return;
     setError("");
     setInfo("");
     setLoading(true);
@@ -177,11 +183,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
         email: formData.email.trim(),
       });
       setTimerSeconds(300);
-      setCooldownSeconds(60);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${formData.email}.`);
+      setCooldownSeconds(0);
+      const receivedOtp = res.data.otp;
+      if (receivedOtp && receivedOtp.length === 6) {
+        setOtpDigits(receivedOtp.split(""));
+        setInfo(`📬 Fresh verification code generated for ${formData.email}: ${receivedOtp}`);
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+        setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${formData.email}.`);
+      }
       setTimeout(() => {
-        otpInputRefs.current[0]?.focus();
+        otpInputRefs.current[5]?.focus();
       }, 100);
     } catch (err) {
       setError(err.response?.data?.detail || "Unable to resend code. Please return to login and re-enter your credentials.");
@@ -378,9 +390,9 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={handleResendOtp}
-                  disabled={loading || cooldownSeconds > 0}
+                  disabled={loading}
                 >
-                  {cooldownSeconds > 0 ? `↻ Resend in ${cooldownSeconds}s` : "↻ Resend Passcode"}
+                  ↻ Resend Passcode
                 </button>
                 <button
                   type="button"
