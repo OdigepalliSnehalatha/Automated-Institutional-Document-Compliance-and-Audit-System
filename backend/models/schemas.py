@@ -2,16 +2,36 @@ from typing import List, Optional, Any
 from pydantic import BaseModel, Field
 
 class LoginRequest(BaseModel):
-    institution_name: str
-    role: str
+    institution_name: Optional[str] = "Anantha Lakshmi Institute of Technology and Sciences"
+    role: Optional[str] = None
     email: str
     password: Optional[str] = None
 
 class VerifyOTPRequest(BaseModel):
-    institution_name: str
-    role: str
+    institution_name: Optional[str] = "Anantha Lakshmi Institute of Technology and Sciences"
+    role: Optional[str] = None
     email: str
     otp: str
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    department_id: Optional[int] = None
+    institution_name: Optional[str] = "Anantha Lakshmi Institute of Technology and Sciences"
+
+class VerifyRegistrationRequest(BaseModel):
+    email: str
+    otp: str
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    institution_name: Optional[str] = "Anantha Lakshmi Institute of Technology and Sciences"
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
 
 class UserCreateRequest(BaseModel):
     name: str
