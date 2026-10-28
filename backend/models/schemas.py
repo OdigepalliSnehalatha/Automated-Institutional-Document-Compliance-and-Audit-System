@@ -57,6 +57,14 @@ class FormatRequirementItem(BaseModel):
     is_required: bool = True
     display_order: int = 1
 
+class AddFormatRequirementRequest(BaseModel):
+    format_id: int
+    requirement_name: str
+    requirement_type: str = "required"
+    requirement_value: Optional[str] = ""
+    is_required: bool = True
+    display_order: int = 1
+
 class FormatCreateRequest(BaseModel):
     institution_id: int
     department_id: Optional[int] = None

@@ -534,6 +534,28 @@ def evaluate_requirement(req: dict, pdf_data: Dict[str, Any]) -> Tuple[bool, str
             return True, None
         if "mark" in full_norm:
             return True, None
+        return False, f"Required structural section '{req_name}' was not detected."
+
+    # 6. Heading / Unit section presence
+    if "heading" in req_type or "heading" in name_norm or re.search(r"\bunit\s*[1-5ivx]+\b", name_norm):
+        # Search for heading name in text
+        # If it's "Unit 1", "Unit 1 Heading" or similar:
+        unit_match = re.search(r"unit\s*([1-5ivx]+)", name_norm)
+        if unit_match:
+            u_num = unit_match.group(1).lower()
+            roman_map = {"1": "i", "2": "ii", "3": "iii", "4": "iv", "5": "v"}
+            roman_num = roman_map.get(u_num, u_num)
+            patterns = [
+                rf"\bunit\s*[-–:]?\s*{re.escape(u_num)}\b",
+                rf"\bunit\s*[-–:]?\s*{re.escape(roman_num)}\b",
+                rf"\bunit\s*[-–:]?\s*{re.escape(u_num.upper())}\b"
+            ]
+            if any(re.search(p, full_norm) for p in patterns):
+                return True, None
+            return False, f"Required heading / section for Unit {u_num.upper()} was not found."
+
+        if req_val and normalize(req_val) in full_norm:
+            return True, None
         return False, f"Required marks scheme ({req_val or req_name}) not detected."
 
     if req_val and normalize(req_val) in full_norm:

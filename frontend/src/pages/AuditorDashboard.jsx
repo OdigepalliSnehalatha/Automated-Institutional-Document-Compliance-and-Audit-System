@@ -3,9 +3,11 @@ import api from "../api";
 import StatusBadge from "../components/StatusBadge";
 import ComparisonModal from "../components/ComparisonModal";
 import PdfViewerModal from "../components/PdfViewerModal";
+import Format from "../Format";
 
 function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   const [internalActiveTab, setInternalActiveTab] = useState("overview"); // overview | builder | formats | submissions | accepted
+  const [showAdvancedFormatManager, setShowAdvancedFormatManager] = useState(false);
   const activeTab = propActiveTab || internalActiveTab;
   const setActiveTab = (tab) => {
     setInternalActiveTab(tab);
@@ -20,6 +22,7 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   // Format Builder State
   const [selectedDocTypeId, setSelectedDocTypeId] = useState("");
   const [examType, setExamType] = useState("Mid Examination");
+  const [midSubdivision, setMidSubdivision] = useState("Mid 1");
   const [selectedDeptId, setSelectedDeptId] = useState("");
   const [formatName, setFormatName] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -103,69 +106,64 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
     setFormatName("Standard Institutional Course Structure Format");
     setInstructions("Course structure format enforcing college header, course identification, and Units 1-5 structural sections.");
     setRequirements([
-      { requirement_name: "College Name", requirement_type: "header", requirement_value: "College / Institute header", is_required: true, display_order: 1 },
-      { requirement_name: "Course Name", requirement_type: "field", requirement_value: "Course name", is_required: true, display_order: 2 },
-      { requirement_name: "Course Code", requirement_type: "field", requirement_value: "Course code", is_required: true, display_order: 3 },
-      { requirement_name: "Unit 1 Heading", requirement_type: "heading", requirement_value: "Unit 1", is_required: true, display_order: 4 },
-      { requirement_name: "Unit 1 Topics", requirement_type: "section", requirement_value: "Unit 1 topics", is_required: true, display_order: 5 },
-      { requirement_name: "Unit 2 Heading", requirement_type: "heading", requirement_value: "Unit 2", is_required: true, display_order: 6 },
-      { requirement_name: "Unit 2 Topics", requirement_type: "section", requirement_value: "Unit 2 topics", is_required: true, display_order: 7 },
-      { requirement_name: "Unit 3 Heading", requirement_type: "heading", requirement_value: "Unit 3", is_required: true, display_order: 8 },
-      { requirement_name: "Unit 3 Topics", requirement_type: "section", requirement_value: "Unit 3 topics", is_required: true, display_order: 9 },
-      { requirement_name: "Unit 4 Heading", requirement_type: "heading", requirement_value: "Unit 4", is_required: true, display_order: 10 },
-      { requirement_name: "Unit 4 Topics", requirement_type: "section", requirement_value: "Unit 4 topics", is_required: true, display_order: 11 },
-      { requirement_name: "Unit 5 Heading", requirement_type: "heading", requirement_value: "Unit 5", is_required: true, display_order: 12 },
-      { requirement_name: "Unit 5 Topics", requirement_type: "section", requirement_value: "Unit 5 topics", is_required: true, display_order: 13 },
+      { requirement_name: "College Name", requirement_type: "text", requirement_value: "College name must be present", is_required: true, display_order: 1 },
+      { requirement_name: "Course Name", requirement_type: "text", requirement_value: "Course name must be present", is_required: true, display_order: 2 },
+      { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Course code must be present", is_required: true, display_order: 3 },
+      { requirement_name: "Unit 1", requirement_type: "text", requirement_value: "Unit 1 heading and topics must be present", is_required: true, display_order: 4 },
+      { requirement_name: "Unit 2", requirement_type: "text", requirement_value: "Unit 2 heading and topics must be present", is_required: true, display_order: 5 },
+      { requirement_name: "Unit 3", requirement_type: "text", requirement_value: "Unit 3 heading and topics must be present", is_required: true, display_order: 6 },
+      { requirement_name: "Unit 4", requirement_type: "text", requirement_value: "Unit 4 heading and topics must be present", is_required: true, display_order: 7 },
+      { requirement_name: "Unit 5", requirement_type: "text", requirement_value: "Unit 5 heading and topics must be present", is_required: true, display_order: 8 },
     ]);
   };
 
   const applyQuestionBankPreset = () => {
-    setFormatName("Standard Institutional Question Bank Format");
+    setFormatName("Standard Institutional Question Bank Format (Units 1-5)");
     setInstructions("Question bank requiring College Name, Course Details, Semester, and Units 1-5 with Part A (10 x 2M) and Part B (10 x 10M).");
     const reqs = [
-      { requirement_name: "College Name", requirement_type: "header", requirement_value: "College Name", is_required: true, display_order: 1 },
-      { requirement_name: "Course Name", requirement_type: "field", requirement_value: "Course Name", is_required: true, display_order: 2 },
-      { requirement_name: "Course Code", requirement_type: "field", requirement_value: "Course Code", is_required: true, display_order: 3 },
-      { requirement_name: "Semester", requirement_type: "field", requirement_value: "Semester", is_required: true, display_order: 4 },
+      { requirement_name: "College Name", requirement_type: "text", requirement_value: "College name must be present", is_required: true, display_order: 1 },
+      { requirement_name: "Course Name", requirement_type: "text", requirement_value: "Course name must be present", is_required: true, display_order: 2 },
+      { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Course code must be present", is_required: true, display_order: 3 },
+      { requirement_name: "Semester", requirement_type: "text", requirement_value: "Semester must be present", is_required: true, display_order: 4 },
     ];
     let order = 5;
     for (let u = 1; u <= 5; u++) {
-      reqs.push({ requirement_name: `Unit ${u} Heading`, requirement_type: "heading", requirement_value: `Unit ${u}`, is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part A`, requirement_type: "part a structure", requirement_value: "Part A", is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part A Questions`, requirement_type: "question_count", requirement_value: "10", is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part A Marks Per Question`, requirement_type: "marks", requirement_value: "2", is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part B`, requirement_type: "part b structure", requirement_value: "Part B", is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part B Questions`, requirement_type: "question_count", requirement_value: "10", is_required: true, display_order: order++ });
-      reqs.push({ requirement_name: `Unit ${u} Part B Marks Per Question`, requirement_type: "marks", requirement_value: "10", is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u}`, requirement_type: "required", requirement_value: `Unit ${u} heading must be present`, is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part A`, requirement_type: "required", requirement_value: `Part A must be present under Unit ${u}`, is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part A Question Count`, requirement_type: "question_count", requirement_value: "10", is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part A Marks`, requirement_type: "marks", requirement_value: "2 marks per question", is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part B`, requirement_type: "required", requirement_value: `Part B must be present under Unit ${u}`, is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part B Question Count`, requirement_type: "question_count", requirement_value: "10", is_required: true, display_order: order++ });
+      reqs.push({ requirement_name: `Unit ${u} Part B Marks`, requirement_type: "marks", requirement_value: "10 marks per question", is_required: true, display_order: order++ });
     }
     setRequirements(reqs);
   };
 
-  const applyQuestionPaperPreset = (type) => {
+  const applyQuestionPaperPreset = (type, subDiv = "Mid 1") => {
     const isMid = type === "Mid Examination";
-    setFormatName(`Standard ${type} Question Paper Format`);
-    setInstructions(`Institutional structural format for ${type} question paper.`);
+    const label = isMid ? `${subDiv} Examination` : "Semester Examination";
+    const partBCount = isMid ? "5" : "10";
+    setFormatName(`Standard ${label} Question Paper Format`);
+    setInstructions(`${label}. The question paper is accepted only when every required structural check passes. Question numbering and academic content are not checked.`);
     setRequirements([
-      { requirement_name: "College Header", requirement_type: "header", requirement_value: "College header", is_required: true, display_order: 1 },
-      { requirement_name: "Semester", requirement_type: "field", requirement_value: "Semester", is_required: true, display_order: 2 },
-      { requirement_name: "B.Tech", requirement_type: "field", requirement_value: "B.Tech", is_required: true, display_order: 3 },
-      { requirement_name: "Examination Type", requirement_type: "field", requirement_value: type, is_required: true, display_order: 4 },
-      { requirement_name: "Subject Name", requirement_type: "field", requirement_value: "Subject Name", is_required: true, display_order: 5 },
-      { requirement_name: "Subject Code", requirement_type: "field", requirement_value: "Subject Code", is_required: true, display_order: 6 },
-      { requirement_name: "Branch", requirement_type: "field", requirement_value: "Branch", is_required: true, display_order: 7 },
-      { requirement_name: "Department", requirement_type: "field", requirement_value: "Department", is_required: true, display_order: 8 },
-      { requirement_name: "Time", requirement_type: "field", requirement_value: "Time", is_required: true, display_order: 9 },
-      { requirement_name: "Maximum Marks", requirement_type: "field", requirement_value: "Maximum Marks", is_required: true, display_order: 10 },
-      { requirement_name: "Part A", requirement_type: "part a structure", requirement_value: "Part A", is_required: true, display_order: 11 },
-      { requirement_name: "Part A Question Count", requirement_type: "question_count", requirement_value: isMid ? "5" : "10", is_required: true, display_order: 12 },
-      { requirement_name: "Part A Marks Pattern", requirement_type: "marks", requirement_value: "2 marks", is_required: true, display_order: 13 },
-      { requirement_name: "Part A Arrangement", requirement_type: "arrangement", requirement_value: "Part A followed by questions", is_required: true, display_order: 14 },
-      { requirement_name: "Part B", requirement_type: "part b structure", requirement_value: "Part B", is_required: true, display_order: 15 },
-      { requirement_name: "Part B Question Count", requirement_type: "question_count", requirement_value: isMid ? "6" : "10", is_required: true, display_order: 16 },
-      { requirement_name: "Part B Marks Pattern", requirement_type: "marks", requirement_value: "10 marks", is_required: true, display_order: 17 },
-      { requirement_name: "Part B Arrangement", requirement_type: "arrangement", requirement_value: "Part B arrangement", is_required: true, display_order: 18 },
-      { requirement_name: "Body", requirement_type: "section", requirement_value: "Question Paper Body", is_required: true, display_order: 19 },
-      { requirement_name: "Footer", requirement_type: "footer", requirement_value: "Footer section", is_required: true, display_order: 20 },
+      { requirement_name: "College Header", requirement_type: "required", requirement_value: "ABC College of Engineering", is_required: true, display_order: 1 },
+      { requirement_name: "Semester", requirement_type: "required", requirement_value: "B.Tech Semester", is_required: true, display_order: 2 },
+      { requirement_name: "B.Tech", requirement_type: "required", requirement_value: "B.Tech", is_required: true, display_order: 3 },
+      { requirement_name: "Examination Type", requirement_type: "required", requirement_value: label, is_required: true, display_order: 4 },
+      { requirement_name: "Subject Name", requirement_type: "required", requirement_value: "Subject Name must be present", is_required: true, display_order: 5 },
+      { requirement_name: "Subject Code", requirement_type: "required", requirement_value: "Subject Code must be present", is_required: true, display_order: 6 },
+      { requirement_name: "Branch", requirement_type: "required", requirement_value: "Branch must be present", is_required: true, display_order: 7 },
+      { requirement_name: "Department", requirement_type: "required", requirement_value: "Department must be present", is_required: true, display_order: 8 },
+      { requirement_name: "Time", requirement_type: "required", requirement_value: "Time must be present", is_required: true, display_order: 9 },
+      { requirement_name: "Maximum Marks", requirement_type: "required", requirement_value: "Maximum marks must be present", is_required: true, display_order: 10 },
+      { requirement_name: "Part A", requirement_type: "required", requirement_value: "Part A must be present", is_required: true, display_order: 11 },
+      { requirement_name: "Part A Question Count", requirement_type: "question_count", requirement_value: "10", is_required: true, display_order: 12 },
+      { requirement_name: "Part A Arrangement", requirement_type: "structure", requirement_value: "Predefined Part A arrangement", is_required: true, display_order: 13 },
+      { requirement_name: "Part B", requirement_type: "required", requirement_value: "Part B must be present", is_required: true, display_order: 14 },
+      { requirement_name: "Part B Question Count", requirement_type: "question_count", requirement_value: partBCount, is_required: true, display_order: 15 },
+      { requirement_name: "Part B Arrangement", requirement_type: "structure", requirement_value: "Predefined Part B arrangement", is_required: true, display_order: 16 },
+      { requirement_name: "Body", requirement_type: "required", requirement_value: "Question paper body must be present", is_required: true, display_order: 17 },
+      { requirement_name: "Footer", requirement_type: "required", requirement_value: "Footer must be present", is_required: true, display_order: 18 },
     ]);
   };
 
@@ -354,16 +352,28 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
         </div>
       )}
 
+      {/* ADVANCED FORMAT & COMPARISON SUITE VIEW */}
+      {showAdvancedFormatManager ? (
+        <Format onBack={() => setShowAdvancedFormatManager(false)} />
+      ) : (
+        <>
       {/* TAB 2: FORMAT BUILDER */}
       {activeTab === "builder" && (
         <div className="panel">
-          <div className="panel-header">
+          <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <h3>Structural Format Builder</h3>
               <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                 Define structural rules without code. Documents uploaded by Faculty are strictly validated against these rules.
               </p>
             </div>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => setShowAdvancedFormatManager(true)}
+            >
+              🔍 Open Advanced Format & Comparison Suite →
+            </button>
           </div>
 
           <form onSubmit={handleSaveFormat}>
@@ -1011,6 +1021,8 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
             })()
           )}
         </div>
+      )}
+      </>
       )}
 
       {/* Comparison Results Modal */}

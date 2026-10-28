@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from backend.services.auth_service import require_roles, get_current_user
 from backend.database import get_db_cursor
-from backend.models.schemas import FormatCreateRequest, FormatUpdateRequest
+from backend.models.schemas import FormatCreateRequest, FormatUpdateRequest, AddFormatRequirementRequest
+from backend.services.structural_analyzer import analyze_document_structure
+import os
+import json
 
 router = APIRouter(prefix="", tags=["Auditor"])
 
@@ -178,6 +181,68 @@ def create_format(
     return {
         "message": "Format created successfully.",
         "format": format_record
+    }
+
+@router.post("/format-requirements")
+def add_format_requirement(
+    data: AddFormatRequirementRequest,
+    current_user: dict = Depends(require_roles("Auditor", "Admin"))
+):
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            """
+            INSERT INTO format_requirements
+                (format_id, requirement_name, requirement_type, requirement_value, is_required, display_order)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING *
+            """,
+            (
+                data.format_id,
+                data.requirement_name.strip(),
+                data.requirement_type,
+                (data.requirement_value or "").strip(),
+                data.is_required,
+                data.display_order
+            )
+        )
+        saved = cursor.fetchone()
+
+    return {
+        "message": "Requirement added successfully.",
+        "requirement": saved
+    }
+
+@router.post("/formats/{format_id}/compare-document/{document_id}")
+def compare_document_with_format(
+    format_id: int,
+    document_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT * FROM document_formats WHERE id = %s", (format_id,))
+        fmt = cursor.fetchone()
+        if not fmt:
+            raise HTTPException(status_code=404, detail="Format not found.")
+
+        cursor.execute("SELECT * FROM format_requirements WHERE format_id = %s ORDER BY display_order ASC", (format_id,))
+        reqs = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
+        doc = cursor.fetchone()
+        if not doc:
+            raise HTTPException(status_code=404, detail="Document not found.")
+
+    file_path = doc.get("file_path")
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Physical document PDF file not found on server.")
+
+    analysis = analyze_document_structure(file_path, fmt, reqs)
+    return {
+        "document_id": doc["id"],
+        "file_name": doc["file_name"],
+        "format_id": fmt["id"],
+        "format_name": fmt["format_name"],
+        "comparison": analysis
     }
 
 @router.get("/formats/{format_id}")
