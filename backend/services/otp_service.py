@@ -6,6 +6,11 @@ from datetime import datetime, timedelta
 from email.message import EmailMessage
 from fastapi import HTTPException
 from backend.database import get_db_cursor
+from backend.services.n8n_service import (
+    is_n8n_enabled,
+    send_otp_via_n8n,
+    is_dev_otp_exposed
+)
 
 OTP_EXPIRY_MINUTES = 5
 MAX_OTP_ATTEMPTS = 5
@@ -19,12 +24,43 @@ def generate_secure_otp() -> str:
     """Generates a cryptographically random 6-digit numeric OTP."""
     return f"{secrets.randbelow(1000000):06d}"
 
-def send_real_email_otp(email: str, institution_name: str, subject_prefix: str, purpose_text: str, otp: str):
+def send_real_email_otp(email: str, institution_name: str, subject_prefix: str, purpose_text: str, otp: str, role: str = "Faculty") -> dict:
     """
-    Sends the 6-digit OTP to the recipient's real email address via real SMTP (e.g. Gmail SMTP).
-    If SMTP credentials are not yet configured or sending encounters a network error,
-    it gracefully simulates real inbox delivery without interrupting the user.
+    Sends the 6-digit OTP to the recipient's real email address.
+    Primary channel: n8n automated email workflow webhook.
+    Secondary fallback: Direct SMTP (Gmail/Institutional SMTP).
+    Tertiary fallback: Local dev dispatch.
+    Returns: dict { "delivered": bool, "channel": str, "message": str }
     """
+    # 1. Trigger n8n automated email workflow if enabled
+    if is_n8n_enabled():
+        subject = f"{subject_prefix} - {institution_name}"
+        n8n_res = send_otp_via_n8n(
+            email=email,
+            otp=otp,
+            institution_name=institution_name,
+            role=role,
+            purpose=purpose_text,
+            subject=subject,
+            expires_in_minutes=OTP_EXPIRY_MINUTES
+        )
+        if n8n_res.get("dispatched"):
+            if n8n_res.get("email_delivered"):
+                print(f"[n8n AUTOMATION SUCCESS] Real email sent to {email} inbox.")
+                return {
+                    "delivered": True,
+                    "channel": "n8n",
+                    "message": f"Verification passcode successfully sent to your email ({email}) via n8n automation."
+                }
+            else:
+                print(f"[n8n SIMULATION NOTICE] n8n webhook received the OTP, but outbound SMTP credentials are not configured in .env.")
+                return {
+                    "delivered": False,
+                    "channel": "n8n",
+                    "message": f"n8n webhook received the passcode. Outbound SMTP credentials are not yet configured in .env."
+                }
+
+    # 2. Direct SMTP fallback (e.g. Gmail SMTP)
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_username = os.getenv("SMTP_USERNAME")
@@ -43,9 +79,7 @@ def send_real_email_otp(email: str, institution_name: str, subject_prefix: str, 
                 f"Institution: {institution_name}\n\n"
                 f"Your verification passcode is: {otp}\n\n"
                 f"{purpose_text}\n"
-                f"This code will expire in {OTP_EXPIRY_MINUTES} minutes and can only be used once.\n\n"
-                f"SECURITY NOTICE:\n"
-                f"Never share this verification code with anyone.\n"
+                f"This code will expire in {OTP_EXPIRY_MINUTES} minutes and can only be used once.\n"
             )
 
             html_content = f"""<!DOCTYPE html>
@@ -53,11 +87,10 @@ def send_real_email_otp(email: str, institution_name: str, subject_prefix: str, 
 <head>
   <meta charset="utf-8">
   <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }}
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; }}
     .container {{ max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }}
     .header {{ background-color: #1e3a8a; padding: 24px; text-align: center; color: #ffffff; }}
     .header h1 {{ margin: 0; font-size: 20px; font-weight: 700; }}
-    .header p {{ margin: 6px 0 0; font-size: 13px; opacity: 0.9; }}
     .content {{ padding: 32px 28px; text-align: center; color: #334155; }}
     .otp-badge {{ display: inline-block; font-size: 38px; font-weight: 800; letter-spacing: 8px; padding: 14px 28px; background: #eff6ff; color: #1d4ed8; border: 2px dashed #93c5fd; border-radius: 8px; margin: 20px 0; }}
     .expiry {{ font-size: 14px; color: #64748b; margin-bottom: 24px; }}
@@ -95,19 +128,36 @@ def send_real_email_otp(email: str, institution_name: str, subject_prefix: str, 
                     server.login(smtp_username, smtp_password)
                     server.send_message(msg)
             print(f"[SMTP DELIVERY SUCCESS] Sent passcode to {email}")
+            return {
+                "delivered": True,
+                "channel": "smtp",
+                "message": f"Verification passcode successfully sent to your email ({email})."
+            }
         except Exception as e:
-            print(f"[SMTP DELIVERY NOTICE] SMTP delivery encountered: {e}. Falling back to instant dispatch.")
+            print(f"[SMTP DELIVERY NOTICE] SMTP delivery encountered: {e}.")
+            return {
+                "delivered": False,
+                "channel": "smtp",
+                "error": str(e),
+                "message": f"Outbound SMTP error: {e}"
+            }
     else:
         print(f"[INSTITUTIONAL MAIL DISPATCH] To: {email} | Passcode: {otp} | Role Context: {purpose_text}")
+        return {
+            "delivered": False,
+            "channel": "simulated",
+            "message": "Outbound SMTP credentials (SMTP_USERNAME/SMTP_PASSWORD) are not yet configured in .env."
+        }
 
 # ==============================================================================
 # LOGIN OTP HANDLERS
 # ==============================================================================
 
-def create_and_send_login_otp(institution_name: str, email: str, role: str) -> None:
+def create_and_send_login_otp(institution_name: str, email: str, role: str) -> tuple:
     """
     Validates cooldown, invalidates prior unused OTPs, stores hashed OTP,
     and sends it via real email to the user.
+    Returns: (otp: str, delivery_info: dict)
     """
     email = email.strip().lower()
     institution_name = institution_name.strip()
@@ -160,15 +210,16 @@ def create_and_send_login_otp(institution_name: str, email: str, role: str) -> N
     subject = "Password Reset Passcode" if role == "Password Reset" else "Your Login Verification Passcode"
     purpose = "You requested a password reset passcode for your institutional account." if role == "Password Reset" else f"You requested a secure login passcode for role: {role}."
 
-    send_real_email_otp(
+    delivery = send_real_email_otp(
         email=email,
         institution_name=institution_name,
         subject_prefix=subject,
         purpose_text=purpose,
-        otp=otp
+        otp=otp,
+        role=role
     )
 
-    return otp
+    return otp, delivery
 
 def verify_login_otp(email: str, entered_otp: str) -> bool:
     """
@@ -248,9 +299,10 @@ def verify_login_otp(email: str, entered_otp: str) -> bool:
 # REGISTRATION OTP HANDLERS
 # ==============================================================================
 
-def create_and_send_registration_otp(name: str, email: str, password_hash: str, institution_id: int, department_id: int | None, institution_name: str) -> None:
+def create_and_send_registration_otp(name: str, email: str, password_hash: str, institution_id: int, department_id: int | None, institution_name: str) -> tuple:
     """
     Validates cooldown, stores pending registration with hashed OTP, and dispatches real email OTP.
+    Returns: (otp: str, delivery_info: dict)
     """
     email = email.strip().lower()
 
@@ -290,15 +342,16 @@ def create_and_send_registration_otp(name: str, email: str, password_hash: str, 
             (name, email, password_hash, institution_id, department_id, otp_hashed, expires_at)
         )
 
-    send_real_email_otp(
+    delivery = send_real_email_otp(
         email=email,
         institution_name=institution_name,
         subject_prefix="Verify Your Account Registration",
         purpose_text="Please enter the verification code below to verify your email and activate your institutional account.",
-        otp=otp
+        otp=otp,
+        role="Faculty"
     )
 
-    return otp
+    return otp, delivery
 
 def verify_registration_otp(email: str, entered_otp: str) -> dict:
     """
@@ -368,7 +421,7 @@ def verify_registration_otp(email: str, entered_otp: str) -> dict:
                     detail="Maximum verification attempts exceeded. Please register again."
                 )
 
-        # Check if email was somehow registered while pending
+        # Check if email was registered while pending
         cursor.execute("SELECT id FROM users WHERE LOWER(email) = %s", (email,))
         if cursor.fetchone():
             cursor.execute("DELETE FROM pending_registrations WHERE id = %s", (reg_id,))

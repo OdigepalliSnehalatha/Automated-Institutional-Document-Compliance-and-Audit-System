@@ -1,0 +1,95 @@
+{
+  "name": "Institutional Compliance - Realistic OTP Email Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-otp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1e9a1b02-8a9d-4731-9f20-b0c6a5120001",
+      "name": "Webhook - Receive OTP Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "webhookId": "send-otp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract incoming webhook payload\nconst data = $input.first().json;\n\nconst email = (data.email || '').trim().toLowerCase();\nconst otp = String(data.otp || '').trim();\nconst institution = data.institution_name || 'Anantha Lakshmi Institute of Technology and Sciences';\nconst role = data.role || 'Faculty';\nconst purpose = data.purpose || 'Institutional Portal Login Verification';\nconst expiryMinutes = data.expires_in_minutes || 5;\nconst subject = data.subject || `🔐 [${institution}] Your Verification Passcode: ${otp}`;\n\nif (!email || !otp) {\n  throw new Error('Invalid payload: email and otp are required.');\n}\n\n// Generate clean, modern, responsive HTML email template\nconst htmlBody = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>${subject}</title>\n  <style>\n    body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; }\n    .wrapper { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }\n    .header { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 28px 24px; text-align: center; color: #ffffff; }\n    .header h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }\n    .header p { margin: 6px 0 0; font-size: 13px; color: #bfdbfe; }\n    .badge-bar { background: #0f172a; padding: 8px 16px; text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #38bdf8; font-weight: 600; }\n    .content { padding: 32px 28px; text-align: center; color: #1e293b; }\n    .purpose-text { font-size: 15px; line-height: 1.5; color: #475569; margin: 0 0 20px; }\n    .otp-container { background: #eff6ff; border: 2px dashed #60a5fa; border-radius: 10px; padding: 18px 24px; margin: 24px 0; display: inline-block; }\n    .otp-code { font-family: 'Courier New', monospace; font-size: 40px; font-weight: 800; letter-spacing: 10px; color: #1d4ed8; margin: 0; }\n    .expiry-note { font-size: 13px; color: #64748b; margin: 16px 0 0; }\n    .details-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-top: 24px; text-align: left; font-size: 12px; color: #475569; }\n    .details-box p { margin: 4px 0; }\n    .security-notice { margin-top: 20px; font-size: 12px; color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 6px; padding: 10px 14px; text-align: left; }\n    .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 20px; text-align: center; font-size: 11px; color: #94a3b8; }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n    <div class=\"header\">\n      <h1>${institution}</h1>\n      <p>Automated Institutional Compliance & Document Audit System</p>\n    </div>\n    <div class=\"badge-bar\">\n      ⚡ Powered by n8n Automated Email Delivery\n    </div>\n    <div class=\"content\">\n      <p class=\"purpose-text\">${purpose}</p>\n      <div class=\"otp-container\">\n        <div class=\"otp-code\">${otp}</div>\n      </div>\n      <p class=\"expiry-note\">⏱️ This passcode is valid for <strong>${expiryMinutes} minutes</strong> and can only be used once.</p>\n      <div class=\"details-box\">\n        <p><strong>Account Recipient:</strong> ${email}</p>\n        <p><strong>Authorized Role:</strong> ${role}</p>\n        <p><strong>Audit System Host:</strong> Automated Compliance Server</p>\n      </div>\n      <div class=\"security-notice\">\n        ⚠️ <strong>Security Advisory:</strong> Institutional staff will never ask for your verification code. Do not disclose this code to anyone.\n      </div>\n    </div>\n    <div class=\"footer\">\n      This is an automated institutional compliance notification &bull; ${institution}\n    </div>\n  </div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    email,\n    otp,\n    institution,\n    role,\n    purpose,\n    subject,\n    html: htmlBody,\n    expiryMinutes,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "2b8c3d14-9e0f-4822-a131-c1d7b6230002",
+      "name": "Format Institutional Email (HTML)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "compliance-audit@alits.ac.in",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "3c9d4e25-0f1a-4933-b242-d2e8c7340003",
+      "name": "Send Email via SMTP / Mail Service",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Verification OTP email successfully dispatched via n8n automation!\",\n  \"recipient\": \"{{ $('Format Institutional Email (HTML)').item.json.email }}\",\n  \"dispatched_at\": \"{{ $now.toISO() }}\",\n  \"workflow\": \"n8n-institutional-otp-v2\"\n}",
+        "options": {}
+      },
+      "id": "4d0e5f36-1a2b-4a44-c353-e3f9d8450004",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [940, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive OTP Request": {
+      "main": [
+        [
+          {
+            "node": "Format Institutional Email (HTML)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Institutional Email (HTML)": {
+      "main": [
+        [
+          {
+            "node": "Send Email via SMTP / Mail Service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email via SMTP / Mail Service": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

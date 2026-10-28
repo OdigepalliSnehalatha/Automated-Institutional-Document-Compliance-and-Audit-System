@@ -20,6 +20,7 @@ function Sidebar({
       roleBadgeClass: "role-Admin",
       navItems: [
         { id: "overview", label: "Dashboard Overview", icon: "🏠" },
+        { id: "question_papers", label: "Question Papers", icon: "📝" },
         { id: "institution", label: "Institution & Logo", icon: "🏫" },
         { id: "personnel", label: "Faculty & Staff", icon: "👥", badge: counts.total_personnel },
         { id: "departments", label: "Departments & Branches", icon: "🏢", badge: counts.total_departments },
@@ -31,6 +32,7 @@ function Sidebar({
       roleBadgeClass: "role-Auditor",
       navItems: [
         { id: "overview", label: "Overview & Analytics", icon: "📊" },
+        { id: "question_papers", label: "Question Papers", icon: "📝" },
         { id: "builder", label: "Format Builder", icon: "⚙️" },
         { id: "formats", label: "Master Formats", icon: "📑", badge: counts.total_formats },
         { id: "submissions", label: "All Submissions", icon: "📁", badge: counts.total_submissions },
@@ -42,6 +44,7 @@ function Sidebar({
       roleBadgeClass: "role-HOD",
       navItems: [
         { id: "overview", label: "Department Overview", icon: "📊" },
+        { id: "question_papers", label: "Question Papers", icon: "📝" },
         { id: "all", label: "Faculty Submissions", icon: "📁", badge: counts.department_documents },
         { id: "accepted", label: "Accepted Official PDFs", icon: "✓", badge: counts.accepted_documents },
         { id: "branches", label: "Branches & Guidelines", icon: "🏫" },
@@ -51,6 +54,7 @@ function Sidebar({
       portalTitle: "Faculty Portal",
       roleBadgeClass: "role-Faculty",
       navItems: [
+        { id: "question_papers", label: "Question Papers", icon: "📝" },
         { id: "upload", label: "Upload & Verify", icon: "📤" },
         { id: "submissions", label: "My Submissions", icon: "📁", badge: counts.my_documents },
         { id: "guidelines", label: "Compliance Rules", icon: "📋" },

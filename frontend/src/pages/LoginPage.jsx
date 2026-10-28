@@ -6,17 +6,11 @@ import AuthIllustration from "../components/AuthIllustration";
 function LoginPage({ onLoginSuccess, initialInfo }) {
   // Navigation mode: "login" | "register" | "forgot"
   const [authMode, setAuthMode] = useState("login");
-  
-  // Steps within modes:
-  // For login: "form" | "otp"
-  // For register: "form" | "otp"
-  // For forgot: "email" | "otp-reset"
-  const [step, setStep] = useState("form");
+  const [step, setStep] = useState("form"); // "form" | "otp" (for forgot password)
 
   // Form Data
   const [loginData, setLoginData] = useState({
     institution_name: "Anantha Lakshmi Institute of Technology and Sciences",
-    role: "Faculty",
     email: "",
     password: "",
   });
@@ -25,6 +19,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     institution_name: "Anantha Lakshmi Institute of Technology and Sciences",
     name: "",
     email: "",
+    role: "Faculty",
     department_id: "",
     password: "",
     confirmPassword: "",
@@ -40,7 +35,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   const [departments, setDepartments] = useState([]);
   const [departmentsLoading, setDepartmentsLoading] = useState(false);
 
-  // 6 individual OTP box digits
+  // 6-digit OTP for Forgot Password
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const otpInputRefs = useRef([]);
 
@@ -50,10 +45,6 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
   const [info, setInfo] = useState(initialInfo || "");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Timers: Expiration (300s = 5m), Resend Cooldown (60s)
-  const [timerSeconds, setTimerSeconds] = useState(300);
-  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   // Fetch departments on mount
   useEffect(() => {
@@ -78,34 +69,11 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     }
   };
 
-  // Cooldown & Expiry Timer Interval
-  useEffect(() => {
-    let timer;
-    if (step === "otp" && timerSeconds > 0) {
-      timer = setInterval(() => {
-        setTimerSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [step, timerSeconds]);
-
-  useEffect(() => {
-    let timer;
-    if (cooldownSeconds > 0) {
-      timer = setInterval(() => {
-        setCooldownSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldownSeconds]);
-
-  // Mode Switch Handlers
   const switchToLogin = () => {
     setAuthMode("login");
     setStep("form");
     setError("");
     setInfo("");
-    setOtpDigits(["", "", "", "", "", ""]);
   };
 
   const switchToRegister = () => {
@@ -113,10 +81,6 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     setStep("form");
     setError("");
     setInfo("");
-    setOtpDigits(["", "", "", "", "", ""]);
-    if (departments.length === 0) {
-      fetchDepartments();
-    }
   };
 
   const switchToForgot = () => {
@@ -127,25 +91,118 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     setOtpDigits(["", "", "", "", "", ""]);
   };
 
-  // Input change handlers
   const handleLoginChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
   const handleRegisterChange = (e) => {
-    setRegisterData({ ...registerData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setRegisterData((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
   const handleForgotChange = (e) => {
-    setForgotData({ ...forgotData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForgotData((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
-  // ==========================================
-  // OTP Box Management
-  // ==========================================
+  // Quick autofill demo credentials for testing
+  const applyQuickLogin = (email, password) => {
+    setLoginData((prev) => ({ ...prev, email, password }));
+    setError("");
+    setInfo(`Loaded demo credentials for ${email}`);
+  };
+
+  // 1. DIRECT EMAIL & PASSWORD LOGIN (No OTP needed for normal login)
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    if (!loginData.email.trim()) {
+      setError("Please enter your registered email address.");
+      return;
+    }
+    if (!loginData.password) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await api.post("/login", {
+        institution_name: loginData.institution_name.trim(),
+        email: loginData.email.trim(),
+        password: loginData.password,
+      });
+
+      if (response.data.authenticated && response.data.user) {
+        onLoginSuccess(response.data.user);
+      } else {
+        setError("Authentication was inconclusive. Please try again.");
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.detail || "Invalid email or password. Please try again.";
+      setError(errMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. REGISTRATION (Collects name, email, password, role, department)
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    if (!registerData.name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!registerData.email.trim()) {
+      setError("Please enter your official institutional email.");
+      return;
+    }
+    if (registerData.password.length < 6) {
+      setError("Password must be at least 6 characters in length.");
+      return;
+    }
+    if (registerData.password !== registerData.confirmPassword) {
+      setError("Passwords do not match. Please re-enter.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        institution_name: registerData.institution_name.trim(),
+        name: registerData.name.trim(),
+        email: registerData.email.trim(),
+        role: registerData.role,
+        department_id: ["Faculty", "HOD"].includes(registerData.role) && registerData.department_id ? parseInt(registerData.department_id) : null,
+        password: registerData.password,
+      };
+
+      const res = await api.post("/register", payload);
+
+      if (res.data.success && res.data.user) {
+        // Automatically log user into their authorized dashboard
+        onLoginSuccess(res.data.user);
+      } else {
+        setInfo(res.data.message || "Account created! You can now log in.");
+        switchToLogin();
+      }
+    } catch (err) {
+      setError(err.response?.data?.detail || "Registration failed. An account with this email may already exist.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. FORGOT PASSWORD (OTP flow)
   const handleOtpChange = (index, value) => {
     const cleaned = value.replace(/\D/g, "");
     if (!cleaned) {
@@ -175,282 +232,28 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     }
   };
 
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (!pasted) return;
-
-    const newDigits = [...otpDigits];
-    for (let i = 0; i < 6; i++) {
-      newDigits[i] = pasted[i] || "";
-    }
-    setOtpDigits(newDigits);
-    setError("");
-
-    const nextIndex = Math.min(pasted.length, 5);
-    otpInputRefs.current[nextIndex]?.focus();
-  };
-
   const fullOtp = otpDigits.join("");
 
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // ==========================================
-  // 1. LOGIN WORKFLOW
-  // ==========================================
-  const handleLoginSubmit = async (e) => {
+  const handleRequestPasswordReset = async (e) => {
     e.preventDefault();
-    setError("");
-    setInfo("");
-
-    if (!loginData.email.trim()) {
-      setError("Please enter your official email address.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await api.post("/login", {
-        institution_name: loginData.institution_name.trim(),
-        role: loginData.role,
-        email: loginData.email.trim(),
-        password: loginData.password ? loginData.password.trim() : undefined,
-      });
-
-      if (response.data.requires_otp) {
-        setStep("otp");
-        setTimerSeconds(300);
-        setCooldownSeconds(30);
-        const code = response.data.otp;
-        if (code && code.length === 6) {
-          setOtpDigits(code.split(""));
-          setInfo(`📬 Verification code: ${code}`);
-          setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
-        } else {
-          setOtpDigits(["", "", "", "", "", ""]);
-          setInfo(response.data.message || `A verification passcode has been dispatched to ${loginData.email.trim()}.`);
-          setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
-        }
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Authentication failed. Please verify your credentials and institution.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyLoginOtp = async (e) => {
-    e.preventDefault();
-    if (fullOtp.length !== 6) {
-      setError("Please enter the complete 6-digit verification code.");
-      return;
-    }
-
-    setError("");
-    setInfo("");
-    setLoading(true);
-
-    try {
-      const response = await api.post("/verify-otp", {
-        institution_name: loginData.institution_name.trim(),
-        role: loginData.role,
-        email: loginData.email.trim(),
-        otp: fullOtp,
-      });
-
-      if (response.data.authenticated && response.data.user) {
-        onLoginSuccess(response.data.user);
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Invalid or expired OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendLoginOtp = async () => {
-    if (loading || cooldownSeconds > 0) return;
-    setError("");
-    setInfo("");
-    setLoading(true);
-
-    try {
-      const res = await api.post("/login", {
-        institution_name: loginData.institution_name.trim(),
-        role: loginData.role,
-        email: loginData.email.trim(),
-        password: loginData.password ? loginData.password.trim() : undefined,
-      });
-      setTimerSeconds(300);
-      setCooldownSeconds(30);
-      const code = res.data.otp;
-      if (code && code.length === 6) {
-        setOtpDigits(code.split(""));
-        setInfo(`📬 Fresh verification code: ${code}`);
-        setTimeout(() => otpInputRefs.current[5]?.focus(), 100);
-      } else {
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(res.data.message || `A fresh 6-digit verification code has been dispatched to ${loginData.email.trim()}.`);
-        setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Unable to resend passcode. Please check email address.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ==========================================
-  // 2. REGISTRATION WORKFLOW
-  // ==========================================
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setInfo("");
-
-    if (!registerData.name.trim()) {
-      setError("Please enter your full official name.");
-      return;
-    }
-    if (!registerData.email.trim() || !registerData.email.includes("@")) {
-      setError("Please enter a valid official email address.");
-      return;
-    }
-    if (registerData.password.length < 6) {
-      setError("Password must contain at least 6 characters.");
-      return;
-    }
-    if (registerData.password !== registerData.confirmPassword) {
-      setError("Password and confirmation password do not match.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await api.post("/register", {
-        name: registerData.name.trim(),
-        email: registerData.email.trim(),
-        password: registerData.password,
-        department_id: registerData.department_id ? parseInt(registerData.department_id, 10) : undefined,
-        institution_name: registerData.institution_name,
-      });
-
-      if (response.data.requires_verification) {
-        setStep("otp");
-        setTimerSeconds(300);
-        setCooldownSeconds(30);
-        const code = response.data.otp;
-        if (code && code.length === 6) {
-          setOtpDigits(code.split(""));
-          setInfo(`📬 Verification code: ${code}`);
-          setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
-        } else {
-          setOtpDigits(["", "", "", "", "", ""]);
-          setInfo(response.data.message || `A verification code has been dispatched to ${registerData.email.trim()}.`);
-          setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
-        }
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Registration request failed. Please verify your details.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyRegisterOtp = async (e) => {
-    e.preventDefault();
-    if (fullOtp.length !== 6) {
-      setError("Please enter the complete 6-digit verification code.");
-      return;
-    }
-
-    setError("");
-    setInfo("");
-    setLoading(true);
-
-    try {
-      const response = await api.post("/verify-registration", {
-        email: registerData.email.trim(),
-        otp: fullOtp,
-      });
-
-      if (response.data.authenticated && response.data.user) {
-        onLoginSuccess(response.data.user);
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Invalid or expired registration code. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendRegisterOtp = async () => {
-    if (loading || cooldownSeconds > 0) return;
-    setError("");
-    setInfo("");
-    setLoading(true);
-
-    try {
-      const res = await api.post("/register", {
-        name: registerData.name.trim(),
-        email: registerData.email.trim(),
-        password: registerData.password,
-        department_id: registerData.department_id ? parseInt(registerData.department_id, 10) : undefined,
-        institution_name: registerData.institution_name,
-      });
-      setTimerSeconds(300);
-      setCooldownSeconds(30);
-      const code = res.data.otp;
-      if (code && code.length === 6) {
-        setOtpDigits(code.split(""));
-        setInfo(`📬 Fresh verification code: ${code}`);
-        setTimeout(() => otpInputRefs.current[5]?.focus(), 100);
-      } else {
-        setOtpDigits(["", "", "", "", "", ""]);
-        setInfo(res.data.message || `A fresh registration passcode has been dispatched to ${registerData.email.trim()}.`);
-        setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Unable to resend registration code.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ==========================================
-  // 3. FORGOT / RESET PASSWORD WORKFLOW
-  // ==========================================
-  const handleForgotSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setInfo("");
-
     if (!forgotData.email.trim()) {
       setError("Please enter your registered email address.");
       return;
     }
-
+    setError("");
+    setInfo("");
     setLoading(true);
+
     try {
       const res = await api.post("/forgot-password", {
         email: forgotData.email.trim(),
       });
       setStep("otp-reset");
-      setTimerSeconds(300);
-      setCooldownSeconds(30);
-      const code = res.data.otp;
-      if (code && code.length === 6) {
-        setOtpDigits(code.split(""));
-        setInfo(`📬 Password reset code: ${code}`);
-        setTimeout(() => otpInputRefs.current[5]?.focus(), 150);
+      if (res.data.otp) {
+        setOtpDigits(res.data.otp.split(""));
+        setInfo(`📬 Reset code: ${res.data.otp}`);
       } else {
-        setOtpDigits(["", "", "", "", "", ""]);
         setInfo(res.data.message || `Password reset code sent to ${forgotData.email.trim()}.`);
-        setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
       }
     } catch (err) {
       setError(err.response?.data?.detail || "Password reset request failed. Please check your email.");
@@ -470,7 +273,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
       return;
     }
     if (forgotData.newPassword !== forgotData.confirmNewPassword) {
-      setError("New password and confirm password do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
@@ -479,18 +282,17 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
     setLoading(true);
 
     try {
-      const res = await api.post("/reset-password", {
+      await api.post("/reset-password", {
         email: forgotData.email.trim(),
         otp: fullOtp,
         new_password: forgotData.newPassword,
       });
 
-      // Reset successful, return to login form
       switchToLogin();
-      setInfo("✅ Password reset successfully! You can now log in with your new credentials.");
+      setInfo("✅ Password reset successfully! You can now log in with your new password.");
       setLoginData((prev) => ({ ...prev, email: forgotData.email.trim(), password: "" }));
     } catch (err) {
-      setError(err.response?.data?.detail || "Password reset failed. Please verify your OTP.");
+      setError(err.response?.data?.detail || "Password reset failed. Please verify your OTP code.");
     } finally {
       setLoading(false);
     }
@@ -498,7 +300,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
 
   return (
     <div className="login-split-page">
-      {/* LEFT SIDE: Hero & Institutional Branding */}
+      {/* LEFT SIDE: Hero & Branding */}
       <div className="login-split-hero">
         <div className="hero-content-wrapper">
           <div className="hero-header-brand">
@@ -513,12 +315,10 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
             </div>
           </div>
 
-          {/* Educational Campus Art Illustration */}
           <div className="hero-illustration-container">
             <AuthIllustration />
           </div>
 
-          {/* Feature Highlights */}
           <div className="hero-features-list">
             <div className="hero-feature-item">
               <span className="feature-icon">🛡️</span>
@@ -531,16 +331,16 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
             <div className="hero-feature-item">
               <span className="feature-icon">⚡</span>
               <div>
-                <strong>Automated PyMuPDF Analysis</strong>
-                <p>Instant detection of structural sections, marks patterns & question counts</p>
+                <strong>Automated PDF Structural Analysis</strong>
+                <p>Instant detection of Part A / Part B sections, marks schemes & question counts</p>
               </div>
             </div>
 
             <div className="hero-feature-item">
               <span className="feature-icon">🏢</span>
               <div>
-                <strong>Multi-Branch Governance</strong>
-                <p>Unified support for 8 engineering branches including CAI, CSE, ECE</p>
+                <strong>Institutional Multi-Role Governance</strong>
+                <p>Role-enforced permissions for Admin, Auditor, HOD, and Faculty</p>
               </div>
             </div>
           </div>
@@ -549,9 +349,9 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
 
       {/* RIGHT SIDE: Authentication Card */}
       <div className="login-split-form-pane">
-        <div className="login-form-card">
+        <div className="login-form-card" style={{ maxWidth: "480px" }}>
           
-          {/* TOP NAVIGATION TABS: Sign In vs Create Account */}
+          {/* Top Tabs: Sign In vs Create Account */}
           {authMode !== "forgot" && (
             <div className="auth-nav-tabs">
               <button
@@ -573,24 +373,20 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
             </div>
           )}
 
-          {/* Header */}
+          {/* Form Header */}
           <div className="form-card-header">
             <div className="form-card-badge">SECURE INSTITUTIONAL PORTAL</div>
             <h2 className="form-card-title">
-              {authMode === "login" && step === "form" && "Sign in to your Account"}
-              {authMode === "login" && step === "otp" && "Verify Security Passcode"}
-              {authMode === "register" && step === "form" && "Institutional Registration"}
-              {authMode === "register" && step === "otp" && "Verify Account Passcode"}
+              {authMode === "login" && "Sign in to your Account"}
+              {authMode === "register" && "Institutional User Registration"}
               {authMode === "forgot" && step === "email" && "Reset Forgotten Password"}
               {authMode === "forgot" && step === "otp-reset" && "Set New Password"}
             </h2>
             <p className="form-card-desc">
-              {authMode === "login" && step === "form" && "Enter your registered email and credentials to receive a one-time login code."}
-              {authMode === "login" && step === "otp" && `Enter the 6-digit security code sent to ${loginData.email}`}
-              {authMode === "register" && step === "form" && "Register with your official details. An email verification code will be sent to activate your account."}
-              {authMode === "register" && step === "otp" && `Enter the 6-digit registration code sent to ${registerData.email}`}
+              {authMode === "login" && "Enter your registered email and password to open your authorized institutional dashboard."}
+              {authMode === "register" && "Fill in your institutional credentials and assigned role to create an account."}
               {authMode === "forgot" && step === "email" && "Enter your registered email to receive a password reset verification code."}
-              {authMode === "forgot" && step === "otp-reset" && `Enter the code sent to ${forgotData.email} and choose a new password.`}
+              {authMode === "forgot" && step === "otp-reset" && `Enter the verification code sent to ${forgotData.email}`}
             </p>
           </div>
 
@@ -599,9 +395,9 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
           {info && <div className="alert-message alert-success">ℹ️ {info}</div>}
 
           {/* =========================================================
-              VIEW 1: LOGIN FORM
+              VIEW 1: DIRECT LOGIN FORM (Email + Password)
           ========================================================== */}
-          {authMode === "login" && step === "form" && (
+          {authMode === "login" && (
             <form onSubmit={handleLoginSubmit} className="login-form-body">
               <div className="form-group">
                 <label className="form-label">Institution Scope</label>
@@ -613,31 +409,6 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   onChange={handleLoginChange}
                   required
                 />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Assigned Institutional Role</label>
-                <div className="role-selector-grid">
-                  {[
-                    { id: "Admin", label: "Admin", icon: "🛡️" },
-                    { id: "Auditor", label: "Auditor", icon: "📊" },
-                    { id: "HOD", label: "HOD", icon: "🏛️" },
-                    { id: "Faculty", label: "Faculty", icon: "🎓" },
-                  ].map((r) => (
-                    <button
-                      type="button"
-                      key={r.id}
-                      className={`role-select-pill ${loginData.role === r.id ? "active" : ""}`}
-                      onClick={() => {
-                        setLoginData((prev) => ({ ...prev, role: r.id }));
-                        setError("");
-                      }}
-                    >
-                      <span className="role-pill-icon">{r.icon}</span>
-                      <span className="role-pill-text">{r.label}</span>
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="form-group">
@@ -661,11 +432,12 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     type="button"
                     className="auth-link-btn"
                     onClick={switchToForgot}
+                    style={{ fontSize: "12px", background: "none", border: "none", color: "var(--primary)", cursor: "pointer", padding: 0 }}
                   >
                     Forgot Password?
                   </button>
                 </div>
-                <div className="password-input-wrapper">
+                <div className="password-input-wrapper" style={{ position: "relative" }}>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -674,138 +446,86 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     onChange={handleLoginChange}
                     placeholder="Enter account password"
                     autoComplete="current-password"
+                    required
                   />
                   <button
                     type="button"
                     className="password-toggle-btn"
                     onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
+                    tabIndex="-1"
+                    aria-label="Toggle password visibility"
                   >
-                    {showPassword ? "👁️" : "🔒"}
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
-                <span className="auth-input-helper">Optional if account was created with OTP-only verification.</span>
               </div>
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || !loginData.email.trim()}
+                className="btn btn-primary btn-block"
+                style={{ padding: "12px", fontSize: "15px", fontWeight: 600, marginTop: "8px" }}
+                disabled={loading}
               >
-                {loading ? "Verifying & Sending Passcode..." : "Send Verification Passcode →"}
+                {loading ? "Authenticating..." : "Sign In to Dashboard →"}
               </button>
 
-              <div className="auth-sub-links">
-                <span>New to the system?</span>
-                <button
-                  type="button"
-                  className="auth-link-btn"
-                  onClick={switchToRegister}
-                >
-                  Create Faculty Account →
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* =========================================================
-              VIEW 2: LOGIN OTP VERIFICATION
-          ========================================================== */}
-          {authMode === "login" && step === "otp" && (
-            <form onSubmit={handleVerifyLoginOtp} className="login-form-body">
-              <div className="otp-boxes-wrapper" onPaste={handleOtpPaste}>
-                <label className="form-label" style={{ display: "block", marginBottom: "12px", textAlign: "center" }}>
-                  Enter 6-Digit Verification Passcode
-                </label>
-                <div className="otp-digit-inputs">
-                  {otpDigits.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={(el) => (otpInputRefs.current[idx] = el)}
-                      type="text"
-                      className="otp-digit-box"
-                      value={digit}
-                      maxLength={1}
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      disabled={loading}
-                      required
-                    />
-                  ))}
+              {/* Demo Credentials Section for Evaluator / Testing */}
+              <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px dashed var(--border-color)" }}>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, display: "block", marginBottom: "8px" }}>
+                  ⚡ Quick Demo Accounts (Click to Fill):
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    style={{ fontSize: "11px", padding: "6px 8px", textAlign: "left" }}
+                    onClick={() => applyQuickLogin("admin@alitsprototype.test", "Admin@123")}
+                  >
+                    🛡️ Admin / Head
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    style={{ fontSize: "11px", padding: "6px 8px", textAlign: "left" }}
+                    onClick={() => applyQuickLogin("auditor@alitsprototype.test", "Auditor@123")}
+                  >
+                    📊 Auditor
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    style={{ fontSize: "11px", padding: "6px 8px", textAlign: "left" }}
+                    onClick={() => applyQuickLogin("hod.cse@alitsprototype.test", "Hod@123")}
+                  >
+                    🏛️ HOD (CSE)
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    style={{ fontSize: "11px", padding: "6px 8px", textAlign: "left" }}
+                    onClick={() => applyQuickLogin("faculty.cse@alitsprototype.test", "Faculty@123")}
+                  >
+                    🎓 Faculty (CSE)
+                  </button>
                 </div>
               </div>
-
-              {/* Countdown Timer */}
-              <div className="otp-timer-row">
-                <span className="otp-timer-icon">⏱️</span>
-                <span className="otp-timer-text">
-                  {timerSeconds > 0 ? (
-                    <>Code expires in: <strong>{formatTimer(timerSeconds)}</strong></>
-                  ) : (
-                    <span style={{ color: "var(--danger)" }}>Passcode expired. Please request a new one.</span>
-                  )}
-                </span>
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || fullOtp.length !== 6 || timerSeconds === 0}
-                style={{ marginTop: "14px" }}
-              >
-                {loading ? "Verifying Passcode..." : "Verify Passcode & Access Dashboard →"}
-              </button>
-
-              <div className="otp-secondary-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleResendLoginOtp}
-                  disabled={loading || cooldownSeconds > 0}
-                >
-                  {cooldownSeconds > 0
-                    ? `↻ Resend (${cooldownSeconds}s)`
-                    : "↻ Resend Passcode"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => {
-                    setStep("form");
-                    setError("");
-                    setInfo("");
-                  }}
-                  disabled={loading}
-                >
-                  ← Back to Login
-                </button>
-              </div>
             </form>
           )}
 
           {/* =========================================================
-              VIEW 3: REGISTRATION FORM
+              VIEW 2: REGISTRATION FORM (Role & Dept collected)
           ========================================================== */}
-          {authMode === "register" && step === "form" && (
+          {authMode === "register" && (
             <form onSubmit={handleRegisterSubmit} className="login-form-body">
-              <div className="auth-notice-banner">
-                <span>ℹ️</span>
-                <span>
-                  Self-registration activates an authorized <strong>Faculty</strong> account. Administrative & Auditor access is granted via the Administrator Directory.
-                </span>
-              </div>
-
               <div className="form-group">
-                <label className="form-label">Full Official Name</label>
+                <label className="form-label">Full Name</label>
                 <input
                   type="text"
                   name="name"
                   className="form-input"
                   value={registerData.name}
                   onChange={handleRegisterChange}
-                  placeholder="Prof. / Dr. / First Last"
+                  placeholder="e.g. Dr. Rajesh Sharma"
                   required
                 />
               </div>
@@ -818,62 +538,75 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   className="form-input"
                   value={registerData.email}
                   onChange={handleRegisterChange}
-                  placeholder="name@institution.edu"
-                  autoComplete="email"
+                  placeholder="name@alits.ac.in"
                   required
                 />
-                <span className="auth-input-helper">A real verification passcode will be sent to this exact inbox.</span>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Assigned Engineering Department</label>
+                <label className="form-label">Assigned Institutional Role</label>
                 <select
-                  name="department_id"
-                  className="form-select"
-                  value={registerData.department_id}
+                  name="role"
+                  className="form-input"
+                  value={registerData.role}
                   onChange={handleRegisterChange}
-                  disabled={departmentsLoading}
                   required
                 >
-                  {departmentsLoading ? (
-                    <option>Loading departments...</option>
-                  ) : (
-                    departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.code} — {dept.name}
-                      </option>
-                    ))
-                  )}
+                  <option value="Faculty">Faculty Member</option>
+                  <option value="HOD">Head of Department (HOD)</option>
+                  <option value="Auditor">Institutional Compliance Auditor</option>
+                  <option value="Admin">Administrator / Institution Head</option>
                 </select>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+                  Role permissions are enforced strictly on the server backend.
+                </span>
               </div>
 
+              {["Faculty", "HOD"].includes(registerData.role) && (
+                <div className="form-group">
+                  <label className="form-label">Engineering Department</label>
+                  <select
+                    name="department_id"
+                    className="form-input"
+                    value={registerData.department_id}
+                    onChange={handleRegisterChange}
+                    required
+                  >
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.code} - {d.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="form-group">
-                <label className="form-label">Create Password</label>
-                <div className="password-input-wrapper">
+                <label className="form-label">Password</label>
+                <div className="password-input-wrapper" style={{ position: "relative" }}>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     className="form-input"
                     value={registerData.password}
                     onChange={handleRegisterChange}
-                    placeholder="Minimum 6 characters"
-                    autoComplete="new-password"
+                    placeholder="Create a strong password (min 6 chars)"
                     required
                   />
                   <button
                     type="button"
                     className="password-toggle-btn"
                     onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
+                    tabIndex="-1"
                   >
-                    {showPassword ? "👁️" : "🔒"}
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Confirm Password</label>
-                <div className="password-input-wrapper">
+                <div className="password-input-wrapper" style={{ position: "relative" }}>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
@@ -881,135 +614,50 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     value={registerData.confirmPassword}
                     onChange={handleRegisterChange}
                     placeholder="Re-enter password"
-                    autoComplete="new-password"
                     required
                   />
                   <button
                     type="button"
                     className="password-toggle-btn"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    tabIndex={-1}
+                    tabIndex="-1"
                   >
-                    {showConfirmPassword ? "👁️" : "🔒"}
+                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
                   </button>
                 </div>
-                {registerData.confirmPassword && registerData.password !== registerData.confirmPassword && (
-                  <span style={{ fontSize: "11px", color: "var(--danger)", marginTop: "4px", display: "block" }}>
-                    ❌ Passwords do not match
-                  </span>
-                )}
-                {registerData.confirmPassword && registerData.password === registerData.confirmPassword && (
-                  <span style={{ fontSize: "11px", color: "var(--success)", marginTop: "4px", display: "block" }}>
-                    ✓ Passwords match
-                  </span>
-                )}
               </div>
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || !registerData.name.trim() || !registerData.email.trim() || !registerData.password}
+                className="btn btn-primary btn-block"
+                style={{ padding: "12px", fontSize: "15px", fontWeight: 600, marginTop: "8px" }}
+                disabled={loading}
               >
-                {loading ? "Registering & Sending Verification Code..." : "Create Account & Send Code →"}
+                {loading ? "Creating Account..." : "Create Account & Sign In →"}
               </button>
 
-              <div className="auth-sub-links">
-                <span>Already registered?</span>
-                <button
-                  type="button"
-                  className="auth-link-btn"
-                  onClick={switchToLogin}
-                >
-                  ← Sign In Here
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* =========================================================
-              VIEW 4: REGISTRATION OTP VERIFICATION
-          ========================================================== */}
-          {authMode === "register" && step === "otp" && (
-            <form onSubmit={handleVerifyRegisterOtp} className="login-form-body">
-              <div className="otp-boxes-wrapper" onPaste={handleOtpPaste}>
-                <label className="form-label" style={{ display: "block", marginBottom: "12px", textAlign: "center" }}>
-                  Enter 6-Digit Email Verification Code
-                </label>
-                <div className="otp-digit-inputs">
-                  {otpDigits.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={(el) => (otpInputRefs.current[idx] = el)}
-                      type="text"
-                      className="otp-digit-box"
-                      value={digit}
-                      maxLength={1}
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      disabled={loading}
-                      required
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Countdown Timer */}
-              <div className="otp-timer-row">
-                <span className="otp-timer-icon">⏱️</span>
-                <span className="otp-timer-text">
-                  {timerSeconds > 0 ? (
-                    <>Code expires in: <strong>{formatTimer(timerSeconds)}</strong></>
-                  ) : (
-                    <span style={{ color: "var(--danger)" }}>Code expired. Please request a new code.</span>
-                  )}
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={switchToLogin}
+                    style={{ background: "none", border: "none", color: "var(--primary)", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Sign In
+                  </button>
                 </span>
               </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || fullOtp.length !== 6 || timerSeconds === 0}
-                style={{ marginTop: "14px" }}
-              >
-                {loading ? "Activating Account..." : "Verify & Activate Institutional Account →"}
-              </button>
-
-              <div className="otp-secondary-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleResendRegisterOtp}
-                  disabled={loading || cooldownSeconds > 0}
-                >
-                  {cooldownSeconds > 0
-                    ? `↻ Resend (${cooldownSeconds}s)`
-                    : "↻ Resend Code"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => {
-                    setStep("form");
-                    setError("");
-                    setInfo("");
-                  }}
-                  disabled={loading}
-                >
-                  ← Edit Registration
-                </button>
-              </div>
             </form>
           )}
 
           {/* =========================================================
-              VIEW 5: FORGOT PASSWORD - REQUEST EMAIL
+              VIEW 3: FORGOT PASSWORD (OTP Reset)
           ========================================================== */}
           {authMode === "forgot" && step === "email" && (
-            <form onSubmit={handleForgotSubmit} className="login-form-body">
+            <form onSubmit={handleRequestPasswordReset} className="login-form-body">
               <div className="form-group">
-                <label className="form-label">Registered Account Email</label>
+                <label className="form-label">Registered Email</label>
                 <input
                   type="email"
                   name="email"
@@ -1017,25 +665,24 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   value={forgotData.email}
                   onChange={handleForgotChange}
                   placeholder="name@institution.edu"
-                  autoComplete="email"
                   required
                 />
-                <span className="auth-input-helper">We will send a 6-digit security code to reset your password.</span>
               </div>
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || !forgotData.email.trim()}
+                className="btn btn-primary btn-block"
+                style={{ padding: "12px", fontSize: "15px", fontWeight: 600, marginTop: "8px" }}
+                disabled={loading}
               >
-                {loading ? "Sending Reset Passcode..." : "Send Reset Passcode →"}
+                {loading ? "Dispatching Code..." : "Send Verification Passcode"}
               </button>
 
-              <div className="auth-sub-links" style={{ justifyContent: "center" }}>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <button
                   type="button"
-                  className="auth-link-btn"
                   onClick={switchToLogin}
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "13px", cursor: "pointer" }}
                 >
                   ← Return to Sign In
                 </button>
@@ -1043,29 +690,23 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
             </form>
           )}
 
-          {/* =========================================================
-              VIEW 6: FORGOT PASSWORD - OTP & NEW PASSWORD
-          ========================================================== */}
           {authMode === "forgot" && step === "otp-reset" && (
             <form onSubmit={handleResetPasswordSubmit} className="login-form-body">
-              <div className="otp-boxes-wrapper" onPaste={handleOtpPaste}>
-                <label className="form-label" style={{ display: "block", marginBottom: "12px", textAlign: "center" }}>
-                  Enter 6-Digit Reset Passcode
-                </label>
-                <div className="otp-digit-inputs">
+              <div className="form-group">
+                <label className="form-label">6-Digit Passcode</label>
+                <div className="otp-digit-boxes" style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
                       ref={(el) => (otpInputRefs.current[idx] = el)}
                       type="text"
-                      className="otp-digit-box"
-                      value={digit}
-                      maxLength={1}
                       inputMode="numeric"
+                      maxLength={1}
+                      className="otp-digit-input"
+                      value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      disabled={loading}
-                      required
+                      style={{ width: "42px", height: "48px", textAlign: "center", fontSize: "18px", fontWeight: 700 }}
                     />
                   ))}
                 </div>
@@ -1073,74 +714,51 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
 
               <div className="form-group">
                 <label className="form-label">New Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="newPassword"
-                    className="form-input"
-                    value={forgotData.newPassword}
-                    onChange={handleForgotChange}
-                    placeholder="Minimum 6 characters"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? "👁️" : "🔒"}
-                  </button>
-                </div>
+                <input
+                  type="password"
+                  name="newPassword"
+                  className="form-input"
+                  value={forgotData.newPassword}
+                  onChange={handleForgotChange}
+                  placeholder="Min 6 characters"
+                  required
+                />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Confirm New Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    name="confirmNewPassword"
-                    className="form-input"
-                    value={forgotData.confirmNewPassword}
-                    onChange={handleForgotChange}
-                    placeholder="Re-enter new password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    tabIndex={-1}
-                  >
-                    {showConfirmPassword ? "👁️" : "🔒"}
-                  </button>
-                </div>
+                <input
+                  type="password"
+                  name="confirmNewPassword"
+                  className="form-input"
+                  value={forgotData.confirmNewPassword}
+                  onChange={handleForgotChange}
+                  placeholder="Re-enter new password"
+                  required
+                />
               </div>
 
               <button
                 type="submit"
-                className="btn btn-primary btn-block btn-lg"
-                disabled={loading || fullOtp.length !== 6 || !forgotData.newPassword}
+                className="btn btn-primary btn-block"
+                style={{ padding: "12px", fontSize: "15px", fontWeight: 600, marginTop: "8px" }}
+                disabled={loading || fullOtp.length !== 6}
               >
-                {loading ? "Resetting Password..." : "Update Password & Return to Login →"}
+                {loading ? "Updating..." : "Update Password & Return to Sign In"}
               </button>
 
-              <div className="auth-sub-links" style={{ justifyContent: "center" }}>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <button
                   type="button"
-                  className="auth-link-btn"
                   onClick={switchToLogin}
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "13px", cursor: "pointer" }}
                 >
-                  ← Cancel & Return to Sign In
+                  ← Cancel and return to Sign In
                 </button>
               </div>
             </form>
           )}
 
-          {/* Footer note */}
-          <div className="form-card-footer">
-            <span>🔒 Protected by Role-Based Encryption & Session Token Security</span>
-          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AuditorDashboard from "./pages/AuditorDashboard";
 import HodDashboard from "./pages/HodDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
+import QuestionPaperManagement from "./pages/QuestionPaperManagement";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -52,7 +53,7 @@ function App() {
   };
 
   const setDefaultTabForRole = (role) => {
-    if (role === "Faculty") setActiveTab("upload");
+    if (role === "Faculty") setActiveTab("question_papers");
     else setActiveTab("overview");
   };
 
@@ -71,6 +72,13 @@ function App() {
   // Get dynamic title for topbar
   const getHeaderTitles = () => {
     if (!user) return { title: "Dashboard", subtitle: "" };
+
+    if (activeTab === "question_papers") {
+      return {
+        title: "Question Paper Compliance Management",
+        subtitle: "Multi-examination paper tracking, automated structural verification, and institutional approvals"
+      };
+    }
 
     const titlesMap = {
       Admin: {
@@ -156,27 +164,23 @@ function App() {
 
         {/* Active Dashboard View based on User Role */}
         <main className="dashboard-content-area" style={{ flex: 1, padding: "20px 24px" }}>
-          {user.role === "Admin" && (
+          {activeTab === "question_papers" ? (
+            <QuestionPaperManagement user={user} />
+          ) : user.role === "Admin" ? (
             <AdminDashboard user={user} activeTab={activeTab} />
-          )}
-
-          {user.role === "Auditor" && (
+          ) : user.role === "Auditor" ? (
             <AuditorDashboard
               user={user}
               activeTab={activeTab}
               onTabChange={(newTab) => setActiveTab(newTab)}
             />
-          )}
-
-          {user.role === "HOD" && (
+          ) : user.role === "HOD" ? (
             <HodDashboard
               user={user}
               activeTab={activeTab}
               onTabChange={(newTab) => setActiveTab(newTab)}
             />
-          )}
-
-          {user.role === "Faculty" && (
+          ) : (
             <FacultyDashboard
               user={user}
               activeTab={activeTab}

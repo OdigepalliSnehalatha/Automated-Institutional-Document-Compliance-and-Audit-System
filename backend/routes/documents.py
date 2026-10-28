@@ -273,7 +273,11 @@ def download_accepted_pdf(document_id: int, current_user: dict = Depends(get_cur
         check_department_access(current_user, doc["department_id"])
 
     # Strict check: only ACCEPTED documents can be downloaded
-    if doc["analysis_status"] != "ACCEPTED":
+    is_accepted = (
+        (doc.get("approval_status") or "").upper() == "ACCEPTED"
+        or (doc.get("analysis_status") or "").upper() == "ACCEPTED"
+    )
+    if not is_accepted:
         raise HTTPException(
             status_code=403,
             detail="Forbidden: Only accepted documents can be downloaded as official institutional records."

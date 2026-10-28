@@ -2246,3 +2246,28 @@ body {
     display: none;
   }
 }
+
+/* ==========================================================================
+   n8n Automated OTP Delivery Badge
+   ========================================================================== */
+.n8n-dispatch-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+  border-left: 3px solid #ea580c;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(234, 88, 12, 0.05);
+}
+
+.n8n-dispatch-badge strong {
+  color: #ea580c;
+  font-weight: 700;
+}

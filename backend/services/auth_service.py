@@ -19,17 +19,25 @@ def hash_password(plain_password: str) -> str:
         bcrypt.gensalt()
     ).decode("utf-8")
 
-def validate_user_login(
-    institution_name: str,
+def authenticate_user(
     email: str,
-    role: str | None = None,
-    password: str | None = None
+    password: str,
+    institution_name: str | None = None
 ) -> dict:
+    """
+    Authenticates a user against the database using email and password.
+    Never trusts role from client; checks verified role stored in database.
+    Does not require OTP for normal login.
+    """
     email = email.strip().lower()
-    institution_name = institution_name.strip()
-    selected_role = role.strip() if role and role.strip() else "Faculty"
+    password = password.strip() if password else ""
 
-    with get_db_cursor(commit=True) as cursor:
+    if not email:
+        raise HTTPException(status_code=400, detail="Official email address is required.")
+    if not password:
+        raise HTTPException(status_code=400, detail="Password is required.")
+
+    with get_db_cursor() as cursor:
         cursor.execute(
             """
             SELECT 
@@ -41,6 +49,7 @@ def validate_user_login(
                 u.department_id,
                 u.is_active,
                 d.name AS department_name,
+                d.code AS department_code,
                 i.id AS institution_id,
                 i.name AS institution_name,
                 i.logo_url AS institution_logo
@@ -55,47 +64,17 @@ def validate_user_login(
         )
         user = cursor.fetchone()
 
-        if not user:
-            # Auto-provision active institutional account for ANY given email with selected role
-            cursor.execute("SELECT id, name, logo_url FROM institution ORDER BY id LIMIT 1")
-            inst = cursor.fetchone()
-            inst_id = inst["id"] if inst else 1
-            inst_name = inst["name"] if inst else institution_name
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-            cursor.execute("SELECT id, name FROM departments ORDER BY id LIMIT 1")
-            dept = cursor.fetchone()
-            dept_id = dept["id"] if dept else 1
-            dept_name = dept["name"] if dept else "Computer Science & Engineering"
+    if not user.get("password_hash") or not verify_password(password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-            user_name = email.split("@")[0].replace(".", " ").replace("_", " ").title()
-            pwd_hash = hash_password(password.strip()) if password and password.strip() else None
-
-            cursor.execute(
-                """
-                INSERT INTO users (institution_id, department_id, name, email, password_hash, role, is_active)
-                VALUES (%s, %s, %s, %s, %s, %s, TRUE)
-                RETURNING id, name, email, role, department_id, institution_id, is_active
-                """,
-                (inst_id, dept_id, user_name, email, pwd_hash, selected_role)
-            )
-            created_user = cursor.fetchone()
-            user = {
-                **created_user,
-                "department_name": dept_name,
-                "institution_name": inst_name,
-                "institution_logo": inst.get("logo_url") if inst else None
-            }
-        else:
-            # Ensure account is active and role matches user's selection
-            if user["role"] != selected_role:
-                cursor.execute(
-                    "UPDATE users SET role = %s, is_active = TRUE WHERE id = %s",
-                    (selected_role, user["id"])
-                )
-                user["role"] = selected_role
-            elif not user.get("is_active", True):
-                cursor.execute("UPDATE users SET is_active = TRUE WHERE id = %s", (user["id"],))
-                user["is_active"] = True
+    if not user.get("is_active", True):
+        raise HTTPException(
+            status_code=403,
+            detail="Account is deactivated. Please contact your Institution Administrator."
+        )
 
     return user
 
@@ -103,12 +82,18 @@ def register_new_user(
     name: str,
     email: str,
     password: str,
+    role: str = "Faculty",
     department_id: int | None = None,
     institution_name: str = "Anantha Lakshmi Institute of Technology and Sciences"
 ) -> dict:
+    """
+    Registers a new user with email, name, password, and assigned role.
+    Prevents duplicate registrations with the same email.
+    """
     name = name.strip()
     email = email.strip().lower()
     password = password.strip()
+    role = role.strip() if role else "Faculty"
 
     if not name:
         raise HTTPException(status_code=400, detail="Full name is required.")
@@ -116,8 +101,10 @@ def register_new_user(
         raise HTTPException(status_code=400, detail="A valid official email address is required.")
     if len(password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters long.")
+    if role not in ALLOWED_ROLES:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Allowed roles: {', '.join(sorted(ALLOWED_ROLES))}")
 
-    with get_db_cursor() as cursor:
+    with get_db_cursor(commit=True) as cursor:
         cursor.execute("SELECT id FROM users WHERE LOWER(email) = %s", (email,))
         if cursor.fetchone():
             raise HTTPException(
@@ -130,27 +117,57 @@ def register_new_user(
         if not inst:
             cursor.execute("SELECT id, name FROM institution ORDER BY id LIMIT 1")
             inst = cursor.fetchone()
-        inst_id = inst["id"]
-        inst_name = inst["name"]
+        inst_id = inst["id"] if inst else 6
 
-    pwd_hash = hash_password(password)
+        # Verify department if provided
+        if department_id:
+            cursor.execute("SELECT id FROM departments WHERE id = %s AND institution_id = %s", (department_id, inst_id))
+            if not cursor.fetchone():
+                department_id = None
 
-    # Generate and send registration OTP
-    from backend.services.otp_service import create_and_send_registration_otp
-    otp = create_and_send_registration_otp(
-        name=name,
-        email=email,
-        password_hash=pwd_hash,
-        institution_id=inst_id,
-        department_id=department_id,
-        institution_name=inst_name
-    )
+        # Auditor and Admin typically do not require a single department constraint
+        if role in ("Auditor", "Admin"):
+            department_id = None
+
+        pwd_hash = hash_password(password)
+
+        cursor.execute(
+            """
+            INSERT INTO users (institution_id, department_id, name, email, password_hash, role, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, TRUE)
+            RETURNING id, name, email, role, department_id, institution_id, is_active
+            """,
+            (inst_id, department_id, name, email, pwd_hash, role)
+        )
+        new_user = cursor.fetchone()
+
+        cursor.execute(
+            """
+            SELECT 
+                u.id,
+                u.name,
+                u.email,
+                u.role,
+                u.department_id,
+                u.is_active,
+                d.name AS department_name,
+                d.code AS department_code,
+                i.id AS institution_id,
+                i.name AS institution_name,
+                i.logo_url AS institution_logo
+            FROM users u
+            JOIN institution i ON i.id = u.institution_id
+            LEFT JOIN departments d ON d.id = u.department_id
+            WHERE u.id = %s
+            """,
+            (new_user["id"],)
+        )
+        user_full = cursor.fetchone()
 
     return {
-        "message": f"Verification passcode for {email}: {otp}",
-        "otp": otp,
-        "email": email,
-        "requires_verification": True
+        "success": True,
+        "message": "Account created successfully! You can now log in with your credentials.",
+        "user": build_session_user(user_full)
     }
 
 def build_session_user(user_record: dict) -> dict:
@@ -159,45 +176,43 @@ def build_session_user(user_record: dict) -> dict:
         "name": user_record.get("name"),
         "email": user_record["email"],
         "role": user_record["role"],
-        "institution_id": user_record["institution_id"],
-        "institution_name": user_record["institution_name"],
-        "institution": user_record["institution_name"],
-        "institution_logo": user_record.get("institution_logo") or user_record.get("logo_url"),
         "department_id": user_record.get("department_id"),
         "department_name": user_record.get("department_name"),
-        "department": user_record.get("department_name")
+        "department_code": user_record.get("department_code"),
+        "institution_id": user_record["institution_id"],
+        "institution_name": user_record.get("institution_name", "Anantha Lakshmi Institute of Technology and Sciences"),
+        "institution_logo": user_record.get("institution_logo"),
+        "is_active": user_record.get("is_active", True)
     }
 
 def get_current_user(request: Request) -> dict:
+    """Dependency ensuring request comes from an authenticated session user."""
     user = request.session.get("user")
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated. Please log in.")
     return user
 
-def require_roles(*roles):
-    def dependency(current_user: dict = Depends(get_current_user)):
-        if current_user.get("role") not in roles:
+def require_roles(*allowed_roles: str):
+    """Dependency enforcing role-based access control."""
+    def role_checker(current_user: dict = Depends(get_current_user)) -> dict:
+        user_role = current_user.get("role")
+        if user_role not in allowed_roles:
             raise HTTPException(
                 status_code=403,
-                detail=f"Forbidden: Operation requires one of roles: {', '.join(roles)}"
+                detail=f"Access denied. Requires one of roles: {', '.join(allowed_roles)}"
             )
         return current_user
-    return dependency
+    return role_checker
 
-def check_department_access(current_user: dict, target_department_id: int | None):
-    """
-    Admin and Auditor have institution-wide access.
-    Faculty can submit and access documents across all branches/departments in their institution.
-    HOD is department-specific and oversees their assigned department.
-    """
-    role = current_user.get("role")
-    user_dept_id = current_user.get("department_id")
-
-    if role in {"Admin", "Auditor", "Faculty", "HOD"}:
-        return
-
-    if user_dept_id is None:
-        raise HTTPException(status_code=403, detail="User is not assigned to any department.")
-
-    if target_department_id is not None and int(user_dept_id) != int(target_department_id):
-        raise HTTPException(status_code=403, detail="Access denied: Cannot access documents from another department.")
+def check_department_access(user: dict, target_department_id: int | None):
+    """Enforces department scope for department-level roles (HOD, Faculty)."""
+    if user["role"] in {"Admin", "Auditor"}:
+        return True
+    if target_department_id is None:
+        return True
+    if user.get("department_id") != target_department_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden: You do not have permission to access resources outside your department."
+        )
+    return True
