@@ -481,7 +481,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("admin@alits.ac.in", "Admin@123")}
                   >
-                    🛡️ Admin / Head
+                    🛡️ Admin
                   </button>
                   <button
                     type="button"
@@ -489,7 +489,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("hod.cse@alits.ac.in", "HOD@123")}
                   >
-                    🏛️ HOD (CSE)
+                    🏛️ HOD
                   </button>
                   <button
                     type="button"
@@ -505,7 +505,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                     style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("faculty.cse@alits.ac.in", "Faculty@123")}
                   >
-                    🎓 Faculty (CSE)
+                    🎓 Faculty
                   </button>
                 </div>
               </div>

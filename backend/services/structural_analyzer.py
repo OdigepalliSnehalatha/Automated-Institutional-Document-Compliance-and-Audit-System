@@ -181,7 +181,7 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
             ("Examination Type", "Mid Examination" if exam_cat in ("MID1", "MID2") else "Semester Examination"),
             ("Department / Branch", f"{dept_name} ({dept_code})".strip() if (dept_name or dept_code) else "Department Header"),
             ("Course / Subject Details", f"{course_name} [{course_code}]".strip() if (course_name or course_code) else "Course Header"),
-            ("Section Structure (Part A & Part B)", "Part A and Part B clearly demarcated"),
+            ("Section Structure (Unit Architecture)" if exam_cat in ("MID1", "MID2", "MID") else "Section Structure (Part A & Part B)", "Unit Headings with Internal Choice" if exam_cat in ("MID1", "MID2", "MID") else "Part A and Part B clearly demarcated"),
             ("Question Numbering & Count", "Standard numbered questions"),
             ("Total Maximum Marks", f"{exp_marks} Marks"),
         ]:
@@ -342,47 +342,63 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
                 "recommended_correction": f"Add subject line: 'Subject: {course_name} | Subject Code: {course_code}'."
             })
 
-    # Check 6: Section Structure (Part A and Part B)
-    has_part_a = "part a" in full_norm or "section a" in full_norm or "unit 1" in full_norm
-    has_part_b = "part b" in full_norm or "section b" in full_norm or "unit 2" in full_norm
+    # Check 6: Section Structure (Unit Architecture for Mid, Part A/B for Semester)
+    is_mid_exam = exam_category in ("MID1", "MID2", "MID")
 
-    if has_part_a and has_part_b:
-        items.append({
-            "requirement": "Section Structure (Part A & Part B)",
-            "expected_value": "Part A and Part B clearly demarcated",
-            "detected_value": "Both Part A and Part B detected in sequential order",
-            "result": "Correct",
-            "explanation": "Paper contains standard structural divisions for objective/short and descriptive sections.",
-            "recommended_correction": "None required."
-        })
-    elif has_part_a or has_part_b:
-        missing_sec = "Part B" if has_part_a else "Part A"
-        items.append({
-            "requirement": "Section Structure (Part A & Part B)",
-            "expected_value": "Part A and Part B clearly demarcated",
-            "detected_value": f"Only {'Part A' if has_part_a else 'Part B'} detected",
-            "result": "Missing",
-            "explanation": f"Missing mandatory structural section '{missing_sec}'.",
-            "recommended_correction": f"Organize the paper into two sections: 'PART A' (Short Answer) and 'PART B' (Descriptive)."
-        })
-    else:
-        # Some papers use units directly
-        if "unit" in full_norm:
+    if is_mid_exam:
+        # Mid Papers do NOT have Part A / Part B headings; they utilize Question 1 & Unit Headings with internal choice ('OR')
+        has_units = "unit" in full_norm or any(u in full_norm for u in ["unit-i", "unit-ii", "unit-iii", "unit-iv", "unit-v", "unit 1", "unit 2", "unit 3", "unit 4", "unit 5"])
+        has_or = bool(re.search(r"\bor\b", full_norm)) or "either" in full_norm
+
+        if has_units:
             items.append({
-                "requirement": "Section Structure",
-                "expected_value": "Part A / Part B or Unit Structure",
-                "detected_value": "Unit-based structure detected",
+                "requirement": "Section Structure (Unit Architecture & Internal Choice)",
+                "expected_value": "Unit Headings with Internal Choice ('OR')",
+                "detected_value": f"Unit-wise breakdown verified ({'with internal choice OR' if has_or else 'standard unit structure'})",
                 "result": "Correct",
-                "explanation": "Paper utilizes unit-wise breakdown.",
+                "explanation": "Mid question paper complies with official autonomous layout without Part A / Part B subdivisions.",
                 "recommended_correction": "None required."
             })
         else:
             items.append({
-                "requirement": "Section Structure",
+                "requirement": "Section Structure (Unit Architecture & Internal Choice)",
+                "expected_value": "Unit Headings (e.g. UNIT-I/II or UNIT-III/IV/V) with 'OR' internal choice",
+                "detected_value": "Unit headings not detected",
+                "result": "Missing",
+                "explanation": "Descriptive questions must be organized under Unit headings with internal choice ('OR').",
+                "recommended_correction": "Add clear unit headings such as 'UNIT-I', 'UNIT-II' or 'UNIT-III', 'UNIT-IV', 'UNIT-V'."
+            })
+    else:
+        # Semester Examination uses Part A and Part B
+        has_part_a = "part a" in full_norm or "section a" in full_norm
+        has_part_b = "part b" in full_norm or "section b" in full_norm
+
+        if has_part_a and has_part_b:
+            items.append({
+                "requirement": "Section Structure (Part A & Part B)",
+                "expected_value": "Part A and Part B clearly demarcated",
+                "detected_value": "Both Part A and Part B detected in sequential order",
+                "result": "Correct",
+                "explanation": "Paper contains standard structural divisions for objective/short and descriptive sections.",
+                "recommended_correction": "None required."
+            })
+        elif has_part_a or has_part_b:
+            missing_sec = "Part B" if has_part_a else "Part A"
+            items.append({
+                "requirement": "Section Structure (Part A & Part B)",
+                "expected_value": "Part A and Part B clearly demarcated",
+                "detected_value": f"Only {'Part A' if has_part_a else 'Part B'} detected",
+                "result": "Missing",
+                "explanation": f"Missing mandatory structural section '{missing_sec}'.",
+                "recommended_correction": f"Organize the paper into two sections: 'PART A' (Short Answer) and 'PART B' (Descriptive)."
+            })
+        else:
+            items.append({
+                "requirement": "Section Structure (Part A & Part B)",
                 "expected_value": "Part A and Part B sections",
                 "detected_value": "No distinct section markers found",
                 "result": "Missing",
-                "explanation": "No distinct 'Part A', 'Part B', or 'Unit' markers detected.",
+                "explanation": "No distinct 'Part A' and 'Part B' markers detected.",
                 "recommended_correction": "Add clear section headings like 'PART A' and 'PART B'."
             })
 
