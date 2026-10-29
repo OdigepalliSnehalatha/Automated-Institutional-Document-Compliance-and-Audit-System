@@ -204,6 +204,23 @@ function QuestionPaperManagement({ user }) {
     setReportModalOpen(true);
   };
 
+  // Delete uploaded question paper file
+  const handleDeletePaper = async (docId, fileName, categoryLabel) => {
+    const ok = window.confirm(
+      `Are you sure you want to delete the uploaded ${categoryLabel} file:\n"${fileName}"?\n\nThis will remove the file and reset the upload status.`
+    );
+    if (!ok) return;
+
+    try {
+      await api.delete(`/question-papers/documents/${docId}`);
+      alert(`Question paper "${fileName}" deleted successfully.`);
+      loadOverview();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert(err.response?.data?.detail || "Failed to delete question paper.");
+    }
+  };
+
   // Download Accepted PDF strictly through authenticated download endpoint
   const handleDownload = async (docId, fileName) => {
     try {
@@ -345,6 +362,24 @@ function QuestionPaperManagement({ user }) {
               title="Review & submit approval/rejection decision"
             >
               ⚖️ Decision
+            </button>
+          )}
+
+          {(course.permissions.can_upload || user.role === "Faculty" || user.role === "Admin" || user.role === "HOD") && (
+            <button
+              className="btn btn-sm btn-danger"
+              style={{
+                fontSize: "11px",
+                padding: "2px 6px",
+                color: "#ef4444",
+                borderColor: "rgba(239, 68, 68, 0.4)",
+                background: "rgba(239, 68, 68, 0.08)",
+                cursor: "pointer"
+              }}
+              onClick={() => handleDeletePaper(paper.id, paper.file_name, categoryLabel)}
+              title={`Delete ${paper.file_name}`}
+            >
+              🗑️ Delete
             </button>
           )}
 

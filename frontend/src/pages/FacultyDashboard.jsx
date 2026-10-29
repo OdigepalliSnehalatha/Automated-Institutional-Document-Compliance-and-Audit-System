@@ -390,6 +390,15 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
                                 🔍 Breakdown
                               </button>
                             )}
+
+                            <button
+                              className="btn btn-danger btn-sm"
+                              style={{ color: "#ef4444", borderColor: "rgba(239, 68, 68, 0.4)", background: "rgba(239, 68, 68, 0.08)", padding: "4px 8px" }}
+                              onClick={() => handleDeleteDocument(doc.id, doc.file_name)}
+                              title={`Delete ${doc.file_name}`}
+                            >
+                              🗑️ Delete
+                            </button>
                           </div>
                         </td>
                       </tr>

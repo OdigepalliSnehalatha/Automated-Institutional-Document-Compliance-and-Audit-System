@@ -544,3 +544,44 @@ def submit_document_decision(
         "approval_status": decision,
         "message": f"Document status updated to {decision} successfully."
     }
+
+@router.delete("/documents/{document_id}")
+def delete_question_paper(document_id: int, current_user: dict = Depends(get_current_user)):
+    """Deletes an uploaded question paper, physical file, and associated reports for faculty/admin."""
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
+        doc = cursor.fetchone()
+
+        if not doc:
+            raise HTTPException(status_code=404, detail="Question paper not found or already deleted.")
+
+        # Clean up physical file on disk
+        file_path = doc.get("file_path")
+        if file_path:
+            p = Path(file_path)
+            if p.exists():
+                try:
+                    p.unlink()
+                except Exception as e:
+                    print(f"File delete warning: {e}")
+
+        # Delete dependent records
+        try:
+            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+        try:
+            cursor.execute("DELETE FROM audit_findings WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+        try:
+            cursor.execute("DELETE FROM compliance_checks WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+
+        cursor.execute("DELETE FROM documents WHERE id = %s", (document_id,))
+
+        return {
+            "success": True,
+            "message": f"Question paper '{doc.get('file_name', 'File')}' deleted successfully."
+        }
