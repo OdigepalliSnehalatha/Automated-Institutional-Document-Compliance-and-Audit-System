@@ -182,3 +182,31 @@ def reset_password_request(data: ResetPasswordRequest):
         "message": "Password successfully reset! You can now log in with your new password.",
         "success": True
     }
+
+
+@router.get("/document-types")
+def get_document_types():
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT id, name, description, is_active
+            FROM document_types 
+            ORDER BY id
+            """
+        )
+        return cursor.fetchall()
+
+@router.get("/departments")
+def get_departments(institution_id: int | None = None):
+    with get_db_cursor() as cursor:
+        if institution_id:
+            cursor.execute("SELECT id, code, name FROM departments WHERE institution_id = %s ORDER BY id", (institution_id,))
+        else:
+            cursor.execute("SELECT id, code, name FROM departments ORDER BY id")
+        return cursor.fetchall()
+
+@router.get("/institutions")
+def get_institutions():
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT id, name FROM institution ORDER BY name")
+        return cursor.fetchall()
