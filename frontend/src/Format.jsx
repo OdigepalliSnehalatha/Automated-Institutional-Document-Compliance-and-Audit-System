@@ -358,163 +358,196 @@ function Format({ onBack }) {
   // STANDARD QUESTION PAPER
   // =========================================================
 
-  const addQuestionPaperRequirements = () => {
+  const addQuestionPaperRequirements = (targetSubDiv) => {
     if (!examType) {
-      setMessage(
-        "Please select Mid Examination or Semester Examination first."
-      );
+      setMessage("Please select Mid Examination or Semester Examination first.");
       return;
     }
 
-    const effectiveExamLabel =
-      examType === "Mid Examination" ? `${midSubdivision} Examination` : "Semester Examination";
+    const effectiveSubDiv = targetSubDiv || midSubdivision || "Mid 1";
+    let reqs = [];
+    const isMid = examType === "Mid Examination";
 
-    const partBQuestionCount =
-      examType === "Mid Examination" ? "5" : "10";
+    if (isMid) {
+      const examTitle = effectiveSubDiv === "Mid 2" ? "II-MID Examinations" : "I-MID Examinations";
+      const unitCoverage = effectiveSubDiv === "Mid 2" ? "UNIT-III, UNIT-IV, and UNIT-V" : "UNIT-I, UNIT-II, and UNIT-III (Part)";
 
-    const questionPaperRequirements = [
-      // -----------------------------------------------------
-      // HEADER
-      // -----------------------------------------------------
-      {
-        requirement_name: "College Header",
-        requirement_type: "required",
-        requirement_value: "ABC College of Engineering",
-        is_required: true,
-      },
-      {
-        requirement_name: "Semester",
-        requirement_type: "required",
-        requirement_value: "B.Tech Semester",
-        is_required: true,
-      },
-      {
-        requirement_name: "B.Tech",
-        requirement_type: "required",
-        requirement_value: "B.Tech",
-        is_required: true,
-      },
-      {
-        requirement_name: "Examination Type",
-        requirement_type: "required",
-        requirement_value: effectiveExamLabel,
-        is_required: true,
-      },
-      {
-        requirement_name: "Subject Name",
-        requirement_type: "required",
-        requirement_value: "Subject Name must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Subject Code",
-        requirement_type: "required",
-        requirement_value: "Subject Code must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Branch",
-        requirement_type: "required",
-        requirement_value: "Branch must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Department",
-        requirement_type: "required",
-        requirement_value: "Department must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Time",
-        requirement_type: "required",
-        requirement_value: "Time must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Maximum Marks",
-        requirement_type: "required",
-        requirement_value: "Maximum marks must be present",
-        is_required: true,
-      },
+      reqs = [
+        // 1. Institutional Header Block
+        {
+          requirement_name: "College Header",
+          requirement_type: "header",
+          requirement_value: "Anantha Lakshmi Institute of Technology & Sciences",
+          is_required: true,
+          display_order: 1,
+        },
+        {
+          requirement_name: "Autonomous Status",
+          requirement_type: "text",
+          requirement_value: "(AUTONOMOUS)",
+          is_required: true,
+          display_order: 2,
+        },
+        {
+          requirement_name: "Institutional Location",
+          requirement_type: "text",
+          requirement_value: "Near S.K. University, Ananthapuramu- 515721",
+          is_required: true,
+          display_order: 3,
+        },
+        {
+          requirement_name: "Class & Semester",
+          requirement_type: "heading",
+          requirement_value: "B.Tech Semester (e.g., I B.Tech II Semester)",
+          is_required: true,
+          display_order: 4,
+        },
+        {
+          requirement_name: "Examination Title",
+          requirement_type: "heading",
+          requirement_value: examTitle,
+          is_required: true,
+          display_order: 5,
+        },
+        {
+          requirement_name: "Subject with Code",
+          requirement_type: "heading",
+          requirement_value: "Subject with Code: [Subject Name] : [Subject Code]",
+          is_required: true,
+          display_order: 6,
+        },
+        {
+          requirement_name: "Branch Identifier",
+          requirement_type: "text",
+          requirement_value: "Branch: CSE, EEE (or designated engineering branch)",
+          is_required: true,
+          display_order: 7,
+        },
+        {
+          requirement_name: "Academic Regulations",
+          requirement_type: "text",
+          requirement_value: "Regulations: R-24",
+          is_required: true,
+          display_order: 8,
+        },
+        {
+          requirement_name: "Time Duration",
+          requirement_type: "text",
+          requirement_value: "Time: 110 Min",
+          is_required: true,
+          display_order: 9,
+        },
+        {
+          requirement_name: "Maximum Marks",
+          requirement_type: "marks",
+          requirement_value: "Max. Marks: 40",
+          is_required: true,
+          display_order: 10,
+        },
+        {
+          requirement_name: "General Instruction",
+          requirement_type: "text",
+          requirement_value: "Answer all questions",
+          is_required: true,
+          display_order: 11,
+        },
 
-      // -----------------------------------------------------
-      // PART A
-      // -----------------------------------------------------
-      {
-        requirement_name: "Part A",
-        requirement_type: "required",
-        requirement_value: "Part A must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part A Question Count",
-        requirement_type: "question_count",
-        requirement_value: "10",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part A Arrangement",
-        requirement_type: "structure",
-        requirement_value: "Predefined Part A arrangement",
-        is_required: true,
-      },
+        // 2. Table Header Architecture
+        {
+          requirement_name: "Table Column: S.No",
+          requirement_type: "structure",
+          requirement_value: "S.No",
+          is_required: true,
+          display_order: 12,
+        },
+        {
+          requirement_name: "Table Column: Blooms Level",
+          requirement_type: "structure",
+          requirement_value: "Blooms Level (e.g. Apply, Remember, Understand, Analyze)",
+          is_required: true,
+          display_order: 13,
+        },
+        {
+          requirement_name: "Table Column: Course Outcome",
+          requirement_type: "structure",
+          requirement_value: "Course Outcome (e.g. CO1 to CO6)",
+          is_required: true,
+          display_order: 14,
+        },
+        {
+          requirement_name: "Table Column: Marks",
+          requirement_type: "structure",
+          requirement_value: "Marks (e.g. 2, 5, 10)",
+          is_required: true,
+          display_order: 15,
+        },
 
-      // -----------------------------------------------------
-      // PART B
-      // -----------------------------------------------------
-      {
-        requirement_name: "Part B",
-        requirement_type: "required",
-        requirement_value: "Part B must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part B Question Count",
-        requirement_type: "question_count",
-        requirement_value: partBQuestionCount,
-        is_required: true,
-      },
-      {
-        requirement_name: "Part B Arrangement",
-        requirement_type: "structure",
-        requirement_value: "Predefined Part B arrangement",
-        is_required: true,
-      },
+        // 3. Question Structure & Breakdown
+        {
+          requirement_name: "Question 1 (Short Answer Section)",
+          requirement_type: "question_count",
+          requirement_value: "Question 1 with 5 sub-questions (a, b, c, d, e) @ 2 Marks each = 10 Marks",
+          is_required: true,
+          display_order: 16,
+        },
+        {
+          requirement_name: "Unit Syllabus Architecture",
+          requirement_type: "structure",
+          requirement_value: unitCoverage,
+          is_required: true,
+          display_order: 17,
+        },
+        {
+          requirement_name: "Descriptive Internal Choice (OR)",
+          requirement_type: "structure",
+          requirement_value: "Internal Choice 'OR' between questions under each Unit",
+          is_required: true,
+          display_order: 18,
+        },
+        {
+          requirement_name: "Unit Descriptive Marks Weightage",
+          requirement_type: "marks",
+          requirement_value: "Each Unit carries 10 Marks (either single 10M or subdivided 5M + 5M)",
+          is_required: true,
+          display_order: 19,
+        },
+        {
+          requirement_name: "Total Marks Scheme Verification",
+          requirement_type: "marks",
+          requirement_value: "Total 40 Marks (Q1: 10M + 3 Units x 10M = 40 Marks)",
+          is_required: true,
+          display_order: 20,
+        },
+      ];
 
-      // -----------------------------------------------------
-      // BODY / FOOTER
-      // -----------------------------------------------------
-      {
-        requirement_name: "Body",
-        requirement_type: "required",
-        requirement_value: "Question paper body must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Footer",
-        requirement_type: "required",
-        requirement_value: "Footer must be present",
-        is_required: true,
-      },
-    ];
+      setFormatName(`Standard ${examTitle} Format (R-24 / 40 Marks)`);
+      setInstructions(
+        `${examTitle} (Autonomous R-24 Format). Requires official header with (AUTONOMOUS), location 515721, Subject with Code, Regulations: R-24, Time: 110 Min, Max Marks: 40, Table format with Blooms Level & CO, Question 1 (a-e @ 2M = 10M), and 3 Unit questions with internal choice (10M each). Total = 40 Marks.`
+      );
+      setMessage(`Standard ${examTitle} requirements loaded successfully (${reqs.length} rules).`);
+    } else {
+      // Semester Examination
+      reqs = [
+        { requirement_name: "College Header", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
+        { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(AUTONOMOUS)", is_required: true, display_order: 2 },
+        { requirement_name: "Semester", requirement_type: "required", requirement_value: "B.Tech Semester", is_required: true, display_order: 3 },
+        { requirement_name: "Examination Type", requirement_type: "required", requirement_value: "Semester Examination", is_required: true, display_order: 4 },
+        { requirement_name: "Subject Name & Code", requirement_type: "heading", requirement_value: "Subject Name and Subject Code must be present", is_required: true, display_order: 5 },
+        { requirement_name: "Branch / Department", requirement_type: "required", requirement_value: "Branch / Department must be present", is_required: true, display_order: 6 },
+        { requirement_name: "Time", requirement_type: "required", requirement_value: "Time: 3 Hours", is_required: true, display_order: 7 },
+        { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 70", is_required: true, display_order: 8 },
+        { requirement_name: "Part A (Short Answer)", requirement_type: "part a structure", requirement_value: "10 Questions @ 2 Marks each = 20 Marks", is_required: true, display_order: 9 },
+        { requirement_name: "Part B (Descriptive)", requirement_type: "structure", requirement_value: "5 Questions @ 10 Marks each with internal choice = 50 Marks", is_required: true, display_order: 10 },
+        { requirement_name: "Total Marks Scheme", requirement_type: "marks", requirement_value: "Total 70 Marks", is_required: true, display_order: 11 },
+        { requirement_name: "Footer", requirement_type: "required", requirement_value: "Footer must be present", is_required: true, display_order: 12 },
+      ];
 
-    setRequirements(
-      questionPaperRequirements.map((item, index) => ({
-        ...item,
-        display_order: index + 1,
-      }))
-    );
+      setFormatName("Standard Semester Examination Question Paper Format (70 Marks)");
+      setInstructions("Semester Examination format requiring institutional header, Part A (10 questions @ 2M = 20M), Part B (5 questions @ 10M = 50M) covering all 5 units with internal choice. Total = 70 Marks.");
+      setMessage(`Standard Semester Examination requirements loaded successfully (${reqs.length} rules).`);
+    }
 
-    setFormatName(
-      `Standard ${effectiveExamLabel} Question Paper Format`
-    );
-    setInstructions(
-      `${effectiveExamLabel}. The question paper is accepted only when every required structural check passes. Question numbering and academic content are not checked.`
-    );
-
-    setMessage(
-      `Standard ${effectiveExamLabel} requirements loaded successfully (${questionPaperRequirements.length} rules).`
-    );
+    setRequirements(reqs);
   };
 
   // =========================================================
@@ -825,10 +858,25 @@ function Format({ onBack }) {
                     const qp = documentTypes.find((t) => t.name === "Question Paper");
                     if (qp) setSelectedType(String(qp.id));
                     setExamType("Mid Examination");
-                    addQuestionPaperRequirements();
+                    setMidSubdivision("Mid 1");
+                    setTimeout(() => addQuestionPaperRequirements("Mid 1"), 50);
                   }}
                 >
-                  📝 Mid Examination Paper (Mid 1 / Mid 2)
+                  📝 Mid-1 Paper (I-MID, 40M)
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    const qp = documentTypes.find((t) => t.name === "Question Paper");
+                    if (qp) setSelectedType(String(qp.id));
+                    setExamType("Mid Examination");
+                    setMidSubdivision("Mid 2");
+                    setTimeout(() => addQuestionPaperRequirements("Mid 2"), 50);
+                  }}
+                >
+                  📝 Mid-2 Paper (II-MID, 40M)
                 </button>
 
                 <button
@@ -841,7 +889,7 @@ function Format({ onBack }) {
                     setTimeout(() => addQuestionPaperRequirements(), 50);
                   }}
                 >
-                  🎓 Semester Examination Paper
+                  🎓 Semester Paper (70M)
                 </button>
               </div>
             </div>

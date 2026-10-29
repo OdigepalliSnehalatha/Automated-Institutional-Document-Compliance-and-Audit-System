@@ -174,7 +174,7 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
         course_code = (metadata.get("course_code") or "").upper()
         course_name = (metadata.get("course_name") or "")
         exam_cat = metadata.get("exam_category", "MID1").upper()
-        exp_marks = metadata.get("max_marks") or (30 if exam_cat in ("MID1", "MID2") else 70)
+        exp_marks = metadata.get("max_marks") or (40 if exam_cat in ("MID1", "MID2", "MID") else 70)
 
         for req_name, exp_val in [
             ("Institutional Header", metadata.get("institution_name") or "Anantha Lakshmi Institute of Technology and Sciences"),
@@ -418,10 +418,11 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
         })
 
     # Check 8: Total Marks Scheme
-    expected_marks = metadata.get("max_marks") or (30 if exam_category in ("MID1", "MID2") else 70)
+    expected_marks = metadata.get("max_marks") or (40 if exam_category in ("MID1", "MID2", "MID") else 70)
     detected_marks = extract_detected_total_marks(full_text)
     if detected_marks:
-        if detected_marks == expected_marks:
+        is_mid_marks_valid = exam_category in ("MID1", "MID2", "MID") and detected_marks in (40, 30)
+        if detected_marks == expected_marks or is_mid_marks_valid:
             items.append({
                 "requirement": "Total Maximum Marks",
                 "expected_value": f"{expected_marks} Marks",
@@ -557,6 +558,91 @@ def evaluate_requirement(req: dict, pdf_data: Dict[str, Any]) -> Tuple[bool, str
         if req_val and normalize(req_val) in full_norm:
             return True, None
         return False, f"Required marks scheme ({req_val or req_name}) not detected."
+
+# Autonomous Status
+    if "autonomous" in name_norm or "autonomous" in normalize(req_val):
+        if "autonomous" in full_norm:
+            return True, None
+        return False, "Autonomous status marker '(AUTONOMOUS)' was not detected."
+
+    # Location / Address
+    if any(k in name_norm for k in ["location", "address", "ananthapuramu", "pin"]):
+        if any(k in full_norm for k in ["515721", "ananthapuramu", "s.k. university", "near s.k"]):
+            return True, None
+        return False, f"Institutional address '{req_val}' was not detected."
+
+    # Regulations
+    if "regulation" in name_norm or "regulation" in normalize(req_val):
+        if any(k in full_norm for k in ["regulation", "r-24", "r24", "r-20", "r-23", "r20", "r23"]):
+            return True, None
+        return False, "Academic regulations tag (e.g. 'Regulations: R-24') was not detected."
+
+    # Time Duration
+    if "time" in name_norm or "time duration" in name_norm:
+        if any(k in full_norm for k in ["110 min", "110", "time", "min", "hours"]):
+            return True, None
+        return False, f"Time duration specification '{req_val}' was not detected."
+
+    # Maximum Marks
+    if "maximum marks" in name_norm or "max marks" in name_norm:
+        if any(k in full_norm for k in ["40", "max marks", "max. marks", "70", "30"]):
+            return True, None
+        return False, f"Maximum marks specification '{req_val}' was not detected."
+
+    # General Instruction
+    if "instruction" in name_norm or "answer all" in name_norm:
+        if any(k in full_norm for k in ["answer all questions", "answer all", "instructions", "instruction"]):
+            return True, None
+        return False, f"General instruction '{req_val}' was not detected."
+
+    # Table Columns
+    if "table column" in name_norm:
+        if "s.no" in name_norm or "sno" in name_norm:
+            if any(k in full_norm for k in ["s.no", "sno", "q.no", "qno", "s. no", "sl.no"]):
+                return True, None
+            return False, "Table column 'S.No' was not detected."
+        if "blooms" in name_norm:
+            if any(k in full_norm for k in ["bloom", "blooms level", "apply", "remember", "understand", "analyze", "evaluate", "bt level"]):
+                return True, None
+            return False, "Table column 'Blooms Level' was not detected."
+        if "outcome" in name_norm or "course outcome" in name_norm:
+            if any(k in full_norm for k in ["course outcome", "co", "co1", "co2", "co3", "co4", "co5", "co6"]):
+                return True, None
+            return False, "Table column 'Course Outcome' was not detected."
+        if "marks" in name_norm:
+            if "mark" in full_norm:
+                return True, None
+            return False, "Table column 'Marks' was not detected."
+
+    # Internal Choice (OR)
+    if "internal choice" in name_norm or "(or)" in name_norm or "choice" in name_norm:
+        if re.search(r"\bor\b", full_norm) or "either" in full_norm:
+            return True, None
+        return False, "Internal choice 'OR' was not detected between descriptive questions."
+
+    # Unit Syllabus Architecture
+    if "unit" in name_norm and ("syllabus" in name_norm or "architecture" in name_norm):
+        if "unit" in full_norm:
+            return True, None
+        return False, "Unit syllabus section markers were not detected."
+
+    # Question 1 (Short Answer Section)
+    if "question 1" in name_norm or "short answer" in name_norm:
+        if any(k in full_norm for k in ["1.", "1", "q1", "(a)", "a.", "part a"]):
+            return True, None
+        return False, "Short answer question section (Question 1) was not detected."
+
+    # Unit Descriptive Weightage
+    if "descriptive marks" in name_norm or "weightage" in name_norm:
+        if any(k in full_norm for k in ["10", "5", "marks"]):
+            return True, None
+        return False, "Descriptive marks allocation (10 Marks / 5+5 Marks) was not detected."
+
+    # Total Marks Scheme Verification
+    if "total marks" in name_norm:
+        if any(k in full_norm for k in ["40", "70", "30", "total"]):
+            return True, None
+        return False, "Total marks verification failed."
 
     if req_val and normalize(req_val) in full_norm:
         return True, None
