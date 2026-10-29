@@ -54,9 +54,7 @@ function QuestionPaperManagement({ user }) {
     try {
       const res = await api.get("/question-papers/filters");
       setFilterOptions(res.data);
-      if (res.data.academic_years?.length > 0 && !selectedYear) {
-        setSelectedYear(String(res.data.academic_years[0].id));
-      }
+      // Keep selectedYear empty by default so All Courses display immediately
     } catch (err) {
       console.error("Failed to load question paper filters:", err);
     }
@@ -448,7 +446,7 @@ function QuestionPaperManagement({ user }) {
             className="form-input"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            style={{ width: "150px", fontSize: "13px" }}
+            style={{ minWidth: "180px", fontSize: "13px" }}
           >
             <option value="">All Academic Years</option>
             {filterOptions.academic_years.map((y) => (
@@ -463,7 +461,7 @@ function QuestionPaperManagement({ user }) {
             className="form-input"
             value={selectedSemester}
             onChange={(e) => setSelectedSemester(e.target.value)}
-            style={{ width: "150px", fontSize: "13px" }}
+            style={{ minWidth: "180px", fontSize: "13px" }}
           >
             <option value="">All Semesters</option>
             {filterOptions.semesters.map((s) => (
@@ -479,12 +477,12 @@ function QuestionPaperManagement({ user }) {
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
             disabled={user.role === "HOD" && user.department_id}
-            style={{ width: "170px", fontSize: "13px" }}
+            style={{ minWidth: "280px", fontSize: "13px" }}
           >
             <option value="">All Departments</option>
             {filterOptions.departments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.code} - {d.name}
+                {d.name} ({d.code})
               </option>
             ))}
           </select>

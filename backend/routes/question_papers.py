@@ -111,11 +111,8 @@ def get_question_papers_overview(
     if department_id:
         query += " AND c.department_id = %s"
         params.append(department_id)
-
-    # Faculty can view their assigned courses or department courses
-    if user_role == "Faculty" and current_user.get("id"):
-        query += " AND (fca.faculty_id = %s OR (c.department_id = %s AND fca.faculty_id IS NULL))"
-        params.extend([current_user["id"], user_dept_id or 0])
+    # Allow viewing filtered department or all institutional courses
+    pass
 
     if search and search.strip():
         term = f"%{search.strip().lower()}%"
