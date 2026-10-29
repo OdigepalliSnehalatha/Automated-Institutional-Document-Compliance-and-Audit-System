@@ -469,44 +469,24 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                 {loading ? "Authenticating..." : "Sign In to Dashboard →"}
               </button>
 
-              {/* Primary Working Prototype Login */}
+              {/* Quick Demo Access (Equal 4-Role Grid) */}
               <div style={{ marginTop: "20px", paddingTop: "14px", borderTop: "1px dashed var(--border-color)" }}>
-                <div style={{ marginBottom: "10px", padding: "10px 12px", background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "8px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 700, color: "#1e40af" }}>
-                      🔑 Working Prototype Email
-                    </span>
-                    <span style={{ fontSize: "11px", background: "#dbeafe", color: "#1e40af", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
-                      Verified & Active
-                    </span>
-                  </div>
-                  <div style={{ fontSize: "12px", color: "#334155", marginBottom: "8px" }}>
-                    <strong>Email:</strong> <code style={{ background: "#ffffff", padding: "2px 4px", borderRadius: "3px" }}>faculty@alits.ac.in</code><br />
-                    <strong>Password:</strong> <code style={{ background: "#ffffff", padding: "2px 4px", borderRadius: "3px" }}>Faculty@123</code>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-primary"
-                    style={{ width: "100%", fontSize: "12px", padding: "7px 12px", fontWeight: 600 }}
-                    onClick={() => applyQuickLogin("faculty@alits.ac.in", "Faculty@123")}
-                  >
-                    ⚡ Auto-Fill Working Prototype Login (Faculty)
-                  </button>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.6px", fontWeight: 700, display: "block", marginBottom: "8px" }}>
+                  ⚡ Quick Demo Accounts (Click to Fill):
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
                   <button
                     type="button"
                     className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "11px", padding: "5px 6px", textAlign: "center" }}
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("admin@alits.ac.in", "Admin@123")}
                   >
-                    🛡️ Admin
+                    🛡️ Admin / Head
                   </button>
                   <button
                     type="button"
                     className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "11px", padding: "5px 6px", textAlign: "center" }}
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("hod.cse@alits.ac.in", "HOD@123")}
                   >
                     🏛️ HOD (CSE)
@@ -514,14 +494,22 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                   <button
                     type="button"
                     className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "11px", padding: "5px 6px", textAlign: "center" }}
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
                     onClick={() => applyQuickLogin("auditor@alits.ac.in", "Auditor@123")}
                   >
                     📊 Auditor
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    onClick={() => applyQuickLogin("faculty.cse@alits.ac.in", "Faculty@123")}
+                  >
+                    🎓 Faculty (CSE)
+                  </button>
                 </div>
               </div>
-            </form>
+</form>
           )}
 
           {/* =========================================================
