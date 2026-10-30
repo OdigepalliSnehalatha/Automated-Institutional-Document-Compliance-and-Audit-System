@@ -27,6 +27,64 @@ def handle_ai_chat(data: ChatRequest, current_user: dict = Depends(get_current_u
 
     lower_query = user_msg.lower()
 
+    # Universal Academic Knowledge Checks (Mid, Resume, JNTUK Curricula)
+    if any(k in lower_query for k in ["resume", "cv", "curriculum vitae"]):
+        return {
+            "response": (
+                "📄 **Institutional Resume / Curriculum Vitae Standard (10 Mandatory Points)**:\n\n"
+                "1. **Candidate Full Name & Header**: Legal name & engineering qualification prominently placed at top.\n"
+                "2. **Contact Information & Location**: Active 10-digit telephone, institutional/personal email, and city/state.\n"
+                "3. **Professional Summary / Objective**: 2–4 concise lines articulating domain expertise and technical focus.\n"
+                "4. **Educational Qualifications**: Chronological records (B.Tech, Inter/Diploma, SSC) with Institute, Year & CGPA/%.\n"
+                "5. **Technical Skills**: Structured categories (Languages, Frameworks, Databases, Developer Tools).\n"
+                "6. **Academic Projects**: Title, tech stack utilized, personal contribution, and verifiable outcomes.\n"
+                "7. **Work Experience / Internships**: Industry internships, company name, role, and key milestones.\n"
+                "8. **Certifications & Badges**: Accredited industrial/NPTEL/Coursera credentials with year.\n"
+                "9. **Achievements & Extracurricular**: Hackathons, paper presentations, awards, and technical societies.\n"
+                "10. **Declaration & Signature**: Formal declaration affirming authenticity with Place, Date & Signature.\n\n"
+                "💡 *Resumes must achieve at least 80% compliance across these 10 criteria for institutional acceptance.*"
+            )
+        }
+
+    if any(k in lower_query for k in ["mid 1", "mid 2", "mid-1", "mid-2", "mid exam", "i-mid", "ii-mid", "40 mark", "40m"]):
+        return {
+            "response": (
+                "📝 **ALITS Autonomous Regulations (R-24) Question Paper Standard**:\n\n"
+                "- **Institutional Header**: Anantha Lakshmi Institute of Technology & Sciences (AUTONOMOUS), Near S.K. University, Ananthapuramu- 515721\n"
+                "- **Examination Title**: 'I-MID Examinations' (Mid 1) or 'II-MID Examinations' (Mid 2)\n"
+                "- **Time Duration**: Exactly `110 Min`\n"
+                "- **Maximum Marks**: Exactly `40 Marks`\n"
+                "- **General Instruction**: 'Answer all questions'\n"
+                "- **Structure**: Unified continuous examination layout without 'Part A' or 'Part B' subheadings.\n"
+                "- **Unit Syllabus Coverage**:\n"
+                "  • **Mid-1**: Covers Unit-I, Unit-II, and Unit-III (Part)\n"
+                "  • **Mid-2**: Covers Unit-III (Part), Unit-IV, and Unit-V\n\n"
+                "💡 *All papers must include Bloom's Taxonomy Cognitive Levels (L1-L4) and Course Outcomes (CO1-CO5) for every question.*"
+            )
+        }
+
+    if any(k in lower_query for k in ["jntu", "jntuk", "curriculum", "syllabus", "branches", "all subjects", "all semesters"]):
+        return {
+            "response": (
+                "🎓 **JNTUK & ALITS Autonomous Curriculum (1-1 Sem to 4-2 Sem)**:\n\n"
+                "- **All 9 Engineering Branches Configured**:\n"
+                "  1. Computer Science & Engineering (CSE)\n"
+                "  2. Computer Science & Design (CSD)\n"
+                "  3. Computer Science & Machine Learning (CSM)\n"
+                "  4. CSE - Artificial Intelligence & ML (CSE-AIML)\n"
+                "  5. Computer Artificial Intelligence (CAI)\n"
+                "  6. Electronics & Communication Engineering (ECE)\n"
+                "  7. Electrical & Electronics Engineering (EEE)\n"
+                "  8. Mechanical Engineering (ME)\n"
+                "  9. Civil Engineering (CE)\n\n"
+                "- **Curricular Structure**:\n"
+                "  • **1st Year (1-1 & 1-2)**: Foundational mathematics, physics, chemistry, C programming, basic electrical/electronics, drawing, and engineering workshops.\n"
+                "  • **2nd to 4th Year (2-1 to 4-2)**: Core specializations, professional electives, open electives, industrial internships, and major capstone projects.\n"
+                "  • **Total Courses Seeded**: 494 verified departmental courses with assigned faculty."
+            )
+        }
+
+
     with get_db_cursor() as cursor:
         # =========================================================
         # 1. ADMIN ROLE CONTEXT & RESPONSES

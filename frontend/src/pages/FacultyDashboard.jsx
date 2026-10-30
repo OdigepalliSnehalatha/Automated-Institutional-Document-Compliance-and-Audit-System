@@ -163,12 +163,17 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
       return;
     }
     try {
-      await api.delete(`/documents/${docId}`);
-      alert(`Document "${fileName}" deleted successfully.`);
+      const res = await api.delete(`/documents/${docId}`);
+      setFeedback({
+        success: res.data?.message || `Document "${fileName}" deleted successfully.`,
+        error: ""
+      });
       loadMyDocuments();
     } catch (err) {
       console.error("Delete failed:", err);
-      alert(err.response?.data?.detail || "Failed to delete document.");
+      const msg = err.response?.data?.detail || "Failed to delete document. Please try again.";
+      setFeedback({ error: msg, success: "" });
+      alert(msg);
     }
   };
 

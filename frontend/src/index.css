@@ -2271,3 +2271,412 @@ body {
   color: #ea580c;
   font-weight: 700;
 }
+
+/* ==========================================================================
+   ALITS INSTITUTIONAL COMPLIANCE COPILOT (Executive Advisor Styling)
+   ========================================================================== */
+.alits-copilot-dock {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+}
+
+.alits-copilot-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #0b132b 0%, #1c2541 55%, #1e3a8a 100%);
+  border: 1.5px solid rgba(234, 179, 8, 0.45);
+  padding: 8px 18px 8px 10px;
+  border-radius: 40px;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(11, 19, 43, 0.4), 0 0 15px rgba(234, 179, 8, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.alits-copilot-pill:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 34px rgba(11, 19, 43, 0.5), 0 0 22px rgba(234, 179, 8, 0.3);
+  border-color: #facc15;
+}
+
+.alits-copilot-emblem {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1e40af 0%, #0b132b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(253, 224, 71, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.alits-pulse-dot {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #0b132b;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.alits-copilot-labels {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.alits-copilot-name {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-family: inherit;
+}
+
+.alits-copilot-status {
+  color: #fde047;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.alits-sparkle-icon {
+  font-size: 14px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Copilot Window Container */
+.alits-copilot-window {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  height: 600px;
+  max-height: calc(100vh - 48px);
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.35);
+  border: 1.5px solid #cbd5e1;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alits-copilot-window.minimized {
+  height: auto;
+}
+
+/* Copilot Header */
+.alits-copilot-header {
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #0b132b 0%, #1c2541 55%, #1e3a8a 100%);
+  border-bottom: 2px solid rgba(234, 179, 8, 0.5);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alits-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alits-header-emblem {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(253, 224, 71, 0.4);
+}
+
+.alits-window-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+}
+
+.alits-window-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.alits-status-badge {
+  color: #4ade80;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.alits-scope-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #bae6fd;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.alits-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.alits-btn-icon {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #e2e8f0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.alits-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Copilot Body */
+.alits-copilot-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.alits-intro-card {
+  display: flex;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11.5px;
+  color: #166534;
+  line-height: 1.4;
+}
+
+.alits-intro-card strong {
+  display: block;
+  font-size: 12px;
+  color: #14532d;
+  margin-bottom: 2px;
+}
+
+.alits-intro-icon {
+  font-size: 18px;
+}
+
+/* Message Rows */
+.alits-message-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.alits-message-row.user-row {
+  justify-content: flex-end;
+}
+
+.alits-copilot-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #0b132b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #facc15;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alits-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alits-bubble {
+  max-width: 84%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.copilot-bubble {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  border-top-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.user-bubble {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+  color: #ffffff;
+  border-top-right-radius: 4px;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+.user-bubble strong {
+  color: #ffffff !important;
+}
+
+.user-bubble p {
+  color: #ffffff !important;
+}
+
+.alits-msg-time {
+  display: block;
+  font-size: 9.5px;
+  margin-top: 4px;
+  opacity: 0.65;
+  text-align: right;
+}
+
+.alits-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+}
+
+.alits-typing .dot {
+  width: 6px;
+  height: 6px;
+  background: #2563eb;
+  border-radius: 50%;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.alits-typing .dot:nth-child(2) { animation-delay: 0.2s; }
+.alits-typing .dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Suggestions Bar */
+.alits-copilot-suggestions {
+  padding: 8px 12px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.alits-suggestions-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.alits-suggestions-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+}
+
+.alits-suggestion-pill {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.alits-suggestion-pill:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Footer / Input */
+.alits-copilot-footer {
+  padding: 10px 12px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+}
+
+.alits-copilot-input {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 13px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.alits-copilot-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.alits-copilot-send {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.alits-copilot-send:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.alits-copilot-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

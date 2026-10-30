@@ -318,44 +318,13 @@ def execute_safe_document_deletion(document_id: int):
         audit_ids = [r["id"] for r in audit_rows]
 
         if audit_ids:
-            try:
-                cursor.execute("DELETE FROM audit_reports WHERE audit_id = ANY(%s)", (audit_ids,))
-            except Exception as e:
-                print(f"audit_reports cleanup: {e}")
-            try:
-                cursor.execute("DELETE FROM compliance_checks WHERE audit_id = ANY(%s)", (audit_ids,))
-            except Exception as e:
-                print(f"compliance_checks cleanup: {e}")
-            try:
-                cursor.execute("DELETE FROM audit_findings WHERE audit_id = ANY(%s)", (audit_ids,))
-            except Exception as e:
-                print(f"audit_findings cleanup: {e}")
-            try:
-                cursor.execute("DELETE FROM audits WHERE id = ANY(%s)", (audit_ids,))
-            except Exception as e:
-                print(f"audits cleanup: {e}")
+            cursor.execute("DELETE FROM audit_reports WHERE audit_id = ANY(%s)", (audit_ids,))
+            cursor.execute("DELETE FROM compliance_checks WHERE audit_id = ANY(%s)", (audit_ids,))
+            cursor.execute("DELETE FROM audit_findings WHERE audit_id = ANY(%s)", (audit_ids,))
+            cursor.execute("DELETE FROM audits WHERE id = ANY(%s)", (audit_ids,))
 
-        # 3. Delete any remaining direct document references
-        try:
-            cursor.execute("DELETE FROM audit_reports WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
-        try:
-            cursor.execute("DELETE FROM compliance_checks WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
-        try:
-            cursor.execute("DELETE FROM audit_findings WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
-        try:
-            cursor.execute("DELETE FROM audits WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
-        try:
-            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
+        # 3. Delete document versions
+        cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
 
         # 4. Delete document record
         cursor.execute("DELETE FROM documents WHERE id = %s", (document_id,))

@@ -6,34 +6,33 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [quickInput, setQuickInput] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Define role-specific suggested questions
+  // Role-specific curated prompts reflecting the ALITS academic system
   const roleSuggestions = {
     Admin: [
-      "Show institution information",
-      "How many faculty are registered?",
-      "What are the pending activities?",
-      "List all engineering branches",
+      "Show institutional compliance summary",
+      "List all 9 engineering branches",
+      "Explain the Boolean compliance policy",
+      "Show registered faculty & HOD directory",
     ],
     Faculty: [
-      "What tasks are assigned to me?",
-      "Explain question paper requirements",
-      "Explain course structure rules",
+      "Explain Mid-1 and Mid-2 (R-24) format rules",
+      "Explain Resume standard requirements (10 points)",
+      "List JNTUK curricula & branch subjects",
       "Why was my document rejected?",
     ],
     HOD: [
-      "Show my department information",
-      "What activities are pending?",
-      "How many submissions are accepted?",
-      "How to download verified documents?",
+      "Show my department submission status",
+      "Explain R-24 Mid examination requirements",
+      "Which faculty documents are pending approval?",
+      "How are compliant documents downloaded?",
     ],
     Auditor: [
-      "What is the current audit status?",
-      "Which documents need review?",
-      "What format presets are available?",
-      "Explain the Boolean compliance decision rule",
+      "Explain the 100% Boolean compliance engine",
+      "What format presets are available in Builder?",
+      "Explain Resume 10-point standard requirements",
+      "Which documents currently need review?",
     ],
   };
 
@@ -66,16 +65,8 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
   function getInitialGreeting(u) {
     const name = u.name || u.email.split("@")[0];
-    if (u.role === "Admin") {
-      return `Hello **${name}**! I am your **Institutional Admin Assistant**.\n\nI can provide executive summaries on registered faculty, department compliance, and overall audit progress across **${u.institution_name || "the institution"}**. How may I help you?`;
-    } else if (u.role === "HOD") {
-      return `Welcome **${name}**! I am your **Department Audit Assistant** for **${u.department_name || "your department"}**.\n\nI can summarize faculty submissions, show pending audits, and check compliant records for your branch.`;
-    } else if (u.role === "Faculty") {
-      return `Hello **${name}**! I am your **Faculty Compliance Assistant**.\n\nI can help you format Question Papers, Course Structures, and Question Banks correctly to pass 100% structural compliance on first submission!`;
-    } else if (u.role === "Auditor") {
-      return `Greetings **${name}**! I am your **Structural Audit Assistant**.\n\nI can assist with format rule definitions, document verification queues, and audit reporting.`;
-    }
-    return `Hello ${name}! How can I assist you with document compliance today?`;
+    const dept = u.department_name ? ` (${u.department_name})` : "";
+    return `Welcome **${name}**${dept}! I am your **ALITS Academic Compliance Copilot**.\n\nI am configured with **Autonomous Regulations (R-24)**, **JNTUK all-branch curricula (1-1 to 4-2 Semesters)**, **Resume Standard Verification (10 Points)**, and the **100% Boolean Decision Engine**.\n\nHow can I assist you with your institutional documentation today?`;
   }
 
   const handleSendMessage = async (textToSend) => {
@@ -96,7 +87,6 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
-    setQuickInput("");
     setLoading(true);
 
     try {
@@ -126,11 +116,10 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
     }
   };
 
-  // Convert simple markdown bullets & bold to rendered text
+  // Convert simple markdown bullets & bold to rendered elements
   const renderFormattedContent = (content) => {
     const lines = content.split("\n");
     return lines.map((line, i) => {
-      let formatted = line;
       const boldRegex = /\*\*(.*?)\*\*/g;
       const parts = [];
       let lastIndex = 0;
@@ -140,7 +129,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
         if (match.index > lastIndex) {
           parts.push(line.substring(lastIndex, match.index));
         }
-        parts.push(<strong key={match.index}>{match[1]}</strong>);
+        parts.push(<strong key={match.index} style={{ color: "#0f172a", fontWeight: 700 }}>{match[1]}</strong>);
         lastIndex = match.index + match[0].length;
       }
       if (lastIndex < line.length) {
@@ -148,13 +137,18 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
       }
 
       const isBullet = line.trim().startsWith("•") || line.trim().startsWith("-");
+      const isHeader = line.trim().startsWith("###") || line.trim().startsWith("##");
+
       return (
         <p
           key={i}
           style={{
             margin: "0 0 6px 0",
             paddingLeft: isBullet ? "12px" : "0",
-            lineHeight: "1.5",
+            lineHeight: "1.55",
+            fontSize: isHeader ? "14px" : "13px",
+            fontWeight: isHeader ? 700 : 400,
+            color: "#334155"
           }}
         >
           {parts.length > 0 ? parts : line}
@@ -165,86 +159,83 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
 
   return (
     <>
-      {/* 1. DOCKED WIDGET AT BOTTOM RIGHT (When chat is closed or minimized) */}
+      {/* 1. FLOATING EXECUTIVE TRIGGER PILL (When closed) */}
       {!isOpen && (
-        <div className="ai-dock-widget">
-          {/* Picture Type Illusion */}
-          <div
-            className="ai-illusion-avatar-wrapper"
+        <div className="alits-copilot-dock">
+          <button
+            type="button"
+            className="alits-copilot-pill"
             onClick={onOpen}
-            title="Click to open AI Assistant chat"
+            title="Open ALITS Institutional Compliance Copilot"
           >
-            <div className="ai-illusion-bubble">
-              ✨ Ask AI Assistant
-            </div>
-            <div className="ai-illusion-character">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
-                <rect x="4" y="8" width="16" height="12" rx="4"/>
-                <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
-                <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
-                <path d="M9 17h6"/>
+            {/* Elegant Institutional Emblem */}
+            <div className="alits-copilot-emblem">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z" fill="url(#crestGrad)" />
+                <path d="M12 6L13.8 10.4L18 11.2L14.7 14.1L15.7 18.5L12 16.2L8.3 18.5L9.3 14.1L6 11.2L10.2 10.4L12 6Z" fill="#FDE047" />
+                <defs>
+                  <linearGradient id="crestGrad" x1="3" y1="2" x2="21" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#1E3A8A" />
+                    <stop offset="1" stopColor="#0284C7" />
+                  </linearGradient>
+                </defs>
               </svg>
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: "1px",
-                  right: "1px",
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  background: "#22c55e",
-                  border: "2px solid #ffffff",
-                }}
-              />
+              <span className="alits-pulse-dot" />
             </div>
-          </div>
+
+            <div className="alits-copilot-labels">
+              <span className="alits-copilot-name">ALITS Compliance Copilot</span>
+              <span className="alits-copilot-status">Institutional Advisor • R-24</span>
+            </div>
+
+            <span className="alits-sparkle-icon">✨</span>
+          </button>
         </div>
       )}
 
-      {/* 2. EXPANDED CONVERSATION WINDOW AT BOTTOM RIGHT */}
+      {/* 2. EXPANDED CONVERSATION WINDOW */}
       {isOpen && (
-        <div
-          className={`ai-chat-window ${minimized ? "minimized" : ""}`}
-          style={{
-            position: "fixed",
-            bottom: "24px",
-            right: "24px",
-            zIndex: 9999,
-          }}
-        >
-          {/* Header with Picture Illusion Character */}
-          <div className="ai-chat-header">
-            <div className="ai-chat-header-info">
-              <div className="ai-illusion-character" style={{ width: "38px", height: "38px" }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
-                  <rect x="4" y="8" width="16" height="12" rx="4"/>
-                  <circle cx="9" cy="13" r="1.5" fill="#ffffff"/>
-                  <circle cx="15" cy="13" r="1.5" fill="#ffffff"/>
-                  <path d="M9 17h6"/>
+        <div className={`alits-copilot-window ${minimized ? "minimized" : ""}`}>
+          {/* Executive Institutional Header */}
+          <div className="alits-copilot-header">
+            <div className="alits-header-main">
+              <div className="alits-header-emblem">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z" fill="url(#crestGradHead)" />
+                  <path d="M12 6L13.8 10.4L18 11.2L14.7 14.1L15.7 18.5L12 16.2L8.3 18.5L9.3 14.1L6 11.2L10.2 10.4L12 6Z" fill="#FDE047" />
+                  <defs>
+                    <linearGradient id="crestGradHead" x1="3" y1="2" x2="21" y2="24" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#2563EB" />
+                      <stop offset="1" stopColor="#38BDF8" />
+                    </linearGradient>
+                  </defs>
                 </svg>
               </div>
+
               <div>
-                <h3 className="ai-chat-title">AI Compliance Assistant</h3>
-                <span className="ai-chat-role-badge">
-                  {user?.role} Mode • Live Database
-                </span>
+                <h3 className="alits-window-title">ALITS Compliance Copilot</h3>
+                <div className="alits-window-badges">
+                  <span className="alits-status-badge">● Online</span>
+                  <span className="alits-scope-badge">{user?.role} Portal</span>
+                  <span className="alits-scope-badge">R-24 & JNTUK</span>
+                </div>
               </div>
             </div>
 
-            <div className="ai-chat-header-actions">
+            <div className="alits-header-actions">
               <button
-                className="ai-header-btn"
+                type="button"
+                className="alits-btn-icon"
                 onClick={() => setMinimized(!minimized)}
                 title={minimized ? "Expand" : "Minimize"}
               >
                 {minimized ? "▢" : "—"}
               </button>
               <button
-                className="ai-header-btn"
+                type="button"
+                className="alits-btn-icon"
                 onClick={onClose}
-                title="Close AI Assistant"
+                title="Close Copilot"
               >
                 ✕
               </button>
@@ -254,47 +245,75 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
           {/* Body */}
           {!minimized && (
             <>
-              <div className="ai-chat-body">
+              <div className="alits-copilot-body">
+                {/* Institutional Notice Card */}
+                <div className="alits-intro-card">
+                  <div className="alits-intro-icon">🏛️</div>
+                  <div>
+                    <strong>Anantha Lakshmi Institute Compliance Advisor</strong>
+                    <p>Verified with Autonomous Regulations (R-24), JNTUK 1-1 to 4-2 curricula, and 100% Boolean audit rules.</p>
+                  </div>
+                </div>
+
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`ai-message-row ${msg.role === "user" ? "user-row" : "ai-row"}`}
+                    className={`alits-message-row ${msg.role === "user" ? "user-row" : "copilot-row"}`}
                   >
                     {msg.role === "assistant" && (
-                      <div className="ai-msg-avatar">🤖</div>
+                      <div className="alits-copilot-avatar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2L4 6V11C4 16.5 7.4 21.6 12 23C16.6 21.6 20 16.5 20 11V6L12 2Z" fill="#1E3A8A"/>
+                          <path d="M12 7L13.5 10.5L17 11.2L14.3 13.5L15.1 17L12 15.2L8.9 17L9.7 13.5L7 11.2L10.5 10.5L12 7Z" fill="#FACC15"/>
+                        </svg>
+                      </div>
                     )}
+
                     <div
-                      className={`ai-message-bubble ${
-                        msg.role === "user" ? "user-bubble" : "ai-bubble"
+                      className={`alits-bubble ${
+                        msg.role === "user" ? "user-bubble" : "copilot-bubble"
                       }`}
                     >
                       {renderFormattedContent(msg.content)}
-                      <span className="ai-msg-time">{msg.time}</span>
+                      <span className="alits-msg-time">{msg.time}</span>
                     </div>
+
+                    {msg.role === "user" && (
+                      <div className="alits-user-avatar">
+                        {user?.name ? user.name[0].toUpperCase() : "U"}
+                      </div>
+                    )}
                   </div>
                 ))}
 
                 {loading && (
-                  <div className="ai-message-row ai-row">
-                    <div className="ai-msg-avatar">🤖</div>
-                    <div className="ai-message-bubble ai-bubble ai-typing-indicator">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                  <div className="alits-message-row copilot-row">
+                    <div className="alits-copilot-avatar">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L4 6V11C4 16.5 7.4 21.6 12 23C16.6 21.6 20 16.5 20 11V6L12 2Z" fill="#1E3A8A"/>
+                        <path d="M12 7L13.5 10.5L17 11.2L14.3 13.5L15.1 17L12 15.2L8.9 17L9.7 13.5L7 11.2L10.5 10.5L12 7Z" fill="#FACC15"/>
+                      </svg>
+                    </div>
+                    <div className="alits-bubble copilot-bubble alits-typing">
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                      <span className="dot"></span>
+                      <em style={{ fontSize: "11px", color: "#64748b", marginLeft: "6px" }}>Analyzing institutional compliance database...</em>
                     </div>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Suggested Questions Chips */}
-              <div className="ai-chat-suggestions">
-                <span className="suggestions-label">Suggested Prompts:</span>
-                <div className="suggestions-scroll">
+              {/* Recommended Curricular Queries */}
+              <div className="alits-copilot-suggestions">
+                <span className="alits-suggestions-title">RECOMMENDED COMPLIANCE GUIDANCE:</span>
+                <div className="alits-suggestions-scroll">
                   {currentSuggestions.map((sug, idx) => (
                     <button
                       key={idx}
-                      className="suggestion-chip"
+                      type="button"
+                      className="alits-suggestion-pill"
                       onClick={() => handleSendMessage(sug)}
                       disabled={loading}
                     >
@@ -304,9 +323,9 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
                 </div>
               </div>
 
-              {/* Rectangle Bar to Chat (at Bottom) */}
+              {/* Message Composer */}
               <form
-                className="ai-chat-footer"
+                className="alits-copilot-footer"
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendMessage();
@@ -314,19 +333,22 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
               >
                 <input
                   type="text"
-                  className="ai-chat-input"
-                  placeholder={`Ask a question as ${user?.role}...`}
+                  className="alits-copilot-input"
+                  placeholder={`Ask about R-24 Mid papers, Resume criteria, JNTUK subjects...`}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   disabled={loading}
                 />
                 <button
                   type="submit"
-                  className="ai-send-btn"
+                  className="alits-copilot-send"
                   disabled={loading || !inputMessage.trim()}
-                  title="Send Question"
+                  title="Submit Inquiry"
                 >
-                  ➤
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
                 </button>
               </form>
             </>
