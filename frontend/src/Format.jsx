@@ -360,152 +360,152 @@ function Format({ onBack }) {
   // =========================================================
 
   const addQuestionPaperRequirements = (targetSubDiv) => {
-    if (!examType) {
-      setMessage("Please select Mid Examination or Semester Examination first.");
-      return;
-    }
+    const effectiveExamType = targetSubDiv === "Semester Examination" || examType === "Semester Examination"
+      ? "Semester Examination"
+      : "Mid Examination";
 
-    const effectiveSubDiv = targetSubDiv || midSubdivision || "Mid 1";
-    let reqs = [];
-    const isMid = examType === "Mid Examination";
+    const partBQuestionCount = effectiveExamType === "Mid Examination" ? "5" : "10";
 
-    if (isMid) {
-      const examTitle = effectiveSubDiv === "Mid 2" ? "Mid 2 Examination" : "Mid 1 Examination";
+    const questionPaperRequirements = [
+      // -----------------------------------------------------
+      // HEADER
+      // -----------------------------------------------------
+      {
+        requirement_name: "College Header",
+        requirement_type: "required",
+        requirement_value: "Anantha Lakshmi Institute of Technology & Sciences",
+        is_required: true,
+      },
+      {
+        requirement_name: "Semester",
+        requirement_type: "required",
+        requirement_value: "B.Tech Semester",
+        is_required: true,
+      },
+      {
+        requirement_name: "B.Tech",
+        requirement_type: "required",
+        requirement_value: "B.Tech",
+        is_required: true,
+      },
+      {
+        requirement_name: "Examination Type",
+        requirement_type: "required",
+        requirement_value: effectiveExamType,
+        is_required: true,
+      },
+      {
+        requirement_name: "Subject Name",
+        requirement_type: "required",
+        requirement_value: "Subject Name must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Subject Code",
+        requirement_type: "required",
+        requirement_value: "Subject Code must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Branch",
+        requirement_type: "required",
+        requirement_value: "Branch must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Department",
+        requirement_type: "required",
+        requirement_value: "Department must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Time",
+        requirement_type: "required",
+        requirement_value: "Time must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Maximum Marks",
+        requirement_type: "required",
+        requirement_value: "Maximum marks must be present",
+        is_required: true,
+      },
 
-      reqs = [
-        // 1. Common Institutional Details
-        {
-          requirement_name: "College Name",
-          requirement_type: "header",
-          requirement_value: "Anantha Lakshmi Institute of Technology & Sciences",
-          is_required: true,
-          display_order: 1,
-        },
-        {
-          requirement_name: "Course Name",
-          requirement_type: "heading",
-          requirement_value: "Approved Course / Subject Title",
-          is_required: true,
-          display_order: 2,
-        },
-        {
-          requirement_name: "Course Code",
-          requirement_type: "text",
-          requirement_value: "Approved Alphanumeric Course Code (e.g. 24ALBTCS403T)",
-          is_required: true,
-          display_order: 3,
-        },
-        {
-          requirement_name: "Academic Year",
-          requirement_type: "text",
-          requirement_value: "Current Academic Year (e.g. 2024-2025)",
-          is_required: true,
-          display_order: 4,
-        },
-        {
-          requirement_name: "Semester Name",
-          requirement_type: "heading",
-          requirement_value: "Semester Designation (e.g. I B.Tech II Semester)",
-          is_required: true,
-          display_order: 5,
-        },
-        {
-          requirement_name: "Examination Category",
-          requirement_type: "heading",
-          requirement_value: examTitle,
-          is_required: true,
-          display_order: 6,
-        },
+      // -----------------------------------------------------
+      // PART A
+      // -----------------------------------------------------
+      {
+        requirement_name: "Part A",
+        requirement_type: "required",
+        requirement_value: "Part A must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Part A Question Count",
+        requirement_type: "question_count",
+        requirement_value: "10",
+        is_required: true,
+      },
+      {
+        requirement_name: "Part A Arrangement",
+        requirement_type: "structure",
+        requirement_value: "Predefined Part A arrangement",
+        is_required: true,
+      },
 
-        // 2. Question Architecture & Marks Distribution
-        {
-          requirement_name: "Main Question Count (Exactly 7)",
-          requirement_type: "question_count",
-          requirement_value: "Exactly 7 main question numbers (Question 1 to Question 7)",
-          is_required: true,
-          display_order: 7,
-        },
-        {
-          requirement_name: "Question 1 Subquestions (A-E @ 2M = 10M)",
-          requirement_type: "question_count",
-          requirement_value: "Question 1 with 5 short-answer subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks",
-          is_required: true,
-          display_order: 8,
-        },
-        {
-          requirement_name: "MCQ Pair 1 (Question 2 & Question 3)",
-          requirement_type: "marks",
-          requirement_value: "Two MCQ questions (Q2 & Q3) with combined value = 10 Marks",
-          is_required: true,
-          display_order: 9,
-        },
-        {
-          requirement_name: "MCQ Pair 2 (Question 4 & Question 5)",
-          requirement_type: "marks",
-          requirement_value: "Two MCQ questions (Q4 & Q5) with combined value = 10 Marks",
-          is_required: true,
-          display_order: 10,
-        },
-        {
-          requirement_name: "MCQ Pair 3 (Question 6 & Question 7)",
-          requirement_type: "marks",
-          requirement_value: "Two MCQ questions (Q6 & Q7) with combined value = 10 Marks",
-          is_required: true,
-          display_order: 11,
-        },
-        {
-          requirement_name: "Compulsory Assessment (No OR Choice)",
-          requirement_type: "text",
-          requirement_value: "All 7 questions are compulsory (No internal choice OR, no attempt-any-three)",
-          is_required: true,
-          display_order: 12,
-        },
-        {
-          requirement_name: "Grand Total Marks (40 Marks)",
-          requirement_type: "marks",
-          requirement_value: "Total 40 Marks (Q1: 10M + Pair 1: 10M + Pair 2: 10M + Pair 3: 10M = 40 Marks)",
-          is_required: true,
-          display_order: 13,
-        },
-      ];
+      // -----------------------------------------------------
+      // PART B
+      // -----------------------------------------------------
+      {
+        requirement_name: "Part B",
+        requirement_type: "required",
+        requirement_value: "Part B must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Part B Question Count",
+        requirement_type: "question_count",
+        requirement_value: partBQuestionCount,
+        is_required: true,
+      },
+      {
+        requirement_name: "Part B Arrangement",
+        requirement_type: "structure",
+        requirement_value: "Predefined Part B arrangement",
+        is_required: true,
+      },
 
-      setFormatName(`Standard ${examTitle} Format (R-24 / 40 Marks)`);
-      setInstructions(
-        `${examTitle} (Autonomous R-24 Format). Requires official header with (AUTONOMOUS), location 515721, Subject with Code, Regulations: R-24, Time: 110 Min, Max Marks: 40, Table format with Blooms Level & CO, Question 1 (a-e @ 2M = 10M), and 3 Unit questions with internal choice (10M each). Total = 40 Marks.`
-      );
-      setMessage(`Standard ${examTitle} requirements loaded successfully (${reqs.length} rules).`);
-    } else {
-      // Semester Examination (Autonomous R-24 / 70 Marks from PDF Standard)
-      reqs = [
-        { requirement_name: "College Header", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
-        { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(Autonomous)", is_required: true, display_order: 2 },
-        { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Course Code (e.g. 24ALBTCS403T)", is_required: true, display_order: 3 },
-        { requirement_name: "Hall Ticket Number Box", requirement_type: "structure", requirement_value: "H.T.No: 10-cell student roll number box", is_required: true, display_order: 4 },
-        { requirement_name: "Academic Regulations", requirement_type: "text", requirement_value: "Regulations: R24 / R-24", is_required: true, display_order: 5 },
-        { requirement_name: "Class & Semester", requirement_type: "heading", requirement_value: "B.Tech [Year] Year [Semester] Semester Regular/Supplementary Examinations", is_required: true, display_order: 6 },
-        { requirement_name: "Subject Name", requirement_type: "heading", requirement_value: "Subject Name (e.g. SOFTWARE ENGINEERING)", is_required: true, display_order: 7 },
-        { requirement_name: "Branch / Department", requirement_type: "heading", requirement_value: "Branch / Department (e.g. COMPUTER SCIENCE AND ENGINEERING)", is_required: true, display_order: 8 },
-        { requirement_name: "Time Duration", requirement_type: "text", requirement_value: "Time: 3 Hours", is_required: true, display_order: 9 },
-        { requirement_name: "Paper Set Identifier", requirement_type: "text", requirement_value: "SET-1 / SET-2 / SET-3 / SET-4", is_required: true, display_order: 10 },
-        { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 70", is_required: true, display_order: 11 },
-        { requirement_name: "General Instructions", requirement_type: "text", requirement_value: "Instructions: 1. Answer all 10 questions from Part-A (2 marks each). 2. Answer one full question from each unit in Part-B (10 marks each).", is_required: true, display_order: 12 },
-        { requirement_name: "Table Format Columns", requirement_type: "structure", requirement_value: "Table format with S.No, Question statement, Marks (M), Course Outcome (CO1-CO6), and Bloom's Level (L1/L2)", is_required: true, display_order: 13 },
-        { requirement_name: "PART-A Section", requirement_type: "structure", requirement_value: "PART-A heading (Short Answer Section, Questions 1.a through 1.j)", is_required: true, display_order: 14 },
-        { requirement_name: "PART-A Questions (10 x 2M)", requirement_type: "question_count", requirement_value: "10 Sub-questions (a, b, c, d, e, f, g, h, i, j) @ 2 Marks each = 20 Marks", is_required: true, display_order: 15 },
-        { requirement_name: "PART-A CO & Bloom's Mapping", requirement_type: "structure", requirement_value: "Course Outcomes (CO1 to CO6) and Bloom's Level (L1/L2) mapped for all 10 Part-A sub-questions", is_required: true, display_order: 16 },
-        { requirement_name: "PART-B Section", requirement_type: "structure", requirement_value: "PART-B heading (Descriptive Unit-wise Questions)", is_required: true, display_order: 17 },
-        { requirement_name: "Unit Coverage (Units I - V)", requirement_type: "structure", requirement_value: "5 Units clearly demarcated: UNIT-I, UNIT-II, UNIT-III, UNIT-IV, and UNIT-V", is_required: true, display_order: 18 },
-        { requirement_name: "Internal Choice (OR)", requirement_type: "structure", requirement_value: "Internal Choice 'OR' between questions in each Unit (Q2/Q3, Q4/Q5, Q6/Q7, Q8/Q9, Q10/Q11)", is_required: true, display_order: 19 },
-        { requirement_name: "Unit Marks Weightage (5 x 10M)", requirement_type: "marks", requirement_value: "Each Unit carries 10 Marks with CO and Bloom's Level = 50 Marks", is_required: true, display_order: 20 },
-        { requirement_name: "Total Marks Scheme Verification", requirement_type: "marks", requirement_value: "Total 70 Marks (Part-A: 20M + Part-B: 50M = 70 Marks)", is_required: true, display_order: 21 },
-      ];
+      // -----------------------------------------------------
+      // BODY / FOOTER
+      // -----------------------------------------------------
+      {
+        requirement_name: "Body",
+        requirement_type: "required",
+        requirement_value: "Question paper body must be present",
+        is_required: true,
+      },
+      {
+        requirement_name: "Footer",
+        requirement_type: "required",
+        requirement_value: "Footer must be present",
+        is_required: true,
+      },
+    ];
 
-      setFormatName("Standard Semester Examination Paper Format (R-24 / 70 Marks)");
-      setInstructions("Autonomous R-24 Semester Examination Paper format matching official ALITS template. Requires Hall Ticket Number box (H.T.No), Course Code, Regulations R24, College Header, (Autonomous), B.Tech Year & Semester, Subject Name, Branch/Department, Time: 3 Hours, SET-1, Max. Marks: 70, General Instructions (10 Part-A questions @ 2M, 1 Part-B question per unit @ 10M), Table format with S.No, Question statement, Marks (M), Course Outcome (CO1-CO6), and Bloom's Level (L1/L2), PART-A (10 x 2M = 20M), and PART-B (5 Units with internal choice 'OR' @ 10M = 50M). Grand Total = 70 Marks.");
-      setMessage(`Standard Semester Examination requirements loaded successfully (${reqs.length} rules from PDF standard).`);
-    }
+    setRequirements(
+      questionPaperRequirements.map((item, index) => ({
+        ...item,
+        display_order: index + 1,
+      }))
+    );
 
-    setRequirements(reqs);
+    setFormatName(`Standard ${effectiveExamType} Format`);
+    setInstructions(
+      `${effectiveExamType}. ` +
+      "The question paper is accepted only when every required structural check passes. Question numbering and academic content are not checked."
+    );
+
+    setMessage(`Standard ${effectiveExamType} requirements loaded successfully (18 rules).`);
   };
 
   // =========================================================
