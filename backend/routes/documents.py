@@ -300,7 +300,7 @@ def execute_safe_document_deletion(document_id: int):
         doc = cursor.fetchone()
 
         if not doc:
-            raise HTTPException(status_code=404, detail="Document not found or already deleted.")
+            return {"success": True, "message": "Document already removed."}
 
         # 1. Clean up physical file on disk
         file_path = doc.get("file_path")

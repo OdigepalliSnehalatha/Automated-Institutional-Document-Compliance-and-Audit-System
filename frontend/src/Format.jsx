@@ -370,154 +370,102 @@ function Format({ onBack }) {
     const isMid = examType === "Mid Examination";
 
     if (isMid) {
-      const examTitle = effectiveSubDiv === "Mid 2" ? "II-MID Examinations" : "I-MID Examinations";
-      const unitCoverage = effectiveSubDiv === "Mid 2" ? "UNIT-III, UNIT-IV, and UNIT-V" : "UNIT-I, UNIT-II, and UNIT-III (Part)";
+      const examTitle = effectiveSubDiv === "Mid 2" ? "Mid 2 Examination" : "Mid 1 Examination";
 
       reqs = [
-        // 1. Institutional Header Block
+        // 1. Common Institutional Details
         {
-          requirement_name: "College Header",
+          requirement_name: "College Name",
           requirement_type: "header",
           requirement_value: "Anantha Lakshmi Institute of Technology & Sciences",
           is_required: true,
           display_order: 1,
         },
         {
-          requirement_name: "Autonomous Status",
-          requirement_type: "text",
-          requirement_value: "(AUTONOMOUS)",
+          requirement_name: "Course Name",
+          requirement_type: "heading",
+          requirement_value: "Approved Course / Subject Title",
           is_required: true,
           display_order: 2,
         },
         {
-          requirement_name: "Institutional Location",
+          requirement_name: "Course Code",
           requirement_type: "text",
-          requirement_value: "Near S.K. University, Ananthapuramu- 515721",
+          requirement_value: "Approved Alphanumeric Course Code (e.g. 24ALBTCS403T)",
           is_required: true,
           display_order: 3,
         },
         {
-          requirement_name: "Class & Semester",
-          requirement_type: "heading",
-          requirement_value: "B.Tech Semester (e.g., I B.Tech II Semester)",
+          requirement_name: "Academic Year",
+          requirement_type: "text",
+          requirement_value: "Current Academic Year (e.g. 2024-2025)",
           is_required: true,
           display_order: 4,
         },
         {
-          requirement_name: "Examination Title",
+          requirement_name: "Semester Name",
           requirement_type: "heading",
-          requirement_value: examTitle,
+          requirement_value: "Semester Designation (e.g. I B.Tech II Semester)",
           is_required: true,
           display_order: 5,
         },
         {
-          requirement_name: "Subject with Code",
+          requirement_name: "Examination Category",
           requirement_type: "heading",
-          requirement_value: "Subject with Code: [Subject Name] : [Subject Code]",
+          requirement_value: examTitle,
           is_required: true,
           display_order: 6,
         },
+
+        // 2. Question Architecture & Marks Distribution
         {
-          requirement_name: "Branch Identifier",
-          requirement_type: "text",
-          requirement_value: "Branch: CSE, EEE (or designated engineering branch)",
+          requirement_name: "Main Question Count (Exactly 7)",
+          requirement_type: "question_count",
+          requirement_value: "Exactly 7 main question numbers (Question 1 to Question 7)",
           is_required: true,
           display_order: 7,
         },
         {
-          requirement_name: "Academic Regulations",
-          requirement_type: "text",
-          requirement_value: "Regulations: R-24",
+          requirement_name: "Question 1 Subquestions (A-E @ 2M = 10M)",
+          requirement_type: "question_count",
+          requirement_value: "Question 1 with 5 short-answer subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks",
           is_required: true,
           display_order: 8,
         },
         {
-          requirement_name: "Time Duration",
-          requirement_type: "text",
-          requirement_value: "Time: 110 Min",
+          requirement_name: "MCQ Pair 1 (Question 2 & Question 3)",
+          requirement_type: "marks",
+          requirement_value: "Two MCQ questions (Q2 & Q3) with combined value = 10 Marks",
           is_required: true,
           display_order: 9,
         },
         {
-          requirement_name: "Maximum Marks",
+          requirement_name: "MCQ Pair 2 (Question 4 & Question 5)",
           requirement_type: "marks",
-          requirement_value: "Max. Marks: 40",
+          requirement_value: "Two MCQ questions (Q4 & Q5) with combined value = 10 Marks",
           is_required: true,
           display_order: 10,
         },
         {
-          requirement_name: "General Instruction",
-          requirement_type: "text",
-          requirement_value: "Answer all questions",
+          requirement_name: "MCQ Pair 3 (Question 6 & Question 7)",
+          requirement_type: "marks",
+          requirement_value: "Two MCQ questions (Q6 & Q7) with combined value = 10 Marks",
           is_required: true,
           display_order: 11,
         },
-
-        // 2. Table Header Architecture
         {
-          requirement_name: "Table Column: S.No",
-          requirement_type: "structure",
-          requirement_value: "S.No",
+          requirement_name: "Compulsory Assessment (No OR Choice)",
+          requirement_type: "text",
+          requirement_value: "All 7 questions are compulsory (No internal choice OR, no attempt-any-three)",
           is_required: true,
           display_order: 12,
         },
         {
-          requirement_name: "Table Column: Blooms Level",
-          requirement_type: "structure",
-          requirement_value: "Blooms Level (e.g. Apply, Remember, Understand, Analyze)",
+          requirement_name: "Grand Total Marks (40 Marks)",
+          requirement_type: "marks",
+          requirement_value: "Total 40 Marks (Q1: 10M + Pair 1: 10M + Pair 2: 10M + Pair 3: 10M = 40 Marks)",
           is_required: true,
           display_order: 13,
-        },
-        {
-          requirement_name: "Table Column: Course Outcome",
-          requirement_type: "structure",
-          requirement_value: "Course Outcome (e.g. CO1 to CO6)",
-          is_required: true,
-          display_order: 14,
-        },
-        {
-          requirement_name: "Table Column: Marks",
-          requirement_type: "structure",
-          requirement_value: "Marks (e.g. 2, 5, 10)",
-          is_required: true,
-          display_order: 15,
-        },
-
-        // 3. Question Structure & Breakdown
-        {
-          requirement_name: "Question 1 (Short Answer Section)",
-          requirement_type: "question_count",
-          requirement_value: "Question 1 with 5 sub-questions (a, b, c, d, e) @ 2 Marks each = 10 Marks",
-          is_required: true,
-          display_order: 16,
-        },
-        {
-          requirement_name: "Unit Syllabus Architecture",
-          requirement_type: "structure",
-          requirement_value: unitCoverage,
-          is_required: true,
-          display_order: 17,
-        },
-        {
-          requirement_name: "Descriptive Internal Choice (OR)",
-          requirement_type: "structure",
-          requirement_value: "Internal Choice 'OR' between questions under each Unit",
-          is_required: true,
-          display_order: 18,
-        },
-        {
-          requirement_name: "Unit Descriptive Marks Weightage",
-          requirement_type: "marks",
-          requirement_value: "Each Unit carries 10 Marks (either single 10M or subdivided 5M + 5M)",
-          is_required: true,
-          display_order: 19,
-        },
-        {
-          requirement_name: "Total Marks Scheme Verification",
-          requirement_type: "marks",
-          requirement_value: "Total 40 Marks (Q1: 10M + 3 Units x 10M = 40 Marks)",
-          is_required: true,
-          display_order: 20,
         },
       ];
 

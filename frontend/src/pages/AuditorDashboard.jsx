@@ -168,38 +168,31 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
       (t) =>
         t.name.toLowerCase().includes("mid 1") ||
         t.name.toLowerCase().includes("mid") ||
-        t.name.toLowerCase().includes("evaluation")
+        t.name.toLowerCase().includes("paper")
     );
     if (midType) setSelectedDocTypeId(String(midType.id));
 
-    setFormatName("Standard I-MID Paper Format (Autonomous R-24 / 40 Marks)");
+    setFormatName("Standard Mid 1 Examination Paper Format (Total 40 Marks)");
     setInstructions(
-      "I-MID Examination Paper (Autonomous R-24 Format). Requires official header with (Autonomous), location 515721, Subject with Code, Regulations: R-24, Time: 110 Min, Max Marks: 40, Table format with Blooms Level & CO, Question 1 (a-e @ 2M = 10M), and 3 Unit questions (Units 1-3) with internal choice (10M each). Total = 40 Marks."
+      "Mid 1 Examination Paper (Total Marks: 40). Question 1: Short Answer Questions with 5 subquestions (A, B, C, D, E) @ 2M each = 10 Marks. Questions 2 to 7: MCQs arranged in 3 pairs (Pair 1: Q2-3 = 10M, Pair 2: Q4-5 = 10M, Pair 3: Q6-7 = 10M). Exactly 7 main question numbers. Compulsory: no OR choice or attempt-any-three rule. Grand Total = 40 Marks."
     );
     setRequirements([
-      { requirement_name: "College Header", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
-      { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(Autonomous)", is_required: true, display_order: 2 },
-      { requirement_name: "Institutional Location", requirement_type: "text", requirement_value: "Near S.K. University, Ananthapuramu- 515721", is_required: true, display_order: 3 },
-      { requirement_name: "Class & Semester", requirement_type: "heading", requirement_value: "B.Tech Semester (e.g., I B.Tech II Semester)", is_required: true, display_order: 4 },
-      { requirement_name: "Examination Title", requirement_type: "heading", requirement_value: "I-MID Examinations", is_required: true, display_order: 5 },
-      { requirement_name: "Subject with Code", requirement_type: "heading", requirement_value: "Subject with Code: [Subject Name] : [Subject Code]", is_required: true, display_order: 6 },
-      { requirement_name: "Branch Identifier", requirement_type: "text", requirement_value: "Branch: Designated engineering branch (CSE, ECE, ME, CE, EEE)", is_required: true, display_order: 7 },
-      { requirement_name: "Academic Regulations", requirement_type: "text", requirement_value: "Regulations: R-24", is_required: true, display_order: 8 },
-      { requirement_name: "Time Duration", requirement_type: "text", requirement_value: "Time: 110 Min", is_required: true, display_order: 9 },
-      { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 40", is_required: true, display_order: 10 },
-      { requirement_name: "General Instruction", requirement_type: "text", requirement_value: "Answer all questions", is_required: true, display_order: 11 },
-      { requirement_name: "Table Column: S.No", requirement_type: "structure", requirement_value: "S.No", is_required: true, display_order: 12 },
-      { requirement_name: "Table Column: Blooms Level", requirement_type: "structure", requirement_value: "Blooms Level (e.g. Apply, Remember, Understand, Analyze)", is_required: true, display_order: 13 },
-      { requirement_name: "Table Column: Course Outcome", requirement_type: "structure", requirement_value: "Course Outcome (e.g. CO1 to CO6)", is_required: true, display_order: 14 },
-      { requirement_name: "Table Column: Marks", requirement_type: "structure", requirement_value: "Marks (e.g. 2, 5, 10)", is_required: true, display_order: 15 },
-      { requirement_name: "Short Answer Section", requirement_type: "question_count", requirement_value: "Question 1 with 5 sub-questions (a, b, c, d, e) @ 2 Marks each = 10 Marks", is_required: true, display_order: 16 },
-      { requirement_name: "Unit Coverage (Units 1-3)", requirement_type: "structure", requirement_value: "UNIT-I, UNIT-II, and UNIT-III (Part)", is_required: true, display_order: 17 },
-      { requirement_name: "Internal Choice (OR)", requirement_type: "structure", requirement_value: "Internal Choice 'OR' between questions under each Unit", is_required: true, display_order: 18 },
-      { requirement_name: "Unit Marks Weightage", requirement_type: "marks", requirement_value: "Each Unit carries 10 Marks (either single 10M or subdivided 5M + 5M)", is_required: true, display_order: 19 },
-      { requirement_name: "Total Marks Scheme", requirement_type: "marks", requirement_value: "Total 40 Marks (Q1: 10M + 3 Units x 10M = 40 Marks)", is_required: true, display_order: 20 },
+      { requirement_name: "College Name", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
+      { requirement_name: "Course Name", requirement_type: "heading", requirement_value: "Approved Course / Subject Title", is_required: true, display_order: 2 },
+      { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Approved Alphanumeric Course Code (e.g. 24ALBTCS403T)", is_required: true, display_order: 3 },
+      { requirement_name: "Academic Year", requirement_type: "text", requirement_value: "Current Academic Year (e.g. 2024-2025)", is_required: true, display_order: 4 },
+      { requirement_name: "Semester Name", requirement_type: "heading", requirement_value: "Semester Identifier (e.g. I B.Tech II Semester)", is_required: true, display_order: 5 },
+      { requirement_name: "Examination Category", requirement_type: "heading", requirement_value: "Mid 1 Examination", is_required: true, display_order: 6 },
+      { requirement_name: "Main Question Count (Exactly 7)", requirement_type: "question_count", requirement_value: "Exactly 7 main question numbers (Question 1 to Question 7)", is_required: true, display_order: 7 },
+      { requirement_name: "Question 1 Subquestions (A-E @ 2M = 10M)", requirement_type: "question_count", requirement_value: "Question 1 with 5 short-answer subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks", is_required: true, display_order: 8 },
+      { requirement_name: "MCQ Pair 1 (Question 2 & Question 3)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q2 & Q3) with combined value = 10 Marks", is_required: true, display_order: 9 },
+      { requirement_name: "MCQ Pair 2 (Question 4 & Question 5)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q4 & Q5) with combined value = 10 Marks", is_required: true, display_order: 10 },
+      { requirement_name: "MCQ Pair 3 (Question 6 & Question 7)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q6 & Q7) with combined value = 10 Marks", is_required: true, display_order: 11 },
+      { requirement_name: "Compulsory Assessment (No OR Choice)", requirement_type: "text", requirement_value: "All 7 questions are compulsory (No internal choice OR, no attempt-any-three)", is_required: true, display_order: 12 },
+      { requirement_name: "Grand Total Marks (40 Marks)", requirement_type: "marks", requirement_value: "Total 40 Marks (Q1: 10M + Pair 1: 10M + Pair 2: 10M + Pair 3: 10M = 40 Marks)", is_required: true, display_order: 13 },
     ]);
     setFeedback({
-      success: "✓ Loaded Standard I-MID Paper requirements (20 rules) from R-24 PDF standard.",
+      success: "✓ Loaded Standard Mid 1 Paper requirements (13 rules, 40 Marks).",
       error: ""
     });
   };
@@ -209,38 +202,31 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
       (t) =>
         t.name.toLowerCase().includes("mid 2") ||
         t.name.toLowerCase().includes("mid") ||
-        t.name.toLowerCase().includes("evaluation")
+        t.name.toLowerCase().includes("paper")
     );
     if (midType) setSelectedDocTypeId(String(midType.id));
 
-    setFormatName("Standard II-MID Paper Format (Autonomous R-24 / 40 Marks)");
+    setFormatName("Standard Mid 2 Examination Paper Format (Total 40 Marks)");
     setInstructions(
-      "II-MID Examination Paper (Autonomous R-24 Format). Requires official header with (Autonomous), location 515721, Subject with Code, Regulations: R-24, Time: 110 Min, Max Marks: 40, Table format with Blooms Level & CO, Question 1 (a-e @ 2M = 10M), and 3 Unit questions (Units 3-5) with internal choice (10M each). Total = 40 Marks."
+      "Mid 2 Examination Paper (Total Marks: 40). Question 1: Short Answer Questions with 5 subquestions (A, B, C, D, E) @ 2M each = 10 Marks. Questions 2 to 7: MCQs arranged in 3 pairs (Pair 1: Q2-3 = 10M, Pair 2: Q4-5 = 10M, Pair 3: Q6-7 = 10M). Exactly 7 main question numbers. Compulsory: no OR choice or attempt-any-three rule. Grand Total = 40 Marks."
     );
     setRequirements([
-      { requirement_name: "College Header", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
-      { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(Autonomous)", is_required: true, display_order: 2 },
-      { requirement_name: "Institutional Location", requirement_type: "text", requirement_value: "Near S.K. University, Ananthapuramu- 515721", is_required: true, display_order: 3 },
-      { requirement_name: "Class & Semester", requirement_type: "heading", requirement_value: "B.Tech Semester (e.g., I B.Tech II Semester)", is_required: true, display_order: 4 },
-      { requirement_name: "Examination Title", requirement_type: "heading", requirement_value: "II-MID Examinations", is_required: true, display_order: 5 },
-      { requirement_name: "Subject with Code", requirement_type: "heading", requirement_value: "Subject with Code: [Subject Name] : [Subject Code]", is_required: true, display_order: 6 },
-      { requirement_name: "Branch Identifier", requirement_type: "text", requirement_value: "Branch: Designated engineering branch (CSE, ECE, ME, CE, EEE)", is_required: true, display_order: 7 },
-      { requirement_name: "Academic Regulations", requirement_type: "text", requirement_value: "Regulations: R-24", is_required: true, display_order: 8 },
-      { requirement_name: "Time Duration", requirement_type: "text", requirement_value: "Time: 110 Min", is_required: true, display_order: 9 },
-      { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 40", is_required: true, display_order: 10 },
-      { requirement_name: "General Instruction", requirement_type: "text", requirement_value: "Answer all questions", is_required: true, display_order: 11 },
-      { requirement_name: "Table Column: S.No", requirement_type: "structure", requirement_value: "S.No", is_required: true, display_order: 12 },
-      { requirement_name: "Table Column: Blooms Level", requirement_type: "structure", requirement_value: "Blooms Level (e.g. Apply, Remember, Understand, Analyze)", is_required: true, display_order: 13 },
-      { requirement_name: "Table Column: Course Outcome", requirement_type: "structure", requirement_value: "Course Outcome (e.g. CO1 to CO6)", is_required: true, display_order: 14 },
-      { requirement_name: "Table Column: Marks", requirement_type: "structure", requirement_value: "Marks (e.g. 2, 5, 10)", is_required: true, display_order: 15 },
-      { requirement_name: "Short Answer Section", requirement_type: "question_count", requirement_value: "Question 1 with 5 sub-questions (a, b, c, d, e) @ 2 Marks each = 10 Marks", is_required: true, display_order: 16 },
-      { requirement_name: "Unit Coverage (Units 3-5)", requirement_type: "structure", requirement_value: "UNIT-III (Part), UNIT-IV, and UNIT-V", is_required: true, display_order: 17 },
-      { requirement_name: "Internal Choice (OR)", requirement_type: "structure", requirement_value: "Internal Choice 'OR' between questions under each Unit", is_required: true, display_order: 18 },
-      { requirement_name: "Unit Marks Weightage", requirement_type: "marks", requirement_value: "Each Unit carries 10 Marks (either single 10M or subdivided 5M + 5M)", is_required: true, display_order: 19 },
-      { requirement_name: "Total Marks Scheme", requirement_type: "marks", requirement_value: "Total 40 Marks (Q1: 10M + 3 Units x 10M = 40 Marks)", is_required: true, display_order: 20 },
+      { requirement_name: "College Name", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
+      { requirement_name: "Course Name", requirement_type: "heading", requirement_value: "Approved Course / Subject Title", is_required: true, display_order: 2 },
+      { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Approved Alphanumeric Course Code (e.g. 24ALBTCS403T)", is_required: true, display_order: 3 },
+      { requirement_name: "Academic Year", requirement_type: "text", requirement_value: "Current Academic Year (e.g. 2024-2025)", is_required: true, display_order: 4 },
+      { requirement_name: "Semester Name", requirement_type: "heading", requirement_value: "Semester Identifier (e.g. I B.Tech II Semester)", is_required: true, display_order: 5 },
+      { requirement_name: "Examination Category", requirement_type: "heading", requirement_value: "Mid 2 Examination", is_required: true, display_order: 6 },
+      { requirement_name: "Main Question Count (Exactly 7)", requirement_type: "question_count", requirement_value: "Exactly 7 main question numbers (Question 1 to Question 7)", is_required: true, display_order: 7 },
+      { requirement_name: "Question 1 Subquestions (A-E @ 2M = 10M)", requirement_type: "question_count", requirement_value: "Question 1 with 5 short-answer subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks", is_required: true, display_order: 8 },
+      { requirement_name: "MCQ Pair 1 (Question 2 & Question 3)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q2 & Q3) with combined value = 10 Marks", is_required: true, display_order: 9 },
+      { requirement_name: "MCQ Pair 2 (Question 4 & Question 5)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q4 & Q5) with combined value = 10 Marks", is_required: true, display_order: 10 },
+      { requirement_name: "MCQ Pair 3 (Question 6 & Question 7)", requirement_type: "marks", requirement_value: "Two MCQ questions (Q6 & Q7) with combined value = 10 Marks", is_required: true, display_order: 11 },
+      { requirement_name: "Compulsory Assessment (No OR Choice)", requirement_type: "text", requirement_value: "All 7 questions are compulsory (No internal choice OR, no attempt-any-three)", is_required: true, display_order: 12 },
+      { requirement_name: "Grand Total Marks (40 Marks)", requirement_type: "marks", requirement_value: "Total 40 Marks (Q1: 10M + Pair 1: 10M + Pair 2: 10M + Pair 3: 10M = 40 Marks)", is_required: true, display_order: 13 },
     ]);
     setFeedback({
-      success: "✓ Loaded Standard II-MID Paper requirements (20 rules) from R-24 PDF standard.",
+      success: "✓ Loaded Standard Mid 2 Paper requirements (13 rules, 40 Marks).",
       error: ""
     });
   };

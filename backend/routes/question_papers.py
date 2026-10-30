@@ -331,7 +331,7 @@ async def upload_question_paper(
         "course_code": course["course_code"],
         "course_name": course["course_name"],
         "exam_category": exam_cat,
-        "max_marks": 30 if exam_cat in ("MID1", "MID2") else 70
+        "max_marks": 40 if exam_cat in ("MID1", "MID2", "MID") else 70
     }
 
     report = validate_question_paper_document(str(file_path), validation_meta)
