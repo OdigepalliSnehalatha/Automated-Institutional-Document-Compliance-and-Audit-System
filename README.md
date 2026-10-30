@@ -5,7 +5,6 @@ A full-stack, session-authenticated web application designed for higher educatio
 The system enforces a **strict structural compliance engine**—evaluating document layout, sections, question counts, marks distributions, and institutional headers—without judging academic meaning or subject correctness.
 
 ---
-
 ## 🏛️ Project Overview
 
 In institutional accreditation and academic audits, standard document formats (e.g., examination papers, syllabi, question banks) must strictly adhere to regulatory and university structural guidelines. Manual verification of every page, section heading, question count, and marks pattern is tedious and error-prone.
