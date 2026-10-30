@@ -56,7 +56,7 @@ function Format({ onBack }) {
           (
             type.name === "Course Structure" ||
             type.name === "Question Bank" ||
-            type.name === "Question Paper"
+            type.name === "Question Paper" || type.name === "Resume"
           )
       );
 
@@ -877,6 +877,19 @@ function Format({ onBack }) {
                   }}
                 >
                   📝 Mid-2 Paper (II-MID, 40M)
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ background: "#f0fdf4", borderColor: "#86efac", color: "#166534" }}
+                  onClick={() => {
+                    const res = documentTypes.find((t) => t.name === "Resume");
+                    if (res) setSelectedType(String(res.id));
+                    addResumeRequirements();
+                  }}
+                >
+                  📄 Resume / CV (10 Standards)
                 </button>
 
                 <button

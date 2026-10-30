@@ -1385,6 +1385,207 @@ def validate_question_bank_document(file_path: str, metadata: Dict[str, Any]) ->
     }
 
 
+
+# =====================================================================
+# 3. RESUME / CURRICULUM VITAE VALIDATOR (10 Standard Requirements)
+# =====================================================================
+def validate_resume_document(file_path: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Standard Institutional Resume / Curriculum Vitae Validator.
+    Checks 10 accredited standard requirements:
+      1. Candidate Full Name & Professional Title
+      2. Contact Information & Location
+      3. Professional Summary / Career Objective
+      4. Educational Qualifications
+      5. Technical Skills & Competencies
+      6. Academic & Engineering Projects
+      7. Work Experience / Internships
+      8. Certifications & Professional Badges
+      9. Achievements & Extracurricular Activities
+      10. Declaration & Signature
+    """
+    path = Path(file_path)
+    if not path.exists() or path.stat().st_size == 0:
+        item = {
+            "requirement": "File Integrity & Format",
+            "expected_value": "Valid readable Resume PDF document",
+            "detected_value": "Empty or missing file on disk",
+            "result": "Incorrect",
+            "explanation": "Uploaded resume PDF is 0 bytes or could not be opened.",
+            "recommended_correction": "Re-export and upload a valid PDF resume."
+        }
+        return {
+            "validation_status": "INVALID",
+            "compliance_percentage": 0.0,
+            "summary": {"total_checks": 1, "passed_checks": 0, "failed_checks": 1, "missing_requirements": 1, "needs_review": 0, "compliance_percentage": 0.0, "validation_status": "INVALID"},
+            "items": [item],
+            "analyzed_at": datetime.now().isoformat()
+        }
+
+    try:
+        pdf_data = extract_pdf_data(str(path))
+    except Exception as e:
+        item = {
+            "requirement": "PDF Structure Integrity",
+            "expected_value": "Standard readable PDF structure",
+            "detected_value": f"Corrupted PDF ({type(e).__name__})",
+            "result": "Incorrect",
+            "explanation": f"Resume document could not be parsed: {str(e)}",
+            "recommended_correction": "Export clean PDF directly from text editor / LaTeX."
+        }
+        return {
+            "validation_status": "INVALID",
+            "compliance_percentage": 0.0,
+            "summary": {"total_checks": 1, "passed_checks": 0, "failed_checks": 1, "missing_requirements": 1, "needs_review": 0, "compliance_percentage": 0.0, "validation_status": "INVALID"},
+            "items": [item],
+            "analyzed_at": datetime.now().isoformat()
+        }
+
+    full_text = pdf_data.get("full_text", "")
+    full_norm = normalize(full_text)
+    header_preview = normalize(pdf_data.get("header_preview", ""))
+    total_pages = pdf_data.get("total_pages", 1)
+
+    items = []
+
+    # 1. Candidate Full Name & Professional Title
+    name_match = re.search(r"^[A-Z][a-zA-Z\.\s]{2,40}", full_text.strip().splitlines()[0] if full_text.strip().splitlines() else "")
+    has_header = bool(name_match or "resume" in full_norm[:200] or "curriculum vitae" in full_norm[:200] or len(full_norm.split()) > 10)
+    items.append({
+        "requirement": "Candidate Full Name & Header",
+        "expected_value": "Candidate legal name and professional designation positioned at top",
+        "detected_value": full_text.strip().splitlines()[0][:60] if full_text.strip().splitlines() else "Missing header",
+        "result": "Correct" if has_header else "Incorrect",
+        "explanation": "Header establishes applicant identity and portfolio scope." if has_header else "Top candidate legal name header was not recognized.",
+        "recommended_correction": "Ensure your full name appears prominently at the very top of page 1."
+    })
+
+    # 2. Contact Information & Location
+    email_found = bool(re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", full_text))
+    phone_found = bool(re.search(r"(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", full_text) or re.search(r"\d{10}", full_text))
+    contact_ok = email_found and phone_found
+    items.append({
+        "requirement": "Contact Information & Location",
+        "expected_value": "Valid email address and 10-digit telephone contact details",
+        "detected_value": f"Email: {'Found' if email_found else 'Missing'}, Phone: {'Found' if phone_found else 'Missing'}",
+        "result": "Correct" if contact_ok else "Incorrect",
+        "explanation": "Official email and reachable contact number verified." if contact_ok else "Email or active telephone number is missing in the document.",
+        "recommended_correction": "Include a reachable phone number and official/personal email near the header."
+    })
+
+    # 3. Professional Summary / Career Objective
+    has_summary = any(k in full_norm for k in ["career objective", "professional summary", "profile summary", "objective", "executive summary", "about me"])
+    items.append({
+        "requirement": "Professional Summary / Career Objective",
+        "expected_value": "Concise statement of career goals, engineering focus, and core competencies",
+        "detected_value": "Identified summary section" if has_summary else "Section heading not detected",
+        "result": "Correct" if has_summary else "Incorrect",
+        "explanation": "Executive summary outlines applicant goals." if has_summary else "Career objective or executive summary section is absent.",
+        "recommended_correction": "Add a 2-4 sentence 'Professional Summary' or 'Career Objective' section."
+    })
+
+    # 4. Educational Qualifications
+    has_edu = any(k in full_norm for k in ["education", "academic qualification", "qualifications", "academics", "educational background", "b.tech", "degree", "cgpa", "percentage", "intermediate"])
+    items.append({
+        "requirement": "Educational Qualifications",
+        "expected_value": "Chronological degrees with institution names, passing year, and CGPA/Percentage",
+        "detected_value": "Education records identified" if has_edu else "Academic qualification details missing",
+        "result": "Correct" if has_edu else "Incorrect",
+        "explanation": "Accredited educational milestones verified." if has_edu else "No educational degrees or CGPA listings detected.",
+        "recommended_correction": "Detail your B.Tech, Intermediate, and Schooling in tabular or chronological format with CGPA."
+    })
+
+    # 5. Technical Skills & Competencies
+    has_skills = any(k in full_norm for k in ["technical skills", "skills", "core competencies", "programming languages", "tools & technologies", "technologies", "skill set"])
+    items.append({
+        "requirement": "Technical Skills & Competencies",
+        "expected_value": "Categorized skillsets (Programming, Tools, Frameworks, Databases)",
+        "detected_value": "Technical competencies found" if has_skills else "Skills section heading missing",
+        "result": "Correct" if has_skills else "Incorrect",
+        "explanation": "Structured skills inventory detected." if has_skills else "Skills and technical competencies section not found.",
+        "recommended_correction": "List technical skills categorized under Languages, Frameworks, Databases, and Tools."
+    })
+
+    # 6. Academic & Engineering Projects
+    has_projects = any(k in full_norm for k in ["projects", "academic projects", "major project", "mini project", "project work", "capstone project", "technical projects"])
+    items.append({
+        "requirement": "Academic & Engineering Projects",
+        "expected_value": "At least 1-2 projects detailing title, tech stack, and measurable outcomes",
+        "detected_value": "Project records detected" if has_projects else "No project section identified",
+        "result": "Correct" if has_projects else "Incorrect",
+        "explanation": "Practical engineering projects highlighted." if has_projects else "Project experience section not found.",
+        "recommended_correction": "Add project titles with brief descriptions of technology stack, role, and problem solved."
+    })
+
+    # 7. Work Experience / Internships
+    has_exp = any(k in full_norm for k in ["experience", "internship", "internships", "work experience", "industrial training", "professional experience", "apprenticeship"])
+    items.append({
+        "requirement": "Work Experience / Internships",
+        "expected_value": "Industry internship or corporate work experience with duration and company name",
+        "detected_value": "Internship/Experience section detected" if has_exp else "No explicit work experience section found",
+        "result": "Correct" if has_exp else "Incorrect",
+        "explanation": "Industrial exposure confirmed." if has_exp else "Industrial internship or work experience section was not detected.",
+        "recommended_correction": "Document institutional internships, industry trainings, or industrial visits."
+    })
+
+    # 8. Certifications & Professional Badges
+    has_certs = any(k in full_norm for k in ["certifications", "certificates", "certification", "credentials", "online courses", "nptel", "coursera", "licenses"])
+    items.append({
+        "requirement": "Certifications & Credentials",
+        "expected_value": "Accredited certifications with issuing organization and completion year",
+        "detected_value": "Certifications present" if has_certs else "Certifications heading absent",
+        "result": "Correct" if has_certs else "Incorrect",
+        "explanation": "Verified professional credentials." if has_certs else "Certifications and technical badges are missing.",
+        "recommended_correction": "List industrial certifications, NPTEL/Coursera credentials, or workshop certifications."
+    })
+
+    # 9. Achievements & Extracurricular Activities
+    has_achievements = any(k in full_norm for k in ["achievements", "awards", "extracurricular", "co-curricular", "honors", "activities", "participations", "workshops attended"])
+    items.append({
+        "requirement": "Achievements & Extracurricular Activities",
+        "expected_value": "Academic awards, hackathon recognitions, or collegiate activities",
+        "detected_value": "Achievements section found" if has_achievements else "No achievements section detected",
+        "result": "Correct" if has_achievements else "Incorrect",
+        "explanation": "Extracurricular and co-curricular achievements found." if has_achievements else "No awards, hackathon participation, or activities found.",
+        "recommended_correction": "Include hackathons, technical symposiums, or sports/community leadership achievements."
+    })
+
+    # 10. Declaration & Signature
+    has_declaration = any(k in full_norm for k in ["declaration", "declare that", "information is true", "signature", "place:", "date:"])
+    items.append({
+        "requirement": "Declaration & Signature",
+        "expected_value": "Formal declaration affirming information authenticity with Place, Date & Signature",
+        "detected_value": "Declaration block detected" if has_declaration else "Declaration section missing",
+        "result": "Correct" if has_declaration else "Incorrect",
+        "explanation": "Information authenticity declared." if has_declaration else "Formal declaration and date/place signature block not detected.",
+        "recommended_correction": "Add a standard 1-sentence declaration with Place, Date, and your Name at the resume footer."
+    })
+
+    passed_count = sum(1 for it in items if it["result"] == "Correct")
+    failed_count = len(items) - passed_count
+    compliance_pct = round((passed_count / len(items)) * 100.0, 1)
+
+    overall_status = "VALID" if compliance_pct >= 80.0 else ("NEEDS_REVIEW" if compliance_pct >= 60.0 else "INVALID")
+
+    summary = {
+        "total_checks": len(items),
+        "passed_checks": passed_count,
+        "failed_checks": failed_count,
+        "missing_requirements": failed_count,
+        "needs_review": 1 if overall_status == "NEEDS_REVIEW" else 0,
+        "compliance_percentage": compliance_pct,
+        "validation_status": overall_status
+    }
+
+    return {
+        "validation_status": overall_status,
+        "compliance_percentage": compliance_pct,
+        "summary": summary,
+        "items": items,
+        "analyzed_at": datetime.now().isoformat()
+    }
+
+
 # =====================================================================
 # 4. UNIFIED DOCUMENT DISPATCHER (All Categories)
 # =====================================================================
@@ -1403,6 +1604,8 @@ def validate_any_document(file_path: str, doc_type_name: str, metadata: Dict[str
         return validate_question_bank_document(file_path, metadata)
     elif "question paper" in type_lower or "mid" in type_lower or "semester" in type_lower:
         return validate_question_paper_document(file_path, metadata)
+    elif "resume" in type_lower or "cv" in type_lower or "curriculum vitae" in type_lower:
+        return validate_resume_document(file_path, metadata)
     else:
         # Default fallback to Course Structure / general structural validator
         return validate_course_structure_document(file_path, metadata)

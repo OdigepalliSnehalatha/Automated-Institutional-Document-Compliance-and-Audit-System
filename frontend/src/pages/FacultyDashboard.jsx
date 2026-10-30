@@ -158,6 +158,20 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
     }
   };
 
+  const handleDeleteDocument = async (docId, fileName) => {
+    if (!window.confirm(`Are you sure you want to delete the uploaded document:\n"${fileName}"?\n\nThis will permanently remove the file, audit records, and verification results.`)) {
+      return;
+    }
+    try {
+      await api.delete(`/documents/${docId}`);
+      alert(`Document "${fileName}" deleted successfully.`);
+      loadMyDocuments();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert(err.response?.data?.detail || "Failed to delete document.");
+    }
+  };
+
   return (
     <div className="main-content">
       <div style={{ marginBottom: "24px" }}>

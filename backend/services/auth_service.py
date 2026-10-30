@@ -179,7 +179,7 @@ def build_session_user(user_record: dict) -> dict:
         "department_id": user_record.get("department_id"),
         "department_name": user_record.get("department_name"),
         "department_code": user_record.get("department_code"),
-        "institution_id": user_record["institution_id"],
+        "institution_id": user_record.get("institution_id") or 6,
         "institution_name": user_record.get("institution_name", "Anantha Lakshmi Institute of Technology and Sciences"),
         "institution_logo": user_record.get("institution_logo"),
         "is_active": user_record.get("is_active", True)

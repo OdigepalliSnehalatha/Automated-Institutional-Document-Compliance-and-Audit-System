@@ -293,17 +293,16 @@ def download_accepted_pdf(document_id: int, current_user: dict = Depends(get_cur
         filename=doc["file_name"]
     )
 
-@router.delete("/{document_id}")
-def delete_document(document_id: int, current_user: dict = Depends(get_current_user)):
-    """Deletes an uploaded document, physical file, and associated check records."""
+def execute_safe_document_deletion(document_id: int):
+    """Deletes an uploaded document, physical file, and all associated checks/audits in proper FK order."""
     with get_db_cursor(commit=True) as cursor:
         cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
         doc = cursor.fetchone()
 
         if not doc:
-            raise HTTPException(status_code=404, detail="Document not found.")
+            raise HTTPException(status_code=404, detail="Document not found or already deleted.")
 
-        # Clean up physical file on disk
+        # 1. Clean up physical file on disk
         file_path = doc.get("file_path")
         if file_path:
             p = Path(file_path)
@@ -313,13 +312,32 @@ def delete_document(document_id: int, current_user: dict = Depends(get_current_u
                 except Exception as e:
                     print(f"File delete warning: {e}")
 
-        # Delete dependent records safely
+        # 2. Get associated audit IDs
+        cursor.execute("SELECT id FROM audits WHERE document_id = %s", (document_id,))
+        audit_rows = cursor.fetchall()
+        audit_ids = [r["id"] for r in audit_rows]
+
+        if audit_ids:
+            try:
+                cursor.execute("DELETE FROM audit_reports WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audit_reports cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM compliance_checks WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"compliance_checks cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM audit_findings WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audit_findings cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM audits WHERE id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audits cleanup: {e}")
+
+        # 3. Delete any remaining direct document references
         try:
-            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
-        except Exception:
-            pass
-        try:
-            cursor.execute("DELETE FROM audit_findings WHERE document_id = %s", (document_id,))
+            cursor.execute("DELETE FROM audit_reports WHERE document_id = %s", (document_id,))
         except Exception:
             pass
         try:
@@ -327,13 +345,26 @@ def delete_document(document_id: int, current_user: dict = Depends(get_current_u
         except Exception:
             pass
         try:
+            cursor.execute("DELETE FROM audit_findings WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+        try:
             cursor.execute("DELETE FROM audits WHERE document_id = %s", (document_id,))
         except Exception:
             pass
+        try:
+            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
 
+        # 4. Delete document record
         cursor.execute("DELETE FROM documents WHERE id = %s", (document_id,))
 
         return {
             "success": True,
             "message": f"Document '{doc.get('file_name', 'File')}' deleted successfully."
         }
+
+@router.delete("/{document_id}")
+def delete_document(document_id: int, current_user: dict = Depends(get_current_user)):
+    return execute_safe_document_deletion(document_id)

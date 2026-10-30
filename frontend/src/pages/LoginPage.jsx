@@ -469,44 +469,93 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
                 {loading ? "Authenticating..." : "Sign In to Dashboard →"}
               </button>
 
-              {/* Quick Demo Access (Equal 4-Role Grid) */}
+              {/* Quick Demo Access & All-Branch HOD Selector */}
               <div style={{ marginTop: "20px", paddingTop: "14px", borderTop: "1px dashed var(--border-color)" }}>
                 <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.6px", fontWeight: 700, display: "block", marginBottom: "8px" }}>
-                  ⚡ Quick Demo Accounts (Click to Fill):
+                  ⚡ Quick Demo Accounts & Branch HOD Logins:
                 </span>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                
+                {/* Admin & Auditor Buttons */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "10px" }}>
                   <button
                     type="button"
                     className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "center", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#f8fafc", fontWeight: 600 }}
                     onClick={() => applyQuickLogin("admin@alits.ac.in", "Admin@123")}
+                    title="Click to fill Admin account"
                   >
                     🛡️ Admin
                   </button>
                   <button
                     type="button"
                     className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                    onClick={() => applyQuickLogin("hod.cse@alits.ac.in", "HOD@123")}
-                  >
-                    🏛️ HOD
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
+                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "center", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#f8fafc", fontWeight: 600 }}
                     onClick={() => applyQuickLogin("auditor@alits.ac.in", "Auditor@123")}
+                    title="Click to fill Auditor account"
                   >
                     📊 Auditor
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-secondary"
-                    style={{ fontSize: "12px", padding: "8px 10px", textAlign: "left", borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                    onClick={() => applyQuickLogin("faculty.cse@alits.ac.in", "Faculty@123")}
+                </div>
+
+                {/* HOD All-Branches Selector */}
+                <div style={{ background: "#f1f5f9", borderRadius: "8px", padding: "8px 10px", border: "1px solid #e2e8f0", marginBottom: "8px" }}>
+                  <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "#1e293b", marginBottom: "4px" }}>
+                    <span>🏛️ Select HOD Branch (All 9 Engineering Departments):</span>
+                    <span style={{ fontSize: "10px", color: "#2563eb", fontWeight: 600 }}>Click to Load</span>
+                  </label>
+                  <select
+                    className="form-input"
+                    style={{ fontSize: "12px", padding: "6px 8px", width: "100%", background: "#ffffff", cursor: "pointer", borderColor: "#94a3b8" }}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const [email, pwd] = e.target.value.split(":::");
+                        applyQuickLogin(email, pwd);
+                      }
+                    }}
+                    defaultValue=""
                   >
-                    🎓 Faculty
-                  </button>
+                    <option value="" disabled>-- Choose Branch HOD to Auto-Fill --</option>
+                    <option value="hod.cse@alits.ac.in:::HOD@123">💻 Computer Science & Engineering (CSE) HOD</option>
+                    <option value="hod.csd@alits.ac.in:::HOD@123">🎨 Computer Science & Design (CSD) HOD</option>
+                    <option value="hod.csm@alits.ac.in:::HOD@123">🤖 Computer Science & Machine Learning (CSM) HOD</option>
+                    <option value="hod.aiml@alits.ac.in:::HOD@123">🧠 CSE - Artificial Intelligence & ML (CSE-AIML) HOD</option>
+                    <option value="hod.cai@alits.ac.in:::HOD@123">💡 Computer Artificial Intelligence (CAI) HOD</option>
+                    <option value="hod.ece@alits.ac.in:::HOD@123">📡 Electronics & Communication Engineering (ECE) HOD</option>
+                    <option value="hod.eee@alits.ac.in:::HOD@123">⚡ Electrical & Electronics Engineering (EEE) HOD</option>
+                    <option value="hod.me@alits.ac.in:::HOD@123">⚙️ Mechanical Engineering (ME) HOD</option>
+                    <option value="hod.ce@alits.ac.in:::HOD@123">🏗️ Civil Engineering (CE) HOD</option>
+                  </select>
+                </div>
+
+                {/* Faculty All-Branches Selector */}
+                <div style={{ background: "#f8fafc", borderRadius: "8px", padding: "8px 10px", border: "1px solid #e2e8f0" }}>
+                  <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "#1e293b", marginBottom: "4px" }}>
+                    <span>🎓 Select Faculty Branch (All Branches):</span>
+                    <span style={{ fontSize: "10px", color: "#16a34a", fontWeight: 600 }}>Click to Load</span>
+                  </label>
+                  <select
+                    className="form-input"
+                    style={{ fontSize: "12px", padding: "6px 8px", width: "100%", background: "#ffffff", cursor: "pointer", borderColor: "#94a3b8" }}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const [email, pwd] = e.target.value.split(":::");
+                        applyQuickLogin(email, pwd);
+                      }
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>-- Choose Branch Faculty to Auto-Fill --</option>
+                    <option value="faculty.cse@alits.ac.in:::Faculty@123">💻 Computer Science & Engineering (CSE) Faculty</option>
+                    <option value="faculty.csd@alits.ac.in:::Faculty@123">🎨 Computer Science & Design (CSD) Faculty</option>
+                    <option value="faculty.csm@alits.ac.in:::Faculty@123">🤖 Computer Science & Machine Learning (CSM) Faculty</option>
+                    <option value="faculty.aiml@alits.ac.in:::Faculty@123">🧠 CSE - Artificial Intelligence & ML (CSE-AIML) Faculty</option>
+                    <option value="faculty.cai@alits.ac.in:::Faculty@123">💡 Computer Artificial Intelligence (CAI) Faculty</option>
+                    <option value="faculty.ece@alits.ac.in:::Faculty@123">📡 Electronics & Communication (ECE) Faculty</option>
+                    <option value="faculty.eee@alits.ac.in:::Faculty@123">⚡ Electrical & Electronics (EEE) Faculty</option>
+                    <option value="faculty.me@alits.ac.in:::Faculty@123">⚙️ Mechanical Engineering (ME) Faculty</option>
+                    <option value="faculty.ce@alits.ac.in:::Faculty@123">🏗️ Civil Engineering (CE) Faculty</option>
+                    <option value="faculty@alits.ac.in:::Faculty@123">🏛️ General Institutional Faculty</option>
+                  </select>
                 </div>
               </div>
 </form>

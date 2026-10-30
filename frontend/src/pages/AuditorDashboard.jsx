@@ -102,6 +102,23 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   // Preset Handlers
   const selectedDocTypeName = documentTypes.find((t) => String(t.id) === String(selectedDocTypeId))?.name || "";
 
+  const applyResumePreset = () => {
+    setFormatName("Standard Institutional Resume / Curriculum Vitae Format");
+    setInstructions("Mandatory 10-point standard requirements for institutional faculty and student resume verification.");
+    setRequirements([
+      { requirement_name: "Candidate Full Name & Header", requirement_type: "heading", requirement_value: "Candidate legal name and professional designation prominently positioned at top", is_required: true, display_order: 1 },
+      { requirement_name: "Contact Information & Location", requirement_type: "text", requirement_value: "Active phone number, institutional/professional email, and city/state location", is_required: true, display_order: 2 },
+      { requirement_name: "Professional Summary / Career Objective", requirement_type: "text", requirement_value: "Concise summary articulating career goals, engineering focus, and core competencies", is_required: true, display_order: 3 },
+      { requirement_name: "Educational Qualifications", requirement_type: "heading", requirement_value: "Chronological degrees with institution name, passing year, and CGPA/Percentage", is_required: true, display_order: 4 },
+      { requirement_name: "Technical Skills & Competencies", requirement_type: "text", requirement_value: "Categorized skillsets: programming languages, database systems, frameworks, and developer tools", is_required: true, display_order: 5 },
+      { requirement_name: "Academic & Engineering Projects", requirement_type: "heading", requirement_value: "Engineering projects with project title, tech stack utilized, and measurable outcomes", is_required: true, display_order: 6 },
+      { requirement_name: "Work Experience / Internships", requirement_type: "heading", requirement_value: "Industry internship or corporate work tenure with company name, designated role, and duration", is_required: true, display_order: 7 },
+      { requirement_name: "Certifications & Credentials", requirement_type: "text", requirement_value: "Recognized certifications with issuing accredited organization and year", is_required: true, display_order: 8 },
+      { requirement_name: "Achievements & Extracurricular Activities", requirement_type: "text", requirement_value: "Academic awards, hackathon/paper presentation honors, or technical society activities", is_required: true, display_order: 9 },
+      { requirement_name: "Declaration & Signature", requirement_type: "text", requirement_value: "Formal declaration affirming information authenticity with Place, Date & Signature", is_required: true, display_order: 10 },
+    ]);
+  };
+
   const applyCourseStructurePreset = () => {
     setFormatName("Standard Institutional Course Structure Format");
     setInstructions("Course structure format enforcing college header, course identification, and Units 1-5 structural sections.");
@@ -480,6 +497,16 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
                   onClick={() => applyQuestionPaperPreset(examType)}
                 >
                   Load {examType} Standard Template
+                </button>
+              )}
+              {selectedDocTypeName === "Resume" && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ background: "#f0fdf4", borderColor: "#86efac", color: "#166534" }}
+                  onClick={applyResumePreset}
+                >
+                  Load Resume Standard Template (10 Basic Requirements)
                 </button>
               )}
             </div>

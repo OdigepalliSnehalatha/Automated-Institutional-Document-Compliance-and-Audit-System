@@ -23,7 +23,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 @router.get("/filters")
 def get_management_filters(current_user: dict = Depends(get_current_user)):
     """Returns academic years, semesters, departments, and exam categories for filtering."""
-    inst_id = current_user.get("institution_id", 6)
+    inst_id = current_user.get("institution_id") or 6
     with get_db_cursor() as cursor:
         cursor.execute("SELECT id, year_name, is_current FROM academic_years WHERE institution_id = %s ORDER BY id DESC", (inst_id,))
         academic_years = cursor.fetchall()
@@ -67,7 +67,7 @@ def get_question_papers_overview(
     11. Approval Status
     12. Actions
     """
-    inst_id = current_user.get("institution_id", 6)
+    inst_id = current_user.get("institution_id") or 6
     user_role = current_user["role"]
     user_dept_id = current_user.get("department_id")
 
@@ -545,17 +545,16 @@ def submit_document_decision(
         "message": f"Document status updated to {decision} successfully."
     }
 
-@router.delete("/documents/{document_id}")
-def delete_question_paper(document_id: int, current_user: dict = Depends(get_current_user)):
-    """Deletes an uploaded question paper, physical file, and associated reports for faculty/admin."""
+def execute_safe_document_deletion(document_id: int):
+    """Deletes an uploaded document, physical file, and all associated checks/audits in proper FK order."""
     with get_db_cursor(commit=True) as cursor:
         cursor.execute("SELECT * FROM documents WHERE id = %s", (document_id,))
         doc = cursor.fetchone()
 
         if not doc:
-            raise HTTPException(status_code=404, detail="Question paper not found or already deleted.")
+            raise HTTPException(status_code=404, detail="Document not found or already deleted.")
 
-        # Clean up physical file on disk
+        # 1. Clean up physical file on disk
         file_path = doc.get("file_path")
         if file_path:
             p = Path(file_path)
@@ -565,9 +564,36 @@ def delete_question_paper(document_id: int, current_user: dict = Depends(get_cur
                 except Exception as e:
                     print(f"File delete warning: {e}")
 
-        # Delete dependent records
+        # 2. Get associated audit IDs
+        cursor.execute("SELECT id FROM audits WHERE document_id = %s", (document_id,))
+        audit_rows = cursor.fetchall()
+        audit_ids = [r["id"] for r in audit_rows]
+
+        if audit_ids:
+            try:
+                cursor.execute("DELETE FROM audit_reports WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audit_reports cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM compliance_checks WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"compliance_checks cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM audit_findings WHERE audit_id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audit_findings cleanup: {e}")
+            try:
+                cursor.execute("DELETE FROM audits WHERE id = ANY(%s)", (audit_ids,))
+            except Exception as e:
+                print(f"audits cleanup: {e}")
+
+        # 3. Delete any remaining direct document references
         try:
-            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
+            cursor.execute("DELETE FROM audit_reports WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+        try:
+            cursor.execute("DELETE FROM compliance_checks WHERE document_id = %s", (document_id,))
         except Exception:
             pass
         try:
@@ -575,13 +601,22 @@ def delete_question_paper(document_id: int, current_user: dict = Depends(get_cur
         except Exception:
             pass
         try:
-            cursor.execute("DELETE FROM compliance_checks WHERE document_id = %s", (document_id,))
+            cursor.execute("DELETE FROM audits WHERE document_id = %s", (document_id,))
+        except Exception:
+            pass
+        try:
+            cursor.execute("DELETE FROM document_versions WHERE document_id = %s", (document_id,))
         except Exception:
             pass
 
+        # 4. Delete document record
         cursor.execute("DELETE FROM documents WHERE id = %s", (document_id,))
 
         return {
             "success": True,
-            "message": f"Question paper '{doc.get('file_name', 'File')}' deleted successfully."
+            "message": f"Document '{doc.get('file_name', 'File')}' deleted successfully."
         }
+
+@router.delete("/documents/{document_id}")
+def delete_question_paper(document_id: int, current_user: dict = Depends(get_current_user)):
+    return execute_safe_document_deletion(document_id)
