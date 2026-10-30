@@ -35,7 +35,7 @@ def list_documents(current_user: dict = Depends(get_current_user)):
     if role == "HOD":
         query += " AND d.department_id = %s"
         params.append(current_user["department_id"])
-    elif role == "Faculty":
+    elif role in ("Faculty", "Student"):
         query += " AND d.uploaded_by = %s"
         params.append(current_user["id"])
 
@@ -174,7 +174,7 @@ def get_document_details(document_id: int, current_user: dict = Depends(get_curr
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found.")
 
-    if current_user["role"] == "Faculty" and doc["uploaded_by"] != current_user["id"]:
+    if current_user["role"] in ("Faculty", "Student") and doc["uploaded_by"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Forbidden: You cannot access this document.")
     elif current_user["role"] == "HOD":
         check_department_access(current_user, doc["department_id"])
@@ -207,7 +207,7 @@ def get_document_comparison(document_id: int, current_user: dict = Depends(get_c
         raise HTTPException(status_code=404, detail="Document not found.")
 
     # Permissions
-    if current_user["role"] == "Faculty" and doc["uploaded_by"] != current_user["id"]:
+    if current_user["role"] in ("Faculty", "Student") and doc["uploaded_by"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied.")
     elif current_user["role"] == "HOD":
         check_department_access(current_user, doc["department_id"])
@@ -238,7 +238,7 @@ def view_document_pdf(document_id: int, current_user: dict = Depends(get_current
         raise HTTPException(status_code=404, detail="Document not found.")
 
     # Authorization check
-    if current_user["role"] == "Faculty" and doc["uploaded_by"] != current_user["id"]:
+    if current_user["role"] in ("Faculty", "Student") and doc["uploaded_by"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Forbidden.")
     elif current_user["role"] == "HOD":
         check_department_access(current_user, doc["department_id"])

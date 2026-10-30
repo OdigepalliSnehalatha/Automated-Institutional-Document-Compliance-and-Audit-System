@@ -20,7 +20,7 @@ async def upload_document(
     file: UploadFile = File(...),
     document_type_id: int = Form(...),
     department_id: int | None = Form(None),
-    current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin"))
+    current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin", "Student"))
 ):
     # 1. Validate file extension
     if not file.filename.lower().endswith(".pdf"):
@@ -73,7 +73,7 @@ async def upload_document(
     }
 
 @router.get("/faculty/documents")
-def get_faculty_documents(current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin"))):
+def get_faculty_documents(current_user: dict = Depends(require_roles("Faculty", "HOD", "Auditor", "Admin", "Student"))):
     with get_db_cursor() as cursor:
         cursor.execute(
             """
@@ -97,7 +97,7 @@ def get_faculty_documents(current_user: dict = Depends(require_roles("Faculty", 
         return cursor.fetchall()
 
 @router.get("/faculty/documents/{document_id}")
-def get_faculty_document(document_id: int, current_user: dict = Depends(require_roles("Faculty"))):
+def get_faculty_document(document_id: int, current_user: dict = Depends(require_roles("Faculty", "Student"))):
     with get_db_cursor() as cursor:
         cursor.execute(
             """
@@ -140,7 +140,7 @@ def analyze_document(
 
     # Permissions:
     # Faculty can analyze their own; Auditor can analyze any in institution; HOD can analyze their department
-    if current_user["role"] == "Faculty" and document["uploaded_by"] != current_user["id"]:
+    if current_user["role"] in ("Faculty", "Student") and document["uploaded_by"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="You can only analyze documents uploaded by you.")
     elif current_user["role"] == "HOD":
         check_department_access(current_user, document["department_id"])
