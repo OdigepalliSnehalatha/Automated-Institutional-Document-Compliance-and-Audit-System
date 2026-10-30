@@ -54,9 +54,10 @@ function Format({ onBack }) {
         (type) =>
           type.is_active === true &&
           (
-            type.name === "Course Structure" ||
-            type.name === "Question Bank" ||
-            type.name === "Question Paper"
+            type.name.toLowerCase().includes("course structure") ||
+            type.name.toLowerCase().includes("bank") ||
+            type.name.toLowerCase().includes("evaluation") ||
+            type.name.toLowerCase().includes("paper")
           )
       );
 
@@ -526,25 +527,34 @@ function Format({ onBack }) {
       );
       setMessage(`Standard ${examTitle} requirements loaded successfully (${reqs.length} rules).`);
     } else {
-      // Semester Examination
+      // Semester Examination (Autonomous R-24 / 70 Marks from PDF Standard)
       reqs = [
         { requirement_name: "College Header", requirement_type: "header", requirement_value: "Anantha Lakshmi Institute of Technology & Sciences", is_required: true, display_order: 1 },
-        { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(AUTONOMOUS)", is_required: true, display_order: 2 },
-        { requirement_name: "Semester", requirement_type: "required", requirement_value: "B.Tech Semester", is_required: true, display_order: 3 },
-        { requirement_name: "Examination Type", requirement_type: "required", requirement_value: "Semester Examination", is_required: true, display_order: 4 },
-        { requirement_name: "Subject Name & Code", requirement_type: "heading", requirement_value: "Subject Name and Subject Code must be present", is_required: true, display_order: 5 },
-        { requirement_name: "Branch / Department", requirement_type: "required", requirement_value: "Branch / Department must be present", is_required: true, display_order: 6 },
-        { requirement_name: "Time", requirement_type: "required", requirement_value: "Time: 3 Hours", is_required: true, display_order: 7 },
-        { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 70", is_required: true, display_order: 8 },
-        { requirement_name: "Part A (Short Answer)", requirement_type: "part a structure", requirement_value: "10 Questions @ 2 Marks each = 20 Marks", is_required: true, display_order: 9 },
-        { requirement_name: "Part B (Descriptive)", requirement_type: "structure", requirement_value: "5 Questions @ 10 Marks each with internal choice = 50 Marks", is_required: true, display_order: 10 },
-        { requirement_name: "Total Marks Scheme", requirement_type: "marks", requirement_value: "Total 70 Marks", is_required: true, display_order: 11 },
-        { requirement_name: "Footer", requirement_type: "required", requirement_value: "Footer must be present", is_required: true, display_order: 12 },
+        { requirement_name: "Autonomous Status", requirement_type: "text", requirement_value: "(Autonomous)", is_required: true, display_order: 2 },
+        { requirement_name: "Course Code", requirement_type: "text", requirement_value: "Course Code (e.g. 24ALBTCS403T)", is_required: true, display_order: 3 },
+        { requirement_name: "Hall Ticket Number Box", requirement_type: "structure", requirement_value: "H.T.No: 10-cell student roll number box", is_required: true, display_order: 4 },
+        { requirement_name: "Academic Regulations", requirement_type: "text", requirement_value: "Regulations: R24 / R-24", is_required: true, display_order: 5 },
+        { requirement_name: "Class & Semester", requirement_type: "heading", requirement_value: "B.Tech [Year] Year [Semester] Semester Regular/Supplementary Examinations", is_required: true, display_order: 6 },
+        { requirement_name: "Subject Name", requirement_type: "heading", requirement_value: "Subject Name (e.g. SOFTWARE ENGINEERING)", is_required: true, display_order: 7 },
+        { requirement_name: "Branch / Department", requirement_type: "heading", requirement_value: "Branch / Department (e.g. COMPUTER SCIENCE AND ENGINEERING)", is_required: true, display_order: 8 },
+        { requirement_name: "Time Duration", requirement_type: "text", requirement_value: "Time: 3 Hours", is_required: true, display_order: 9 },
+        { requirement_name: "Paper Set Identifier", requirement_type: "text", requirement_value: "SET-1 / SET-2 / SET-3 / SET-4", is_required: true, display_order: 10 },
+        { requirement_name: "Maximum Marks", requirement_type: "marks", requirement_value: "Max. Marks: 70", is_required: true, display_order: 11 },
+        { requirement_name: "General Instructions", requirement_type: "text", requirement_value: "Instructions: 1. Answer all 10 questions from Part-A (2 marks each). 2. Answer one full question from each unit in Part-B (10 marks each).", is_required: true, display_order: 12 },
+        { requirement_name: "Table Format Columns", requirement_type: "structure", requirement_value: "Table format with S.No, Question statement, Marks (M), Course Outcome (CO1-CO6), and Bloom's Level (L1/L2)", is_required: true, display_order: 13 },
+        { requirement_name: "PART-A Section", requirement_type: "structure", requirement_value: "PART-A heading (Short Answer Section, Questions 1.a through 1.j)", is_required: true, display_order: 14 },
+        { requirement_name: "PART-A Questions (10 x 2M)", requirement_type: "question_count", requirement_value: "10 Sub-questions (a, b, c, d, e, f, g, h, i, j) @ 2 Marks each = 20 Marks", is_required: true, display_order: 15 },
+        { requirement_name: "PART-A CO & Bloom's Mapping", requirement_type: "structure", requirement_value: "Course Outcomes (CO1 to CO6) and Bloom's Level (L1/L2) mapped for all 10 Part-A sub-questions", is_required: true, display_order: 16 },
+        { requirement_name: "PART-B Section", requirement_type: "structure", requirement_value: "PART-B heading (Descriptive Unit-wise Questions)", is_required: true, display_order: 17 },
+        { requirement_name: "Unit Coverage (Units I - V)", requirement_type: "structure", requirement_value: "5 Units clearly demarcated: UNIT-I, UNIT-II, UNIT-III, UNIT-IV, and UNIT-V", is_required: true, display_order: 18 },
+        { requirement_name: "Internal Choice (OR)", requirement_type: "structure", requirement_value: "Internal Choice 'OR' between questions in each Unit (Q2/Q3, Q4/Q5, Q6/Q7, Q8/Q9, Q10/Q11)", is_required: true, display_order: 19 },
+        { requirement_name: "Unit Marks Weightage (5 x 10M)", requirement_type: "marks", requirement_value: "Each Unit carries 10 Marks with CO and Bloom's Level = 50 Marks", is_required: true, display_order: 20 },
+        { requirement_name: "Total Marks Scheme Verification", requirement_type: "marks", requirement_value: "Total 70 Marks (Part-A: 20M + Part-B: 50M = 70 Marks)", is_required: true, display_order: 21 },
       ];
 
-      setFormatName("Standard Semester Examination Question Paper Format (70 Marks)");
-      setInstructions("Semester Examination format requiring institutional header, Part A (10 questions @ 2M = 20M), Part B (5 questions @ 10M = 50M) covering all 5 units with internal choice. Total = 70 Marks.");
-      setMessage(`Standard Semester Examination requirements loaded successfully (${reqs.length} rules).`);
+      setFormatName("Standard Semester Examination Paper Format (R-24 / 70 Marks)");
+      setInstructions("Autonomous R-24 Semester Examination Paper format matching official ALITS template. Requires Hall Ticket Number box (H.T.No), Course Code, Regulations R24, College Header, (Autonomous), B.Tech Year & Semester, Subject Name, Branch/Department, Time: 3 Hours, SET-1, Max. Marks: 70, General Instructions (10 Part-A questions @ 2M, 1 Part-B question per unit @ 10M), Table format with S.No, Question statement, Marks (M), Course Outcome (CO1-CO6), and Bloom's Level (L1/L2), PART-A (10 x 2M = 20M), and PART-B (5 Units with internal choice 'OR' @ 10M = 50M). Grand Total = 70 Marks.");
+      setMessage(`Standard Semester Examination requirements loaded successfully (${reqs.length} rules from PDF standard).`);
     }
 
     setRequirements(reqs);
@@ -855,7 +865,7 @@ function Format({ onBack }) {
                   type="button"
                   className="btn btn-primary btn-sm"
                   onClick={() => {
-                    const qp = documentTypes.find((t) => t.name === "Question Paper");
+                    const qp = documentTypes.find((t) => t.name.toLowerCase().includes("mid 1") || t.name.toLowerCase().includes("mid") || t.name.toLowerCase().includes("evaluation"));
                     if (qp) setSelectedType(String(qp.id));
                     setExamType("Mid Examination");
                     setMidSubdivision("Mid 1");
@@ -869,7 +879,7 @@ function Format({ onBack }) {
                   type="button"
                   className="btn btn-primary btn-sm"
                   onClick={() => {
-                    const qp = documentTypes.find((t) => t.name === "Question Paper");
+                    const qp = documentTypes.find((t) => t.name.toLowerCase().includes("mid 2") || t.name.toLowerCase().includes("mid") || t.name.toLowerCase().includes("evaluation"));
                     if (qp) setSelectedType(String(qp.id));
                     setExamType("Mid Examination");
                     setMidSubdivision("Mid 2");
@@ -879,19 +889,17 @@ function Format({ onBack }) {
                   📝 Mid-2 Paper (II-MID, 40M)
                 </button>
 
-
-
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
                   onClick={() => {
-                    const qp = documentTypes.find((t) => t.name === "Question Paper");
-                    if (qp) setSelectedType(String(qp.id));
+                    const sem = documentTypes.find((t) => t.name.toLowerCase().includes("semester") || t.name.toLowerCase().includes("evaluation"));
+                    if (sem) setSelectedType(String(sem.id));
                     setExamType("Semester Examination");
-                    setTimeout(() => addQuestionPaperRequirements(), 50);
+                    setTimeout(() => addQuestionPaperRequirements("Semester Examination"), 50);
                   }}
                 >
-                  🎓 Semester Paper (70M)
+                  📜 Semester Paper (70M)
                 </button>
               </div>
             </div>
@@ -914,11 +922,19 @@ function Format({ onBack }) {
                   className="form-select"
                 >
                   <option value="">-- Choose Document Type --</option>
-                  {documentTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
+                  {documentTypes
+                    .filter((type) => type.is_active !== false)
+                    .map((type) => {
+                      const clean = type.name
+                        .replace(/Question Paper/gi, "Paper")
+                        .replace(/Question Papers/gi, "Papers")
+                        .trim();
+                      return (
+                        <option key={type.id} value={type.id}>
+                          {clean}
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
 

@@ -1402,7 +1402,7 @@ def validate_any_document(file_path: str, doc_type_name: str, metadata: Dict[str
         return validate_course_structure_document(file_path, metadata)
     elif "question bank" in type_lower or "assignment bank" in type_lower:
         return validate_question_bank_document(file_path, metadata)
-    elif "question paper" in type_lower or "mid" in type_lower or "semester" in type_lower:
+    elif "question paper" in type_lower or "mid" in type_lower or "semester" in type_lower or "evaluation" in type_lower or "paper" in type_lower:
         return validate_question_paper_document(file_path, metadata)
 
     else:
