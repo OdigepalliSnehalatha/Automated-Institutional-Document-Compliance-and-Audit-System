@@ -27,25 +27,7 @@ def handle_ai_chat(data: ChatRequest, current_user: dict = Depends(get_current_u
 
     lower_query = user_msg.lower()
 
-    # Universal Academic Knowledge Checks (Mid, Resume, JNTUK Curricula)
-    if any(k in lower_query for k in ["resume", "cv", "curriculum vitae", "fresher"]):
-        return {
-            "response": (
-                "📄 **Professional Fresher Resume Standard Requirements (10 Points)**:\n\n"
-                "1. **Personal Information**: Full name, mobile number, email address, location.\n"
-                "2. **Career Objective**: Short statement about career goals and professional interests.\n"
-                "3. **Educational Qualifications**: College name, degree, branch, graduation year, CGPA/percentage.\n"
-                "4. **Technical Skills**: Programming languages, technologies, tools, and software skills.\n"
-                "5. **Projects**: Project title, description, technologies used, and key features.\n"
-                "6. **Certifications**: Certification name, issuing organization, and completion date.\n"
-                "7. **Internship / Work Experience**: Organization, role, duration, and responsibilities.\n"
-                "8. **Achievements**: Awards, hackathons, competitions, and academic achievements.\n"
-                "9. **Strengths**: Problem-solving, teamwork, communication, adaptability, and quick learning.\n"
-                "10. **Additional Information**: Languages known, extracurricular activities, and relevant interests.\n\n"
-                "💡 *The Automated Resume Compliance Verification module validates all 10 criteria with 80%+ compliance threshold for institutional acceptance.*"
-            )
-        }
-
+    # Universal Academic Knowledge Checks (Mid & JNTUK Curricula)
     if any(k in lower_query for k in ["mid 1", "mid 2", "mid-1", "mid-2", "mid exam", "i-mid", "ii-mid", "40 mark", "40m"]):
         return {
             "response": (

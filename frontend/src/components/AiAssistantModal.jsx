@@ -18,7 +18,6 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
     ],
     Faculty: [
       "Explain Mid-1 and Mid-2 (R-24) format rules",
-      "Explain Resume standard requirements (10 points)",
       "List JNTUK curricula & branch subjects",
       "Why was my document rejected?",
     ],
@@ -31,7 +30,6 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
     Auditor: [
       "Explain the 100% Boolean compliance engine",
       "What format presets are available in Builder?",
-      "Explain Resume 10-point standard requirements",
       "Which documents currently need review?",
     ],
   };
@@ -66,7 +64,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
   function getInitialGreeting(u) {
     const name = u.name || u.email.split("@")[0];
     const dept = u.department_name ? ` (${u.department_name})` : "";
-    return `Welcome **${name}**${dept}! I am your **ALITS Academic Compliance Copilot**.\n\nI am configured with **Autonomous Regulations (R-24)**, **JNTUK all-branch curricula (1-1 to 4-2 Semesters)**, **Resume Standard Verification (10 Points)**, and the **100% Boolean Decision Engine**.\n\nHow can I assist you with your institutional documentation today?`;
+    return `Welcome **${name}**${dept}! I am your **ALITS Academic Compliance Copilot**.\n\nI am configured with **Autonomous Regulations (R-24)**, **JNTUK all-branch curricula (1-1 to 4-2 Semesters)**, **100% Boolean Decision Engine**.\n\nHow can I assist you with your institutional documentation today?`;
   }
 
   const handleSendMessage = async (textToSend) => {
@@ -334,7 +332,7 @@ function AiAssistantModal({ user, isOpen, onClose, onOpen }) {
                 <input
                   type="text"
                   className="alits-copilot-input"
-                  placeholder={`Ask about R-24 Mid papers, Resume criteria, JNTUK subjects...`}
+                  placeholder={`Ask about R-24 Mid papers, JNTUK subjects...`}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   disabled={loading}
