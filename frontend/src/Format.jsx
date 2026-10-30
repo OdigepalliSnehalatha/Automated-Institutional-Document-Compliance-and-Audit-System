@@ -923,11 +923,12 @@ function Format({ onBack }) {
                 >
                   <option value="">-- Choose Document Type --</option>
                   {documentTypes
-                    .filter((type) => type.is_active !== false)
+                    .filter((type) => type.is_active !== false && type.name.toLowerCase().trim() !== "evaluation")
                     .map((type) => {
                       const clean = type.name
                         .replace(/Question Paper/gi, "Paper")
                         .replace(/Question Papers/gi, "Papers")
+                        .replace(/Semester End Evaluation/gi, "Semester Paper")
                         .trim();
                       return (
                         <option key={type.id} value={type.id}>

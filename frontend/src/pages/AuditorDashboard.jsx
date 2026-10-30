@@ -506,11 +506,12 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
                   required
                 >
                   {documentTypes
-                    .filter((t) => t.is_active !== false)
+                    .filter((t) => t.is_active !== false && t.name.toLowerCase().trim() !== "evaluation")
                     .map((t) => {
                       const cleanName = t.name
                         .replace(/Question Paper/gi, "Paper")
                         .replace(/Question Papers/gi, "Papers")
+                        .replace(/Semester End Evaluation/gi, "Semester Paper")
                         .trim();
                       return (
                         <option key={t.id} value={t.id}>
