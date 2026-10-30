@@ -103,19 +103,19 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
   const selectedDocTypeName = documentTypes.find((t) => String(t.id) === String(selectedDocTypeId))?.name || "";
 
   const applyResumePreset = () => {
-    setFormatName("Standard Institutional Resume / Curriculum Vitae Format");
-    setInstructions("Mandatory 10-point standard requirements for institutional faculty and student resume verification.");
+    setFormatName("Professional Fresher Resume Standard Format");
+    setInstructions("10 standard requirements for fresher resume compliance verification: Personal Info, Career Objective, Education, Technical Skills, Projects, Certifications, Internship/Experience, Achievements, Strengths, and Additional Info.");
     setRequirements([
-      { requirement_name: "Candidate Full Name & Header", requirement_type: "heading", requirement_value: "Candidate legal name and professional designation prominently positioned at top", is_required: true, display_order: 1 },
-      { requirement_name: "Contact Information & Location", requirement_type: "text", requirement_value: "Active phone number, institutional/professional email, and city/state location", is_required: true, display_order: 2 },
-      { requirement_name: "Professional Summary / Career Objective", requirement_type: "text", requirement_value: "Concise summary articulating career goals, engineering focus, and core competencies", is_required: true, display_order: 3 },
-      { requirement_name: "Educational Qualifications", requirement_type: "heading", requirement_value: "Chronological degrees with institution name, passing year, and CGPA/Percentage", is_required: true, display_order: 4 },
-      { requirement_name: "Technical Skills & Competencies", requirement_type: "text", requirement_value: "Categorized skillsets: programming languages, database systems, frameworks, and developer tools", is_required: true, display_order: 5 },
-      { requirement_name: "Academic & Engineering Projects", requirement_type: "heading", requirement_value: "Engineering projects with project title, tech stack utilized, and measurable outcomes", is_required: true, display_order: 6 },
-      { requirement_name: "Work Experience / Internships", requirement_type: "heading", requirement_value: "Industry internship or corporate work tenure with company name, designated role, and duration", is_required: true, display_order: 7 },
-      { requirement_name: "Certifications & Credentials", requirement_type: "text", requirement_value: "Recognized certifications with issuing accredited organization and year", is_required: true, display_order: 8 },
-      { requirement_name: "Achievements & Extracurricular Activities", requirement_type: "text", requirement_value: "Academic awards, hackathon/paper presentation honors, or technical society activities", is_required: true, display_order: 9 },
-      { requirement_name: "Declaration & Signature", requirement_type: "text", requirement_value: "Formal declaration affirming information authenticity with Place, Date & Signature", is_required: true, display_order: 10 },
+      { requirement_name: "Personal Information", requirement_type: "text", requirement_value: "Full name, mobile number, email address, location.", is_required: true, display_order: 1 },
+      { requirement_name: "Career Objective", requirement_type: "text", requirement_value: "Short statement about career goals and professional interests.", is_required: true, display_order: 2 },
+      { requirement_name: "Educational Qualifications", requirement_type: "heading", requirement_value: "College name, degree, branch, graduation year, CGPA/percentage.", is_required: true, display_order: 3 },
+      { requirement_name: "Technical Skills", requirement_type: "text", requirement_value: "Programming languages, technologies, tools, and software skills.", is_required: true, display_order: 4 },
+      { requirement_name: "Projects", requirement_type: "heading", requirement_value: "Project title, description, technologies used, and key features.", is_required: true, display_order: 5 },
+      { requirement_name: "Certifications", requirement_type: "text", requirement_value: "Certification name, issuing organization, and completion date.", is_required: true, display_order: 6 },
+      { requirement_name: "Internship / Work Experience", requirement_type: "heading", requirement_value: "Organization, role, duration, and responsibilities.", is_required: true, display_order: 7 },
+      { requirement_name: "Achievements", requirement_type: "text", requirement_value: "Awards, hackathons, competitions, and academic achievements.", is_required: true, display_order: 8 },
+      { requirement_name: "Strengths", requirement_type: "text", requirement_value: "Problem-solving, teamwork, communication, adaptability, and quick learning.", is_required: true, display_order: 9 },
+      { requirement_name: "Additional Information", requirement_type: "text", requirement_value: "Languages known, extracurricular activities, and relevant interests.", is_required: true, display_order: 10 },
     ]);
   };
 

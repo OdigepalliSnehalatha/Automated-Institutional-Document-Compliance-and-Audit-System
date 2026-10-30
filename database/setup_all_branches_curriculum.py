@@ -506,63 +506,63 @@ BRANCH_CURRICULUM = {
 
 RESUME_REQUIREMENTS = [
     {
-        "name": "Candidate Full Name & Professional Title",
-        "type": "heading",
-        "value": "Candidate legal name and professional designation/qualification prominently positioned at top of resume",
+        "name": "Personal Information",
+        "type": "text",
+        "value": "Full name, mobile number, email address, location.",
         "order": 1
     },
     {
-        "name": "Contact Information & Location",
+        "name": "Career Objective",
         "type": "text",
-        "value": "Active telephone number, institutional/professional email address, and city/state location",
+        "value": "Short statement about career goals and professional interests.",
         "order": 2
-    },
-    {
-        "name": "Professional Summary / Career Objective",
-        "type": "text",
-        "value": "Concise executive overview articulating career focus, engineering domain expertise, and core strengths",
-        "order": 3
     },
     {
         "name": "Educational Qualifications",
         "type": "heading",
-        "value": "Chronological degrees/diplomas detailing institution, board/university, passing year, and CGPA/Percentage",
+        "value": "College name, degree, branch, graduation year, CGPA/percentage.",
+        "order": 3
+    },
+    {
+        "name": "Technical Skills",
+        "type": "text",
+        "value": "Programming languages, technologies, tools, and software skills.",
         "order": 4
     },
     {
-        "name": "Technical Skills & Competencies",
-        "type": "text",
-        "value": "Categorized skillsets: programming languages, database systems, developer frameworks, platforms, and tools",
+        "name": "Projects",
+        "type": "heading",
+        "value": "Project title, description, technologies used, and key features.",
         "order": 5
     },
     {
-        "name": "Academic & Engineering Projects",
-        "type": "heading",
-        "value": "Individual/team projects with title, tech stack utilized, personal contribution, and verifiable outcomes",
+        "name": "Certifications",
+        "type": "text",
+        "value": "Certification name, issuing organization, and completion date.",
         "order": 6
     },
     {
-        "name": "Work Experience / Internships",
+        "name": "Internship / Work Experience",
         "type": "heading",
-        "value": "Professional or industrial internship tenure with company name, designated role, duration, and key milestones",
+        "value": "Organization, role, duration, and responsibilities.",
         "order": 7
     },
     {
-        "name": "Certifications & Professional Badges",
+        "name": "Achievements",
         "type": "text",
-        "value": "Recognized industrial/academic credentials with issuing organization and certification completion year",
+        "value": "Awards, hackathons, competitions, and academic achievements.",
         "order": 8
     },
     {
-        "name": "Achievements & Extracurricular Activities",
+        "name": "Strengths",
         "type": "text",
-        "value": "Academic awards, hackathon/paper presentation honors, technical society memberships, or sports accomplishments",
+        "value": "Problem-solving, teamwork, communication, adaptability, and quick learning.",
         "order": 9
     },
     {
-        "name": "Declaration & Signature",
+        "name": "Additional Information",
         "type": "text",
-        "value": "Formal declaration affirming authenticity of provided information, accompanied by place, date, and candidate name",
+        "value": "Languages known, extracurricular activities, and relevant interests.",
         "order": 10
     }
 ]

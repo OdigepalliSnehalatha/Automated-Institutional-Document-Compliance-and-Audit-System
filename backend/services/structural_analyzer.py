@@ -1391,18 +1391,18 @@ def validate_question_bank_document(file_path: str, metadata: Dict[str, Any]) ->
 # =====================================================================
 def validate_resume_document(file_path: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Standard Institutional Resume / Curriculum Vitae Validator.
-    Checks 10 accredited standard requirements:
-      1. Candidate Full Name & Professional Title
-      2. Contact Information & Location
-      3. Professional Summary / Career Objective
-      4. Educational Qualifications
-      5. Technical Skills & Competencies
-      6. Academic & Engineering Projects
-      7. Work Experience / Internships
-      8. Certifications & Professional Badges
-      9. Achievements & Extracurricular Activities
-      10. Declaration & Signature
+    Standard Fresher Resume Compliance Verification Module.
+    Evaluates 10 Standard Requirements:
+      1. Personal Information – Full name, mobile number, email address, location
+      2. Career Objective – Short statement about career goals and professional interests
+      3. Educational Qualifications – College name, degree, branch, graduation year, CGPA/percentage
+      4. Technical Skills – Programming languages, technologies, tools, and software skills
+      5. Projects – Project title, description, technologies used, and key features
+      6. Certifications – Certification name, issuing organization, and completion date
+      7. Internship / Work Experience – Organization, role, duration, and responsibilities
+      8. Achievements – Awards, hackathons, competitions, and academic achievements
+      9. Strengths – Problem-solving, teamwork, communication, adaptability, and quick learning
+      10. Additional Information – Languages known, extracurricular activities, and relevant interests
     """
     path = Path(file_path)
     if not path.exists() or path.stat().st_size == 0:
@@ -1448,117 +1448,117 @@ def validate_resume_document(file_path: str, metadata: Dict[str, Any]) -> Dict[s
 
     items = []
 
-    # 1. Candidate Full Name & Professional Title
-    name_match = re.search(r"^[A-Z][a-zA-Z\.\s]{2,40}", full_text.strip().splitlines()[0] if full_text.strip().splitlines() else "")
-    has_header = bool(name_match or "resume" in full_norm[:200] or "curriculum vitae" in full_norm[:200] or len(full_norm.split()) > 10)
-    items.append({
-        "requirement": "Candidate Full Name & Header",
-        "expected_value": "Candidate legal name and professional designation positioned at top",
-        "detected_value": full_text.strip().splitlines()[0][:60] if full_text.strip().splitlines() else "Missing header",
-        "result": "Correct" if has_header else "Incorrect",
-        "explanation": "Header establishes applicant identity and portfolio scope." if has_header else "Top candidate legal name header was not recognized.",
-        "recommended_correction": "Ensure your full name appears prominently at the very top of page 1."
-    })
-
-    # 2. Contact Information & Location
+    # 1. Personal Information – Full name, mobile number, email address, location
     email_found = bool(re.search(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", full_text))
     phone_found = bool(re.search(r"(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}", full_text) or re.search(r"\d{10}", full_text))
-    contact_ok = email_found and phone_found
+    has_name = bool(re.search(r"^[A-Z][a-zA-Z\.\s]{2,40}", full_text.strip().splitlines()[0] if full_text.strip().splitlines() else "") or len(full_norm.split()) > 5)
+    personal_info_ok = email_found and phone_found and has_name
     items.append({
-        "requirement": "Contact Information & Location",
-        "expected_value": "Valid email address and 10-digit telephone contact details",
-        "detected_value": f"Email: {'Found' if email_found else 'Missing'}, Phone: {'Found' if phone_found else 'Missing'}",
-        "result": "Correct" if contact_ok else "Incorrect",
-        "explanation": "Official email and reachable contact number verified." if contact_ok else "Email or active telephone number is missing in the document.",
-        "recommended_correction": "Include a reachable phone number and official/personal email near the header."
+        "requirement": "Personal Information",
+        "expected_value": "Full name, mobile number, email address, and location",
+        "detected_value": f"Name: {'Found' if has_name else 'Missing'}, Email: {'Found' if email_found else 'Missing'}, Mobile: {'Found' if phone_found else 'Missing'}",
+        "result": "Correct" if personal_info_ok else "Incorrect",
+        "explanation": "Verified candidate full name, active telephone contact, and official/personal email." if personal_info_ok else "Contact telephone, email address, or candidate full name was missing.",
+        "recommended_correction": "Ensure your full name, 10-digit mobile number, email, and city/state are prominently placed in the header."
     })
 
-    # 3. Professional Summary / Career Objective
-    has_summary = any(k in full_norm for k in ["career objective", "professional summary", "profile summary", "objective", "executive summary", "about me"])
+    # 2. Career Objective – Short statement about career goals and professional interests
+    has_obj = any(k in full_norm for k in ["career objective", "objective", "professional summary", "summary", "career goals", "about me", "profile summary"])
     items.append({
-        "requirement": "Professional Summary / Career Objective",
-        "expected_value": "Concise statement of career goals, engineering focus, and core competencies",
-        "detected_value": "Identified summary section" if has_summary else "Section heading not detected",
-        "result": "Correct" if has_summary else "Incorrect",
-        "explanation": "Executive summary outlines applicant goals." if has_summary else "Career objective or executive summary section is absent.",
-        "recommended_correction": "Add a 2-4 sentence 'Professional Summary' or 'Career Objective' section."
+        "requirement": "Career Objective",
+        "expected_value": "Short statement about career goals and professional interests",
+        "detected_value": "Identified career objective / summary section" if has_obj else "Section heading not detected",
+        "result": "Correct" if has_obj else "Incorrect",
+        "explanation": "Career goals and professional domain interests clearly articulated." if has_obj else "Career objective or summary section heading was not identified.",
+        "recommended_correction": "Add a 2–3 line 'Career Objective' articulating your professional goals and engineering interests."
     })
 
-    # 4. Educational Qualifications
-    has_edu = any(k in full_norm for k in ["education", "academic qualification", "qualifications", "academics", "educational background", "b.tech", "degree", "cgpa", "percentage", "intermediate"])
+    # 3. Educational Qualifications – College name, degree, branch, graduation year, CGPA/percentage
+    has_edu = any(k in full_norm for k in ["education", "academic qualification", "qualifications", "academics", "b.tech", "degree", "cgpa", "percentage", "intermediate", "graduation year"])
     items.append({
         "requirement": "Educational Qualifications",
-        "expected_value": "Chronological degrees with institution names, passing year, and CGPA/Percentage",
-        "detected_value": "Education records identified" if has_edu else "Academic qualification details missing",
+        "expected_value": "College name, degree, branch, graduation year, and CGPA/percentage",
+        "detected_value": "Academic qualification records detected" if has_edu else "Academic qualification details missing",
         "result": "Correct" if has_edu else "Incorrect",
-        "explanation": "Accredited educational milestones verified." if has_edu else "No educational degrees or CGPA listings detected.",
-        "recommended_correction": "Detail your B.Tech, Intermediate, and Schooling in tabular or chronological format with CGPA."
+        "explanation": "Chronological educational milestones with degree, institution, and performance verified." if has_edu else "Educational qualifications or CGPA details were not found.",
+        "recommended_correction": "Include a table or list showing B.Tech, Intermediate/Diploma, and SSC with College Name, Branch, Year, and CGPA/%."
     })
 
-    # 5. Technical Skills & Competencies
-    has_skills = any(k in full_norm for k in ["technical skills", "skills", "core competencies", "programming languages", "tools & technologies", "technologies", "skill set"])
+    # 4. Technical Skills – Programming languages, technologies, tools, and software skills
+    has_skills = any(k in full_norm for k in ["technical skills", "skills", "technologies", "programming languages", "tools & technologies", "software skills", "skill set", "core competencies"])
     items.append({
-        "requirement": "Technical Skills & Competencies",
-        "expected_value": "Categorized skillsets (Programming, Tools, Frameworks, Databases)",
-        "detected_value": "Technical competencies found" if has_skills else "Skills section heading missing",
+        "requirement": "Technical Skills",
+        "expected_value": "Programming languages, technologies, tools, and software skills",
+        "detected_value": "Categorized technical competencies found" if has_skills else "Technical skills section absent",
         "result": "Correct" if has_skills else "Incorrect",
-        "explanation": "Structured skills inventory detected." if has_skills else "Skills and technical competencies section not found.",
-        "recommended_correction": "List technical skills categorized under Languages, Frameworks, Databases, and Tools."
+        "explanation": "Structured inventory of programming languages, tools, and technical software verified." if has_skills else "Technical skills section heading was not identified.",
+        "recommended_correction": "Group technical proficiencies under Languages, Technologies/Frameworks, Databases, and Tools."
     })
 
-    # 6. Academic & Engineering Projects
-    has_projects = any(k in full_norm for k in ["projects", "academic projects", "major project", "mini project", "project work", "capstone project", "technical projects"])
+    # 5. Projects – Project title, description, technologies used, and key features
+    has_proj = any(k in full_norm for k in ["projects", "academic projects", "major project", "mini project", "project work", "capstone project", "technical projects"])
     items.append({
-        "requirement": "Academic & Engineering Projects",
-        "expected_value": "At least 1-2 projects detailing title, tech stack, and measurable outcomes",
-        "detected_value": "Project records detected" if has_projects else "No project section identified",
-        "result": "Correct" if has_projects else "Incorrect",
-        "explanation": "Practical engineering projects highlighted." if has_projects else "Project experience section not found.",
-        "recommended_correction": "Add project titles with brief descriptions of technology stack, role, and problem solved."
+        "requirement": "Projects",
+        "expected_value": "Project title, description, technologies used, and key features",
+        "detected_value": "Project records and technical descriptions found" if has_proj else "No project section identified",
+        "result": "Correct" if has_proj else "Incorrect",
+        "explanation": "Hands-on engineering projects detailing tech stack, description, and key features verified." if has_proj else "Project experience section was not detected.",
+        "recommended_correction": "List at least 1–2 academic or personal projects with Project Title, Description, Tech Stack Used, and Key Features."
     })
 
-    # 7. Work Experience / Internships
-    has_exp = any(k in full_norm for k in ["experience", "internship", "internships", "work experience", "industrial training", "professional experience", "apprenticeship"])
+    # 6. Certifications – Certification name, issuing organization, and completion date
+    has_certs = any(k in full_norm for k in ["certifications", "certificates", "certification", "credentials", "online courses", "nptel", "coursera", "udemy", "licenses"])
     items.append({
-        "requirement": "Work Experience / Internships",
-        "expected_value": "Industry internship or corporate work experience with duration and company name",
-        "detected_value": "Internship/Experience section detected" if has_exp else "No explicit work experience section found",
-        "result": "Correct" if has_exp else "Incorrect",
-        "explanation": "Industrial exposure confirmed." if has_exp else "Industrial internship or work experience section was not detected.",
-        "recommended_correction": "Document institutional internships, industry trainings, or industrial visits."
-    })
-
-    # 8. Certifications & Professional Badges
-    has_certs = any(k in full_norm for k in ["certifications", "certificates", "certification", "credentials", "online courses", "nptel", "coursera", "licenses"])
-    items.append({
-        "requirement": "Certifications & Credentials",
-        "expected_value": "Accredited certifications with issuing organization and completion year",
-        "detected_value": "Certifications present" if has_certs else "Certifications heading absent",
+        "requirement": "Certifications",
+        "expected_value": "Certification name, issuing organization, and completion date",
+        "detected_value": "Certifications and credentials identified" if has_certs else "Certifications heading absent",
         "result": "Correct" if has_certs else "Incorrect",
-        "explanation": "Verified professional credentials." if has_certs else "Certifications and technical badges are missing.",
-        "recommended_correction": "List industrial certifications, NPTEL/Coursera credentials, or workshop certifications."
+        "explanation": "Accredited certifications and completion details verified." if has_certs else "Certifications and technical badges section not detected.",
+        "recommended_correction": "Include relevant technical courses/certifications with Certification Name, Issuing Organization, and Completion Date."
     })
 
-    # 9. Achievements & Extracurricular Activities
-    has_achievements = any(k in full_norm for k in ["achievements", "awards", "extracurricular", "co-curricular", "honors", "activities", "participations", "workshops attended"])
+    # 7. Internship / Work Experience – Organization, role, duration, and responsibilities
+    has_exp = any(k in full_norm for k in ["internship", "internships", "work experience", "experience", "industrial training", "professional experience", "apprenticeship"])
     items.append({
-        "requirement": "Achievements & Extracurricular Activities",
-        "expected_value": "Academic awards, hackathon recognitions, or collegiate activities",
-        "detected_value": "Achievements section found" if has_achievements else "No achievements section detected",
+        "requirement": "Internship / Work Experience",
+        "expected_value": "Organization, role, duration, and responsibilities",
+        "detected_value": "Internship/Experience records detected" if has_exp else "No internship or work experience section found",
+        "result": "Correct" if has_exp else "Incorrect",
+        "explanation": "Practical corporate or industrial training experience confirmed." if has_exp else "Industrial internship or work experience section was not detected.",
+        "recommended_correction": "Add details of any internship, summer training, or industrial project with Organization, Role, Duration, and Responsibilities."
+    })
+
+    # 8. Achievements – Awards, hackathons, competitions, and academic achievements
+    has_achievements = any(k in full_norm for k in ["achievements", "awards", "hackathons", "competitions", "academic achievements", "honors", "participations", "merit"])
+    items.append({
+        "requirement": "Achievements",
+        "expected_value": "Awards, hackathons, competitions, and academic achievements",
+        "detected_value": "Honors and competition achievements found" if has_achievements else "Achievements section not detected",
         "result": "Correct" if has_achievements else "Incorrect",
-        "explanation": "Extracurricular and co-curricular achievements found." if has_achievements else "No awards, hackathon participation, or activities found.",
-        "recommended_correction": "Include hackathons, technical symposiums, or sports/community leadership achievements."
+        "explanation": "Recognitions, awards, and technical competition achievements confirmed." if has_achievements else "No awards, hackathon recognitions, or academic achievements found.",
+        "recommended_correction": "List hackathons won, academic ranks/merits, technical competition wins, or coding platform recognitions."
     })
 
-    # 10. Declaration & Signature
-    has_declaration = any(k in full_norm for k in ["declaration", "declare that", "information is true", "signature", "place:", "date:"])
+    # 9. Strengths – Problem-solving, teamwork, communication, adaptability, and quick learning
+    has_strengths = any(k in full_norm for k in ["strengths", "key strengths", "problem-solving", "problem solving", "teamwork", "communication", "adaptability", "quick learning", "interpersonal skills", "soft skills"])
     items.append({
-        "requirement": "Declaration & Signature",
-        "expected_value": "Formal declaration affirming information authenticity with Place, Date & Signature",
-        "detected_value": "Declaration block detected" if has_declaration else "Declaration section missing",
-        "result": "Correct" if has_declaration else "Incorrect",
-        "explanation": "Information authenticity declared." if has_declaration else "Formal declaration and date/place signature block not detected.",
-        "recommended_correction": "Add a standard 1-sentence declaration with Place, Date, and your Name at the resume footer."
+        "requirement": "Strengths",
+        "expected_value": "Problem-solving, teamwork, communication, adaptability, and quick learning",
+        "detected_value": "Personal strengths and behavioral competencies found" if has_strengths else "Strengths section not detected",
+        "result": "Correct" if has_strengths else "Incorrect",
+        "explanation": "Core strengths such as problem-solving, communication, adaptability, and teamwork verified." if has_strengths else "Strengths or behavioral attributes section was not identified.",
+        "recommended_correction": "Add a 'Strengths' section highlighting Problem-solving, Teamwork, Communication, Adaptability, and Quick Learning."
+    })
+
+    # 10. Additional Information – Languages known, extracurricular activities, and relevant interests
+    has_additional = any(k in full_norm for k in ["additional information", "languages known", "languages", "extracurricular activities", "extracurricular", "interests", "hobbies", "co-curricular"])
+    items.append({
+        "requirement": "Additional Information",
+        "expected_value": "Languages known, extracurricular activities, and relevant interests",
+        "detected_value": "Additional profile information identified" if has_additional else "Additional information section not detected",
+        "result": "Correct" if has_additional else "Incorrect",
+        "explanation": "Languages known, extracurricular activities, and personal interests verified." if has_additional else "Languages known or extracurricular interests section was absent.",
+        "recommended_correction": "Include an 'Additional Information' section with Languages Known, Extracurricular Activities, and Relevant Interests."
     })
 
     passed_count = sum(1 for it in items if it["result"] == "Correct")

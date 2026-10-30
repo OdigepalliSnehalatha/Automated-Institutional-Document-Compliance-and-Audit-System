@@ -28,21 +28,21 @@ def handle_ai_chat(data: ChatRequest, current_user: dict = Depends(get_current_u
     lower_query = user_msg.lower()
 
     # Universal Academic Knowledge Checks (Mid, Resume, JNTUK Curricula)
-    if any(k in lower_query for k in ["resume", "cv", "curriculum vitae"]):
+    if any(k in lower_query for k in ["resume", "cv", "curriculum vitae", "fresher"]):
         return {
             "response": (
-                "📄 **Institutional Resume / Curriculum Vitae Standard (10 Mandatory Points)**:\n\n"
-                "1. **Candidate Full Name & Header**: Legal name & engineering qualification prominently placed at top.\n"
-                "2. **Contact Information & Location**: Active 10-digit telephone, institutional/personal email, and city/state.\n"
-                "3. **Professional Summary / Objective**: 2–4 concise lines articulating domain expertise and technical focus.\n"
-                "4. **Educational Qualifications**: Chronological records (B.Tech, Inter/Diploma, SSC) with Institute, Year & CGPA/%.\n"
-                "5. **Technical Skills**: Structured categories (Languages, Frameworks, Databases, Developer Tools).\n"
-                "6. **Academic Projects**: Title, tech stack utilized, personal contribution, and verifiable outcomes.\n"
-                "7. **Work Experience / Internships**: Industry internships, company name, role, and key milestones.\n"
-                "8. **Certifications & Badges**: Accredited industrial/NPTEL/Coursera credentials with year.\n"
-                "9. **Achievements & Extracurricular**: Hackathons, paper presentations, awards, and technical societies.\n"
-                "10. **Declaration & Signature**: Formal declaration affirming authenticity with Place, Date & Signature.\n\n"
-                "💡 *Resumes must achieve at least 80% compliance across these 10 criteria for institutional acceptance.*"
+                "📄 **Professional Fresher Resume Standard Requirements (10 Points)**:\n\n"
+                "1. **Personal Information**: Full name, mobile number, email address, location.\n"
+                "2. **Career Objective**: Short statement about career goals and professional interests.\n"
+                "3. **Educational Qualifications**: College name, degree, branch, graduation year, CGPA/percentage.\n"
+                "4. **Technical Skills**: Programming languages, technologies, tools, and software skills.\n"
+                "5. **Projects**: Project title, description, technologies used, and key features.\n"
+                "6. **Certifications**: Certification name, issuing organization, and completion date.\n"
+                "7. **Internship / Work Experience**: Organization, role, duration, and responsibilities.\n"
+                "8. **Achievements**: Awards, hackathons, competitions, and academic achievements.\n"
+                "9. **Strengths**: Problem-solving, teamwork, communication, adaptability, and quick learning.\n"
+                "10. **Additional Information**: Languages known, extracurricular activities, and relevant interests.\n\n"
+                "💡 *The Automated Resume Compliance Verification module validates all 10 criteria with 80%+ compliance threshold for institutional acceptance.*"
             )
         }
 
