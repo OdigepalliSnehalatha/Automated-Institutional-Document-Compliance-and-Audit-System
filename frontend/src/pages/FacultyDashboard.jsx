@@ -163,12 +163,21 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
       return;
     }
     try {
-      const res = await api.delete(`/documents/${docId}`);
+      let res;
+      try {
+        res = await api.delete(`/documents/${docId}`);
+      } catch (e1) {
+        res = await api.delete(`/question-papers/documents/${docId}`);
+      }
+      const successMsg = res?.data?.message || `Document "${fileName}" deleted successfully.`;
       setFeedback({
-        success: res.data?.message || `Document "${fileName}" deleted successfully.`,
+        success: successMsg,
         error: ""
       });
+      // Immediately remove from list for fast responsive UI
+      setDocuments((prev) => prev.filter((d) => d.id !== docId));
       loadMyDocuments();
+      alert(successMsg);
     } catch (err) {
       console.error("Delete failed:", err);
       const msg = err.response?.data?.detail || "Failed to delete document. Please try again.";
@@ -448,7 +457,7 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
             <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                 <span style={{ fontSize: "20px" }}>📄</span>
-                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Question Paper Requirements</h4>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Evaluation Requirements</h4>
               </div>
               <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
                 <li><strong>Header</strong>: Institute Name, Semester, Branch, Subject Name & Code, Max Marks, Time.</li>

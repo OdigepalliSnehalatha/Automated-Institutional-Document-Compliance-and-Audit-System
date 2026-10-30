@@ -623,7 +623,7 @@ function AdminDashboard({ user, activeTab = "overview" }) {
               <div>
                 <h3>Institutional Engineering Branches ({departments.length})</h3>
                 <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                  Click on any branch to inspect all uploaded compliance documents, question papers, and syllabi.
+                  Click on any branch to inspect all uploaded compliance documents, evaluations, and syllabi.
                 </span>
               </div>
             </div>

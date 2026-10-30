@@ -324,7 +324,7 @@ function LoginPage({ onLoginSuccess, initialInfo }) {
               <span className="feature-icon">🛡️</span>
               <div>
                 <strong>Boolean Decision Compliance</strong>
-                <p>100% strict layout rule validation for Question Papers & Syllabi</p>
+                <p>100% strict layout rule validation for Evaluations & Syllabi</p>
               </div>
             </div>
 

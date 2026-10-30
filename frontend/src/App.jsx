@@ -53,7 +53,7 @@ function App() {
   };
 
   const setDefaultTabForRole = (role) => {
-    if (role === "Faculty") setActiveTab("question_papers");
+    if (role === "Faculty") setActiveTab("evaluations");
     else setActiveTab("overview");
   };
 
@@ -73,9 +73,10 @@ function App() {
   const getHeaderTitles = () => {
     if (!user) return { title: "Dashboard", subtitle: "" };
 
-    if (activeTab === "question_papers") {
+    if (activeTab === "question_papers" || activeTab === "evaluations") {
       return {
-        title: "Question Paper Compliance Management",
+        title: "Evaluations",
+        subtitle: "Multi-examination institutional document evaluations and approvals",
         subtitle: "Multi-examination paper tracking, automated structural verification, and institutional approvals"
       };
     }
@@ -164,7 +165,7 @@ function App() {
 
         {/* Active Dashboard View based on User Role */}
         <main className="dashboard-content-area" style={{ flex: 1, padding: "20px 24px" }}>
-          {activeTab === "question_papers" ? (
+          {activeTab === "question_papers" || activeTab === "evaluations" ? (
             <QuestionPaperManagement user={user} />
           ) : user.role === "Admin" ? (
             <AdminDashboard user={user} activeTab={activeTab} />

@@ -207,17 +207,22 @@ function QuestionPaperManagement({ user }) {
   // Delete uploaded question paper file
   const handleDeletePaper = async (docId, fileName, categoryLabel) => {
     const ok = window.confirm(
-      `Are you sure you want to delete the uploaded ${categoryLabel} file:\n"${fileName}"?\n\nThis will remove the file and reset the upload status.`
+      `Are you sure you want to delete the uploaded ${categoryLabel} file:\n"${fileName}"?\n\nThis will permanently remove the file, audit records, and verification results.`
     );
     if (!ok) return;
 
     try {
-      await api.delete(`/question-papers/documents/${docId}`);
-      alert(`Question paper "${fileName}" deleted successfully.`);
+      let res;
+      try {
+        res = await api.delete(`/question-papers/documents/${docId}`);
+      } catch (e1) {
+        res = await api.delete(`/documents/${docId}`);
+      }
+      alert(`Evaluation file "${fileName}" deleted successfully.`);
       loadOverview();
     } catch (err) {
       console.error("Delete failed:", err);
-      alert(err.response?.data?.detail || "Failed to delete question paper.");
+      alert(err.response?.data?.detail || "Failed to delete evaluation file.");
     }
   };
 
@@ -407,11 +412,11 @@ function QuestionPaperManagement({ user }) {
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <span style={{ fontSize: "24px" }}>📝</span>
               <h2 style={{ margin: 0, fontSize: "22px", color: "#f8fafc" }}>
-                Question Paper Compliance Management
+                Evaluations Compliance Management
               </h2>
             </div>
             <p style={{ margin: "6px 0 0", color: "#94a3b8", fontSize: "13px" }}>
-              Multi-examination question paper verification, automated PDF structural checking, and institutional approval workflows.
+              Multi-examination evaluation tracking, automated PDF structural checking, and institutional approval workflows.
             </p>
           </div>
 
@@ -552,32 +557,26 @@ function QuestionPaperManagement({ user }) {
           <table className="table" style={{ margin: 0, fontSize: "12px", width: "100%", borderCollapse: "collapse" }}>
             <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "#1e293b", borderBottom: "2px solid var(--border-color)" }}>
               <tr>
-                <th style={{ width: "7%", padding: "10px 8px" }}>1. Academic Year</th>
-                <th style={{ width: "7%", padding: "10px 8px" }}>2. Semester</th>
-                <th style={{ width: "5%", padding: "10px 8px" }}>3. Dept</th>
-                <th style={{ width: "13%", padding: "10px 8px" }}>4. Course / Subject</th>
-                <th style={{ width: "10%", padding: "10px 8px" }}>5. Faculty Name</th>
-                <th style={{ width: "14%", padding: "10px 8px" }}>6. Mid-1 Paper</th>
-                <th style={{ width: "14%", padding: "10px 8px" }}>7. Mid-2 Paper</th>
-                <th style={{ width: "14%", padding: "10px 8px" }}>8. Semester Paper</th>
-                <th style={{ width: "7%", padding: "10px 8px" }}>9. Uploaded Date</th>
-                <th style={{ width: "6%", padding: "10px 8px" }}>10. Validation</th>
-                <th style={{ width: "6%", padding: "10px 8px" }}>11. Approval</th>
-                <th style={{ width: "7%", padding: "10px 8px" }}>12. Actions</th>
+                <th style={{ width: "9%", padding: "10px 8px", textAlign: "center" }}>Branch</th>
+                <th style={{ width: "24%", padding: "10px 8px" }}>Subject</th>
+                <th style={{ width: "9%", padding: "10px 8px", textAlign: "center" }}>Year</th>
+                <th style={{ width: "12%", padding: "10px 8px", textAlign: "center" }}>Sem</th>
+                <th style={{ width: "11%", padding: "10px 8px", textAlign: "center" }}>Academic Year</th>
+                <th style={{ width: "35%", padding: "10px 8px" }}>Uploaded PDFs</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="12" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
                     <div className="spinner" style={{ width: "28px", height: "28px", margin: "0 auto 8px" }}></div>
-                    Loading institutional question paper records...
+                    Loading institutional evaluation records...
                   </td>
                 </tr>
               ) : filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan="12" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
-                    No course examination records match the selected filters.
+                  <td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
+                    No course evaluation records match the selected filters.
                   </td>
                 </tr>
               ) : (
@@ -592,124 +591,53 @@ function QuestionPaperManagement({ user }) {
                         borderBottom: "1px solid var(--border-color)",
                       }}
                     >
-                      {/* 1. Academic Year */}
-                      <td style={{ padding: "10px 8px", fontWeight: 500 }}>
-                        {row.academic_year}
-                      </td>
-
-                      {/* 2. Semester */}
-                      <td style={{ padding: "10px 8px", color: "#93c5fd" }}>
-                        {row.semester}
-                      </td>
-
-                      {/* 3. Department */}
-                      <td style={{ padding: "10px 8px" }}>
-                        <span className="badge badge-neutral" style={{ fontWeight: 600 }}>
-                          {row.department}
+                      {/* 1. Branch */}
+                      <td style={{ padding: "10px 8px", textAlign: "center" }}>
+                        <span className="badge badge-neutral" style={{ fontWeight: 700, fontSize: "11px", letterSpacing: "0.5px" }}>
+                          {row.branch || row.department}
                         </span>
                       </td>
 
-                      {/* 4. Course / Subject */}
+                      {/* 2. Subject */}
                       <td style={{ padding: "10px 8px" }}>
-                        <div style={{ fontWeight: 600, color: "var(--text-main)" }}>
+                        <div style={{ fontWeight: 700, color: "var(--text-main)", fontSize: "13px" }}>
                           {row.course_code}
                         </div>
-                        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
+                        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px", lineHeight: "1.3" }}>
                           {row.course_name}
                         </div>
                       </td>
 
-                      {/* 5. Faculty Name */}
+                      {/* 3. Year */}
+                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 600, color: "#38bdf8" }}>
+                        {row.year || "I Year"}
+                      </td>
+
+                      {/* 4. Sem */}
+                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 500, color: "#93c5fd" }}>
+                        {row.sem || row.semester}
+                      </td>
+
+                      {/* 5. Academic Year */}
+                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 500 }}>
+                        {row.academic_year}
+                      </td>
+
+                      {/* 6. Uploaded PDFs */}
                       <td style={{ padding: "10px 8px" }}>
-                        <div style={{ fontWeight: 500, color: row.faculty_name === "Unassigned" ? "#f59e0b" : "var(--text-main)" }}>
-                          {row.faculty_name}
-                        </div>
-                      </td>
-
-                      {/* 6. Mid-1 Question Paper */}
-                      <td style={{ padding: "8px 6px" }}>
-                        {renderPaperCell(row, row.mid1_paper, "MID1", "Mid-1 Exam")}
-                      </td>
-
-                      {/* 7. Mid-2 Question Paper */}
-                      <td style={{ padding: "8px 6px" }}>
-                        {renderPaperCell(row, row.mid2_paper, "MID2", "Mid-2 Exam")}
-                      </td>
-
-                      {/* 8. Semester / End-Semester Question Paper */}
-                      <td style={{ padding: "8px 6px" }}>
-                        {renderPaperCell(row, row.sem_paper, "SEM", "End Semester Exam")}
-                      </td>
-
-                      {/* 9. Uploaded Date */}
-                      <td style={{ padding: "10px 8px", fontSize: "11px", color: "var(--text-muted)" }}>
-                        {row.uploaded_date}
-                      </td>
-
-                      {/* 10. Validation Status */}
-                      <td style={{ padding: "10px 8px" }}>
-                        <span
-                          className={`badge ${
-                            row.validation_status === "Valid"
-                              ? "badge-success"
-                              : row.validation_status === "Missing"
-                              ? "badge-danger"
-                              : row.validation_status === "Invalid"
-                              ? "badge-danger"
-                              : "badge-warning"
-                          }`}
-                          style={{ fontSize: "11px", fontWeight: 600 }}
-                        >
-                          {row.validation_status}
-                        </span>
-                      </td>
-
-                      {/* 11. Approval Status */}
-                      <td style={{ padding: "10px 8px" }}>
-                        <span
-                          className={`badge ${
-                            row.approval_status === "Accepted"
-                              ? "badge-success"
-                              : row.approval_status === "Rejected"
-                              ? "badge-danger"
-                              : "badge-neutral"
-                          }`}
-                          style={{ fontSize: "11px", fontWeight: 600 }}
-                        >
-                          {row.approval_status}
-                        </span>
-                      </td>
-
-                      {/* 12. Actions */}
-                      <td style={{ padding: "10px 8px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                          {row.permissions.can_upload && (!row.mid1_paper || !row.mid2_paper || !row.sem_paper) && (
-                            <button
-                              className="btn btn-sm btn-primary"
-                              style={{ fontSize: "11px", padding: "3px 6px" }}
-                              onClick={() => {
-                                const nextMissing = !row.mid1_paper ? "MID1" : !row.mid2_paper ? "MID2" : "SEM";
-                                openUploadModal(row, nextMissing);
-                              }}
-                            >
-                              + Upload
-                            </button>
-                          )}
-
-                          <button
-                            className="btn btn-sm btn-secondary"
-                            style={{ fontSize: "11px", padding: "3px 6px" }}
-                            onClick={() => {
-                              const firstAvailable = row.mid1_paper || row.mid2_paper || row.sem_paper;
-                              if (firstAvailable) {
-                                openReportModal(firstAvailable.id, firstAvailable.file_name);
-                              } else {
-                                alert("No question papers have been uploaded yet for this course.");
-                              }
-                            }}
-                          >
-                            📊 View
-                          </button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ minWidth: "65px", fontSize: "11px", fontWeight: 700, color: "#60a5fa" }}>Mid-1:</span>
+                            <div style={{ flex: 1 }}>{renderPaperCell(row, row.mid1_paper, "MID1", "Mid-1 Exam")}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ minWidth: "65px", fontSize: "11px", fontWeight: 700, color: "#60a5fa" }}>Mid-2:</span>
+                            <div style={{ flex: 1 }}>{renderPaperCell(row, row.mid2_paper, "MID2", "Mid-2 Exam")}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ minWidth: "65px", fontSize: "11px", fontWeight: 700, color: "#a855f7" }}>Semester:</span>
+                            <div style={{ flex: 1 }}>{renderPaperCell(row, row.sem_paper, "SEM", "End Semester Exam")}</div>
+                          </div>
                         </div>
                       </td>
                     </tr>

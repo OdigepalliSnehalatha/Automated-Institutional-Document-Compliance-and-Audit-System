@@ -179,7 +179,7 @@ function HodDashboard({ user, activeTab: propActiveTab, onTabChange }) {
               <div>
                 <h3>Institutional Department & Branch Guidelines</h3>
                 <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                  Click on any department to view its uploaded compliance documents, question papers, and syllabi.
+                  Click on any department to view its uploaded compliance documents, evaluations, and syllabi.
                 </p>
               </div>
             </div>

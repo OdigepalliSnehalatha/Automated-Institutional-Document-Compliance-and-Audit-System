@@ -87,6 +87,7 @@ def get_question_papers_overview(
             sem.id AS semester_id,
             sem.semester_name,
             sem.semester_code,
+            sem.semester_number,
             ay.id AS academic_year_id,
             ay.year_name AS academic_year,
             u.id AS faculty_id,
@@ -216,17 +217,30 @@ def get_question_papers_overview(
         can_upload = user_role in ("Faculty", "Admin") and (c["faculty_id"] == current_user["id"] or user_role == "Admin" or c["faculty_id"] is None)
         can_review = user_role in ("HOD", "Auditor", "Admin")
 
+        sem_num = c.get("semester_number") or 1
+        year_num = ((sem_num - 1) // 2) + 1
+        roman_years = {1: "I Year", 2: "II Year", 3: "III Year", 4: "IV Year"}
+        sem_in_yr = ((sem_num - 1) % 2) + 1
+        roman_sems = {1: "I Sem", 2: "II Sem"}
+
+        year_label = roman_years.get(year_num, f"Year {year_num}")
+        sem_label = f"{roman_sems.get(sem_in_yr, f'Sem {sem_in_yr}')} ({c.get('semester_code') or f'{year_num}-{sem_in_yr}'})"
+
         rows.append({
             "course_id": cid,
-            "academic_year": c.get("academic_year") or "2025-2026",
-            "academic_year_id": c.get("academic_year_id"),
-            "semester": c.get("semester_name") or "Semester III",
-            "semester_id": c.get("semester_id"),
+            "branch": c["department_code"],
             "department": c["department_code"],
             "department_id": c["department_id"],
             "department_name": c["department_name"],
+            "subject": f"{c['course_code']} - {c['course_name']}",
             "course_code": c["course_code"],
             "course_name": c["course_name"],
+            "year": year_label,
+            "sem": sem_label,
+            "academic_year": c.get("academic_year") or "2025-2026",
+            "academic_year_id": c.get("academic_year_id"),
+            "semester": c.get("semester_name") or sem_label,
+            "semester_id": c.get("semester_id"),
             "faculty_name": c["faculty_name"],
             "faculty_id": c["faculty_id"],
             "mid1_paper": mid1,
