@@ -264,9 +264,9 @@ function QuestionPaperManagement({ user }) {
   const renderPaperCell = (course, paper, categoryKey, categoryLabel) => {
     if (!paper) {
       return (
-        <div style={{ padding: "6px 8px", background: "rgba(239, 68, 68, 0.05)", borderRadius: "6px", border: "1px dashed rgba(239, 68, 68, 0.25)" }}>
+        <div style={{ padding: "8px 10px", background: "#fef2f2", borderRadius: "6px", border: "1px dashed #fca5a5" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span className="badge badge-warning" style={{ fontSize: "11px", backgroundColor: "#ef4444", color: "#fff", padding: "2px 6px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#fee2e2", color: "#dc2626", padding: "2px 8px", borderRadius: "4px", border: "1px solid #fecaca" }}>
               Missing
             </span>
             {course.permissions.can_upload && (
@@ -280,7 +280,7 @@ function QuestionPaperManagement({ user }) {
               </button>
             )}
           </div>
-          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+          <span style={{ fontSize: "11px", color: "#991b1b", marginTop: "4px", display: "block" }}>
             Mandatory paper required
           </span>
         </div>
@@ -293,17 +293,17 @@ function QuestionPaperManagement({ user }) {
     const isAppRejected = (paper.approval_status || "").toUpperCase() === "REJECTED";
 
     return (
-      <div style={{ padding: "8px 10px", background: "var(--surface)", borderRadius: "6px", border: "1px solid var(--border-color)", fontSize: "12px" }}>
+      <div style={{ padding: "8px 10px", background: "#ffffff", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "12px", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
         {/* Filename & Version */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
           <span
-            style={{ fontWeight: 600, color: "var(--primary)", cursor: "pointer", textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}
+            style={{ fontWeight: 600, color: "#1d4ed8", cursor: "pointer", textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "130px" }}
             onClick={() => openPdfViewer(paper)}
             title={`Preview ${paper.file_name}`}
           >
             📄 {paper.file_name}
           </span>
-          <span className="badge" style={{ fontSize: "10px", background: "rgba(100, 116, 139, 0.2)", color: "#cbd5e1" }}>
+          <span className="badge" style={{ fontSize: "10px", background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1" }}>
             v{paper.version}
           </span>
         </div>
@@ -405,17 +405,17 @@ function QuestionPaperManagement({ user }) {
 
   return (
     <div className="qp-management-page" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* 1. Header & Summary Metrics */}
-      <div className="card" style={{ padding: "20px", background: "linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))" }}>
+      {/* 1. Header & Summary Metrics (Bright Light Theme) */}
+      <div className="panel" style={{ padding: "22px", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "24px" }}>📝</span>
-              <h2 style={{ margin: 0, fontSize: "22px", color: "#f8fafc" }}>
+              <span style={{ fontSize: "24px" }}>📋</span>
+              <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "#0f172a" }}>
                 Evaluations Compliance Management
               </h2>
             </div>
-            <p style={{ margin: "6px 0 0", color: "#94a3b8", fontSize: "13px" }}>
+            <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: "14px" }}>
               Multi-examination evaluation tracking, automated PDF structural checking, and institutional approval workflows.
             </p>
           </div>
@@ -429,39 +429,39 @@ function QuestionPaperManagement({ user }) {
 
         {/* Institutional Coverage Summary Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "12px", marginTop: "20px" }}>
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(15, 23, 42, 0.6)" }}>
-            <span style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase" }}>Total Courses</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#f8fafc", marginTop: "2px" }}>{totalCourses}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+            <span style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase", fontWeight: 600 }}>Total Courses</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#0f172a", marginTop: "2px" }}>{totalCourses}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(34, 197, 94, 0.1)", borderColor: "rgba(34, 197, 94, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#22c55e", textTransform: "uppercase", fontWeight: 600 }}>Fully Compliant</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#22c55e", marginTop: "2px" }}>{compliantCount}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+            <span style={{ fontSize: "11px", color: "#15803d", textTransform: "uppercase", fontWeight: 600 }}>Fully Compliant</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#16a34a", marginTop: "2px" }}>{compliantCount}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(239, 68, 68, 0.1)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#ef4444", textTransform: "uppercase", fontWeight: 600 }}>Action Required</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#ef4444", marginTop: "2px" }}>{nonCompliantCount}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#fef2f2", border: "1px solid #fecaca" }}>
+            <span style={{ fontSize: "11px", color: "#b91c1c", textTransform: "uppercase", fontWeight: 600 }}>Action Required</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#dc2626", marginTop: "2px" }}>{nonCompliantCount}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(59, 130, 246, 0.1)", borderColor: "rgba(59, 130, 246, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#3b82f6", textTransform: "uppercase", fontWeight: 600 }}>Mid-1 Uploads</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#3b82f6", marginTop: "2px" }}>{mid1Count} / {totalCourses}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#eff6ff", border: "1px solid #bfdbfe" }}>
+            <span style={{ fontSize: "11px", color: "#1d4ed8", textTransform: "uppercase", fontWeight: 600 }}>Mid-1 Uploads</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#2563eb", marginTop: "2px" }}>{mid1Count} / {totalCourses}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(59, 130, 246, 0.1)", borderColor: "rgba(59, 130, 246, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#3b82f6", textTransform: "uppercase", fontWeight: 600 }}>Mid-2 Uploads</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#3b82f6", marginTop: "2px" }}>{mid2Count} / {totalCourses}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#eff6ff", border: "1px solid #bfdbfe" }}>
+            <span style={{ fontSize: "11px", color: "#1d4ed8", textTransform: "uppercase", fontWeight: 600 }}>Mid-2 Uploads</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#2563eb", marginTop: "2px" }}>{mid2Count} / {totalCourses}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(168, 85, 247, 0.1)", borderColor: "rgba(168, 85, 247, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#a855f7", textTransform: "uppercase", fontWeight: 600 }}>Semester Uploads</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#a855f7", marginTop: "2px" }}>{semCount} / {totalCourses}</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#faf5ff", border: "1px solid #e9d5ff" }}>
+            <span style={{ fontSize: "11px", color: "#7e22ce", textTransform: "uppercase", fontWeight: 600 }}>Semester Uploads</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#9333ea", marginTop: "2px" }}>{semCount} / {totalCourses}</div>
           </div>
 
-          <div className="card" style={{ padding: "12px", textAlign: "center", background: "rgba(14, 165, 233, 0.1)", borderColor: "rgba(14, 165, 233, 0.3)" }}>
-            <span style={{ fontSize: "11px", color: "#0ea5e9", textTransform: "uppercase", fontWeight: 600 }}>Compliance Rate</span>
-            <div style={{ fontSize: "22px", fontWeight: 700, color: "#0ea5e9", marginTop: "2px" }}>{institutionalComplianceRate}%</div>
+          <div className="card" style={{ padding: "12px", textAlign: "center", background: "#f0f9ff", border: "1px solid #bae6fd" }}>
+            <span style={{ fontSize: "11px", color: "#0369a1", textTransform: "uppercase", fontWeight: 600 }}>Compliance Rate</span>
+            <div style={{ fontSize: "24px", fontWeight: 700, color: "#0284c7", marginTop: "2px" }}>{institutionalComplianceRate}%</div>
           </div>
         </div>
       </div>
@@ -551,18 +551,18 @@ function QuestionPaperManagement({ user }) {
         </div>
       </div>
 
-      {/* 3. Dedicated 12-Column Table */}
-      <div className="card" style={{ padding: "0", overflow: "hidden" }}>
+      {/* 3. Streamlined 6-Column Institutional Table (Bright Light Theme) */}
+      <div className="panel" style={{ padding: "0", overflow: "hidden", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         <div className="table-responsive" style={{ maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
-          <table className="table" style={{ margin: 0, fontSize: "12px", width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "#1e293b", borderBottom: "2px solid var(--border-color)" }}>
+          <table className="custom-table" style={{ margin: 0, width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ position: "sticky", top: 0, zIndex: 10, background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
               <tr>
-                <th style={{ width: "9%", padding: "10px 8px", textAlign: "center" }}>Branch</th>
-                <th style={{ width: "24%", padding: "10px 8px" }}>Subject</th>
-                <th style={{ width: "9%", padding: "10px 8px", textAlign: "center" }}>Year</th>
-                <th style={{ width: "12%", padding: "10px 8px", textAlign: "center" }}>Sem</th>
-                <th style={{ width: "11%", padding: "10px 8px", textAlign: "center" }}>Academic Year</th>
-                <th style={{ width: "35%", padding: "10px 8px" }}>Uploaded PDFs</th>
+                <th style={{ width: "9%", padding: "14px 12px", textAlign: "center", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Branch</th>
+                <th style={{ width: "24%", padding: "14px 12px", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Subject</th>
+                <th style={{ width: "9%", padding: "14px 12px", textAlign: "center", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Year</th>
+                <th style={{ width: "12%", padding: "14px 12px", textAlign: "center", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Sem</th>
+                <th style={{ width: "11%", padding: "14px 12px", textAlign: "center", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Academic Year</th>
+                <th style={{ width: "35%", padding: "14px 12px", background: "#f8fafc", color: "#475569", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px", borderBottom: "2px solid #e2e8f0" }}>Uploaded PDFs</th>
               </tr>
             </thead>
             <tbody>
@@ -609,17 +609,17 @@ function QuestionPaperManagement({ user }) {
                       </td>
 
                       {/* 3. Year */}
-                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 600, color: "#38bdf8" }}>
+                      <td style={{ padding: "12px 10px", textAlign: "center", fontWeight: 700, color: "#0284c7" }}>
                         {row.year || "I Year"}
                       </td>
 
                       {/* 4. Sem */}
-                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 500, color: "#93c5fd" }}>
+                      <td style={{ padding: "12px 10px", textAlign: "center", fontWeight: 600, color: "#2563eb" }}>
                         {row.sem || row.semester}
                       </td>
 
                       {/* 5. Academic Year */}
-                      <td style={{ padding: "10px 8px", textAlign: "center", fontWeight: 500 }}>
+                      <td style={{ padding: "12px 10px", textAlign: "center", fontWeight: 600, color: "#475569" }}>
                         {row.academic_year}
                       </td>
 
