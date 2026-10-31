@@ -531,10 +531,8 @@ def extract_question_paper_header_details(
     """
     Validates Common Header for all three examination papers:
       1. College Name
-      2. Subject Name
-      3. Subject Code
-      4. Branch Name
-      5. Maximum Marks (must appear in header!)
+      2. Branch Name
+      3. Maximum Marks (must appear in header!)
     """
     header_chunk = full_text[:2500]
     header_norm = normalize(header_chunk)
@@ -572,84 +570,7 @@ def extract_question_paper_header_details(
             "recommended_correction": f"Include official College Name: '{expected_inst}' at the top of the examination paper."
         })
 
-    # 2. Subject Name
-    expected_course = metadata.get("course_name") or metadata.get("subject_name") or ""
-    norm_course = normalize(expected_course)
-    has_course = (norm_course and norm_course in header_norm) or bool(
-        re.search(r"(?:course|subject)\s*(?:name|title)?\s*[:=\-]\s*([a-zA-Z\s]{4,40})", header_chunk, re.IGNORECASE)
-    )
-    detected_course_title = expected_course
-    if not has_course:
-        sub_match = re.search(r"(?m)^\s*([A-Z][A-Z\s]{4,35}[A-Z])\s*$", header_chunk)
-        if sub_match and not any(skip in sub_match.group(1).lower() for skip in ["examination", "autonomous", "technology", "sciences", "institute", "regulations"]):
-            detected_course_title = sub_match.group(1).strip()
-            has_course = True
-
-    if has_course:
-        extracted["subject_name"] = detected_course_title or "Subject Name Verified"
-        items.append({
-            "requirement": "Subject Name",
-            "expected_value": expected_course or "Approved Subject Title",
-            "detected_value": detected_course_title or "Subject Name Found",
-            "result": "Correct",
-            "explanation": "Subject Name is clearly displayed in the examination paper header.",
-            "recommended_correction": "None required."
-        })
-    elif expected_course:
-        items.append({
-            "requirement": "Subject Name",
-            "expected_value": expected_course,
-            "detected_value": "Subject Name not found in header",
-            "result": "Missing",
-            "explanation": f"Mandatory Subject Name '{expected_course}' was not found in the examination paper header.",
-            "recommended_correction": f"Display the Subject Name '{expected_course}' in the header."
-        })
-    else:
-        items.append({
-            "requirement": "Subject Name",
-            "expected_value": "Explicit Subject Title in Header",
-            "detected_value": "Missing",
-            "result": "Missing",
-            "explanation": "No Subject Name declaration found in the examination paper header.",
-            "recommended_correction": "Include: '[Subject Title]' in the examination header."
-        })
-
-    # 3. Subject Code
-    expected_code = (metadata.get("course_code") or metadata.get("subject_code") or "").upper().strip()
-    code_match = re.search(r"\b([0-9]{2}[A-Z]{4,6}[0-9]{2,4}[A-Z]?|[A-Z]{2,4}[0-9]{3,5})\b", header_chunk)
-    detected_code = code_match.group(1) if code_match else None
-
-    if expected_code and expected_code.lower() in header_norm:
-        extracted["subject_code"] = expected_code
-        items.append({
-            "requirement": "Subject Code",
-            "expected_value": expected_code,
-            "detected_value": f"Matched Subject Code: {expected_code}",
-            "result": "Correct",
-            "explanation": "Subject Code is clearly present in the header and matches approved curriculum records.",
-            "recommended_correction": "None required."
-        })
-    elif detected_code:
-        extracted["subject_code"] = detected_code
-        items.append({
-            "requirement": "Subject Code",
-            "expected_value": expected_code or "Standard Alphanumeric Subject Code",
-            "detected_value": f"Detected Code: {detected_code}",
-            "result": "Correct",
-            "explanation": f"Valid subject code format detected in header: {detected_code}.",
-            "recommended_correction": "None required."
-        })
-    else:
-        items.append({
-            "requirement": "Subject Code",
-            "expected_value": expected_code or "Standard Alphanumeric Subject Code (e.g. 24ALBTCS403T)",
-            "detected_value": "Missing Subject Code in Header",
-            "result": "Missing",
-            "explanation": "No alphanumeric Subject Code was detected in the document header.",
-            "recommended_correction": f"Include official Subject Code in header: '{expected_code or 'e.g. 24ALBTCS403T'}'."
-        })
-
-    # 4. Branch Name
+    # 2. Branch Name
     dept_meta = metadata.get("department_name") or metadata.get("branch_name") or ""
     dept_norm = normalize(dept_meta)
     branch_keywords = [
@@ -663,7 +584,7 @@ def extract_question_paper_header_details(
         detected_branch = dept_meta
     else:
         for bk in branch_keywords:
-            if bk in header_norm or bk in norm:
+            if re.search(rf"\b{re.escape(bk)}\b", header_norm) or re.search(rf"\b{re.escape(bk)}\b", norm):
                 detected_branch = bk.upper()
                 break
 
@@ -687,13 +608,13 @@ def extract_question_paper_header_details(
             "recommended_correction": "Display the Branch / Department Name in the examination paper header."
         })
 
-    # 5. Maximum Marks (must appear in header!)
+    # 3. Maximum Marks (must appear in header!)
     max_m_regex = re.search(r"(?:max(?:imum)?\.?\s*marks?|m\.m\.)\s*[:=\-]?\s*([0-9]{2,3})", header_chunk, re.IGNORECASE)
     marks_in_header = None
     if max_m_regex:
         marks_in_header = int(max_m_regex.group(1))
     else:
-        m_alt = re.search(r"\b([0-9]{2,3})\s*marks?\b", header_chunk, re.IGNORECASE)
+        m_alt = re.search(r"([0-9]{2,3})\s*marks?", header_chunk, re.IGNORECASE)
         if m_alt:
             marks_in_header = int(m_alt.group(1))
 
@@ -727,7 +648,6 @@ def extract_question_paper_header_details(
         })
 
     return items, extracted
-
 
 def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -809,6 +729,9 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
     # -------------------------------------------------------------
     if is_mid:
         exam_title = "Mid 2 Examination" if ("MID 2" in exam_cat_meta or "mid 2" in full_norm or "mid-2" in full_norm or "mid-ii" in full_norm) else "Mid 1 Examination"
+
+        header_items, _ = extract_question_paper_header_details(full_text, metadata, 40)
+        items.extend(header_items)
 
         # 1. QUESTION 1 - SUBQUESTIONS
         # Question 1 must contain exactly five subquestions.
@@ -914,11 +837,12 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
                 "recommended_correction": "Add '10 Marks' beside each question from 2 to 7."
             })
 
+        all_passed = all(it.get("result") == "Correct" for it in items)
         marks_info = {
             "expected_marks": "N/A",
             "detected_marks": "N/A",
-            "calculation_breakdown": "Mid Exam: Question 1 (5 Subquestions) + Questions 2-7 (10 Marks each)",
-            "status": "Correct" if (q1_ok and qs_present_ok and marks_2_7_ok) else "Incorrect"
+            "calculation_breakdown": "Mid Exam: Common Header (College, Branch, Max Marks: 40) + Q1 (5 Subquestions) + Q2-7 (10 Marks each)",
+            "status": "Correct" if all_passed else "Incorrect"
         }
 
         return build_categorized_report(items, marks_info)
@@ -927,6 +851,9 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
     # CASE B: SEMESTER QUESTION PAPER VALIDATION
     # -------------------------------------------------------------
     else:
+        header_items, _ = extract_question_paper_header_details(full_text, metadata, 70)
+        items.extend(header_items)
+
         # 1. PART A - QUESTION 1 CONTAINS 10 SUBQUESTIONS
         # Accept uppercase and lowercase: A-J or a-j
         # Accept formats such as 1(a), 1(A), (a), (A), 1.a, 1.A, a., A., a), A)
@@ -1014,11 +941,12 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
                 "recommended_correction": "Add '10 Marks' beside each of the 10 questions in Part B."
             })
 
+        all_passed = all(it.get("result") == "Correct" for it in items)
         marks_info = {
             "expected_marks": "N/A",
             "detected_marks": "N/A",
-            "calculation_breakdown": "Semester Exam: Part A (10 Subquestions) + Part B (10 Main Questions @ 10 Marks each)",
-            "status": "Correct" if (part_a_ok and part_b_count_ok and part_b_marks_ok) else "Incorrect"
+            "calculation_breakdown": "Semester Exam: Common Header (College, Branch, Max Marks: 70) + Part A (10 Subquestions) + Part B (10 Main Questions @ 10 Marks each)",
+            "status": "Correct" if all_passed else "Incorrect"
         }
 
         return build_categorized_report(items, marks_info)

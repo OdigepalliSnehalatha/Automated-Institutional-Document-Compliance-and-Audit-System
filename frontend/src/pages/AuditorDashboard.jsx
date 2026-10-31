@@ -174,23 +174,18 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
 
     setFormatName("Standard Mid 1 Examination Paper Format (Total 40 Marks)");
     setInstructions(
-      "Mid 1 Examination Paper (Total Marks: 40). Header must display College Name, Subject Name, Subject Code, Branch Name, and Maximum Marks: 40. Display a separate Marks column beside each question in the table. Question 1 must contain five subquestions (A, B, C, D, E) @ 2 marks each (10 Marks). Questions 2 and 3 form one OR pair. Questions 4 and 5 form one OR pair. Questions 6 and 7 form one OR pair. Each main question carries 10 marks. Maximum Marks: 40. Do not display multiplication calculations or unnecessary marks summaries."
+      "Mid 1 Examination Paper (Total Marks: 40). Common Header must display College Name, Branch Name, and Maximum Marks: 40. Question 1 must contain exactly five subquestions (A-E or a-e). Questions 2 to 7 must all be present. Each of Questions 2 to 7 must display 10 Marks beside it."
     );
     setRequirements([
       { requirement_name: "College Name", requirement_type: "header", requirement_value: "College Name must appear in the header (e.g. Anantha Lakshmi Institute of Technology & Sciences)", is_required: true, display_order: 1 },
-      { requirement_name: "Subject Name", requirement_type: "header", requirement_value: "Subject Name must appear in the header", is_required: true, display_order: 2 },
-      { requirement_name: "Subject Code", requirement_type: "header", requirement_value: "Subject Code must appear in the header", is_required: true, display_order: 3 },
-      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header", is_required: true, display_order: 4 },
-      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 40 must appear in the header", is_required: true, display_order: 5 },
-      { requirement_name: "Separate Marks Column", requirement_type: "structure", requirement_value: "Display a separate Marks column beside each question in the table", is_required: true, display_order: 6 },
-      { requirement_name: "Question 1 Subquestions (Short Answer)", requirement_type: "question_count", requirement_value: "Five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks)", is_required: true, display_order: 7 },
-      { requirement_name: "OR Pair 1 (Question 2 and Question 3)", requirement_type: "marks", requirement_value: "Questions 2 and 3 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 8 },
-      { requirement_name: "OR Pair 2 (Question 4 and Question 5)", requirement_type: "marks", requirement_value: "Questions 4 and 5 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 9 },
-      { requirement_name: "OR Pair 3 (Question 6 and Question 7)", requirement_type: "marks", requirement_value: "Questions 6 and 7 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 10 },
-      { requirement_name: "Main Question Marks (10 Marks Each)", requirement_type: "marks", requirement_value: "Each main question carries 10 marks (Maximum Marks: 40, without multiplication formulas)", is_required: true, display_order: 11 },
+      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header (e.g. COMPUTER SCIENCE AND ENGINEERING)", is_required: true, display_order: 2 },
+      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 40 must appear in the header", is_required: true, display_order: 3 },
+      { requirement_name: "Question 1 Subquestions", requirement_type: "question_count", requirement_value: "Question 1 must contain exactly five subquestions (A-E or a-e)", is_required: true, display_order: 4 },
+      { requirement_name: "Questions 2 to 7 Presence", requirement_type: "structure", requirement_value: "All six main questions (Questions 2, 3, 4, 5, 6, 7) must be present", is_required: true, display_order: 5 },
+      { requirement_name: "Questions 2 to 7 (10 Marks Each)", requirement_type: "marks", requirement_value: "Each of Questions 2 to 7 must display 10 Marks beside it", is_required: true, display_order: 6 },
     ]);
     setFeedback({
-      success: "✓ Loaded Standard Mid 1 Paper requirements (11 rules, 40 Marks).",
+      success: "✓ Loaded Standard Mid 1 Paper requirements (6 rules, 40 Marks).",
       error: ""
     });
   };
@@ -206,23 +201,18 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
 
     setFormatName("Standard Mid 2 Examination Paper Format (Total 40 Marks)");
     setInstructions(
-      "Mid 2 Examination Paper (Total Marks: 40). Header must display College Name, Subject Name, Subject Code, Branch Name, and Maximum Marks: 40. Display a separate Marks column beside each question in the table. Question 1 must contain five subquestions (A, B, C, D, E) @ 2 marks each (10 Marks). Questions 2 and 3 form one OR pair. Questions 4 and 5 form one OR pair. Questions 6 and 7 form one OR pair. Each main question carries 10 marks. Maximum Marks: 40. Do not display multiplication calculations or unnecessary marks summaries."
+      "Mid 2 Examination Paper (Total Marks: 40). Common Header must display College Name, Branch Name, and Maximum Marks: 40. Question 1 must contain exactly five subquestions (A-E or a-e). Questions 2 to 7 must all be present. Each of Questions 2 to 7 must display 10 Marks beside it."
     );
     setRequirements([
       { requirement_name: "College Name", requirement_type: "header", requirement_value: "College Name must appear in the header (e.g. Anantha Lakshmi Institute of Technology & Sciences)", is_required: true, display_order: 1 },
-      { requirement_name: "Subject Name", requirement_type: "header", requirement_value: "Subject Name must appear in the header", is_required: true, display_order: 2 },
-      { requirement_name: "Subject Code", requirement_type: "header", requirement_value: "Subject Code must appear in the header", is_required: true, display_order: 3 },
-      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header", is_required: true, display_order: 4 },
-      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 40 must appear in the header", is_required: true, display_order: 5 },
-      { requirement_name: "Separate Marks Column", requirement_type: "structure", requirement_value: "Display a separate Marks column beside each question in the table", is_required: true, display_order: 6 },
-      { requirement_name: "Question 1 Subquestions (Short Answer)", requirement_type: "question_count", requirement_value: "Five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks)", is_required: true, display_order: 7 },
-      { requirement_name: "OR Pair 1 (Question 2 and Question 3)", requirement_type: "marks", requirement_value: "Questions 2 and 3 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 8 },
-      { requirement_name: "OR Pair 2 (Question 4 and Question 5)", requirement_type: "marks", requirement_value: "Questions 4 and 5 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 9 },
-      { requirement_name: "OR Pair 3 (Question 6 and Question 7)", requirement_type: "marks", requirement_value: "Questions 6 and 7 form one OR pair; each main question carries 10 marks", is_required: true, display_order: 10 },
-      { requirement_name: "Main Question Marks (10 Marks Each)", requirement_type: "marks", requirement_value: "Each main question carries 10 marks (Maximum Marks: 40, without multiplication formulas)", is_required: true, display_order: 11 },
+      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header (e.g. COMPUTER SCIENCE AND ENGINEERING)", is_required: true, display_order: 2 },
+      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 40 must appear in the header", is_required: true, display_order: 3 },
+      { requirement_name: "Question 1 Subquestions", requirement_type: "question_count", requirement_value: "Question 1 must contain exactly five subquestions (A-E or a-e)", is_required: true, display_order: 4 },
+      { requirement_name: "Questions 2 to 7 Presence", requirement_type: "structure", requirement_value: "All six main questions (Questions 2, 3, 4, 5, 6, 7) must be present", is_required: true, display_order: 5 },
+      { requirement_name: "Questions 2 to 7 (10 Marks Each)", requirement_type: "marks", requirement_value: "Each of Questions 2 to 7 must display 10 Marks beside it", is_required: true, display_order: 6 },
     ]);
     setFeedback({
-      success: "✓ Loaded Standard Mid 2 Paper requirements (11 rules, 40 Marks).",
+      success: "✓ Loaded Standard Mid 2 Paper requirements (6 rules, 40 Marks).",
       error: ""
     });
   };
@@ -237,22 +227,18 @@ function AuditorDashboard({ user, activeTab: propActiveTab, onTabChange }) {
 
     setFormatName("Standard Semester Examination Paper Format (Total 70 Marks)");
     setInstructions(
-      "Semester Question Paper (Total Marks: 70). Header must display College Name, Subject Name, Subject Code, Branch Name, and Maximum Marks: 70. Do NOT display a separate Marks column in the question paper table. Display individual marks directly beside each question inline. Part A: Ten subquestions, each individually showing (2 Marks). Part B: Five unit-wise questions, each individually showing (10 Marks). Maximum Marks: 70. Preserve individual marks presentation throughout the paper without multiplication formulas."
+      "Semester Question Paper (Total Marks: 70). Common Header must display College Name, Branch Name, and Maximum Marks: 70. Part A (Question 1) must contain exactly 10 subquestions (A-J or a-j). Part B must contain exactly 10 main questions. Every question in Part B must display '10 Marks' beside it."
     );
     setRequirements([
       { requirement_name: "College Name", requirement_type: "header", requirement_value: "College Name must appear in the header (e.g. Anantha Lakshmi Institute of Technology & Sciences)", is_required: true, display_order: 1 },
-      { requirement_name: "Subject Name", requirement_type: "header", requirement_value: "Subject Name must appear in the header", is_required: true, display_order: 2 },
-      { requirement_name: "Subject Code", requirement_type: "header", requirement_value: "Subject Code must appear in the header", is_required: true, display_order: 3 },
-      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header", is_required: true, display_order: 4 },
-      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 70 must appear in the header", is_required: true, display_order: 5 },
-      { requirement_name: "Marks Column Restriction", requirement_type: "structure", requirement_value: "Do NOT display a separate Marks column in the question paper table", is_required: true, display_order: 6 },
-      { requirement_name: "Inline Individual Marks Presentation", requirement_type: "structure", requirement_value: "Display individual marks directly beside each question (2 Marks for Part A, 10 Marks for Part B)", is_required: true, display_order: 7 },
-      { requirement_name: "PART A - Short Answer Questions", requirement_type: "question_count", requirement_value: "Ten subquestions, each individually showing (2 Marks) (20 Marks total)", is_required: true, display_order: 8 },
-      { requirement_name: "PART B - Unit-Wise Descriptive Questions", requirement_type: "structure", requirement_value: "Five unit-wise questions (Units 1 to 5), each individually showing (10 Marks) (50 Marks total)", is_required: true, display_order: 9 },
-      { requirement_name: "Semester Maximum Marks (70 Marks)", requirement_type: "marks", requirement_value: "Maximum Marks: 70 (Part A: 20 Marks + Part B: 50 Marks, without multiplication formulas)", is_required: true, display_order: 10 },
+      { requirement_name: "Branch Name", requirement_type: "header", requirement_value: "Branch Name must appear in the header (e.g. COMPUTER SCIENCE AND ENGINEERING)", is_required: true, display_order: 2 },
+      { requirement_name: "Maximum Marks (in Header)", requirement_type: "header", requirement_value: "Maximum Marks: 70 must appear in the header", is_required: true, display_order: 3 },
+      { requirement_name: "Part A, Question 1 Subquestions", requirement_type: "question_count", requirement_value: "Question 1 must contain exactly 10 subquestions (A-J or a-j)", is_required: true, display_order: 4 },
+      { requirement_name: "Part B Main Questions Count", requirement_type: "structure", requirement_value: "Part B must contain exactly 10 main questions", is_required: true, display_order: 5 },
+      { requirement_name: "Part B Questions (10 Marks Each)", requirement_type: "marks", requirement_value: "Every question in Part B must display '10 Marks' beside it", is_required: true, display_order: 6 },
     ]);
     setFeedback({
-      success: "✓ Loaded Standard Semester Paper requirements (10 rules, 70 Marks).",
+      success: "✓ Loaded Standard Semester Paper requirements (6 rules, 70 Marks).",
       error: ""
     });
   };

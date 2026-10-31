@@ -464,10 +464,8 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
               </p>
               <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
                 <li><strong>College Name</strong>: Official institution banner.</li>
-                <li><strong>Subject Name</strong>: Course / Subject title.</li>
-                <li><strong>Subject Code</strong>: Approved alphanumeric subject code.</li>
-                <li><strong>Branch Name</strong>: Department / Branch designation.</li>
-                <li><strong>Maximum Marks</strong>: Must strictly appear in the header area.</li>
+                <li><strong>Branch Name</strong>: Department / Branch designation (e.g. COMPUTER SCIENCE AND ENGINEERING).</li>
+                <li><strong>Maximum Marks</strong>: Must strictly appear in the header area (Max. Marks: 40 for Mid 1/Mid 2; Max. Marks: 70 for Semester).</li>
               </ul>
             </div>
 
@@ -478,21 +476,14 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
                 <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Mid 1 & Mid 2 Examination Papers</h4>
               </div>
               <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 10px 0" }}>
-                Total Marks: 40 | Separate Marks Column layout:
+                Total Marks: 40 | Question Paper Structure:
               </p>
               <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
-                <li><strong>Separate Marks Column</strong>: Display a separate Marks column beside each question in the table.</li>
-                <li><strong>Question 1 (Short Answer)</strong>: Must contain five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks).</li>
-                <li><strong>OR Pairs</strong>:
-                  <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
-                    <li>Questions 2 and 3 form one OR pair.</li>
-                    <li>Questions 4 and 5 form one OR pair.</li>
-                    <li>Questions 6 and 7 form one OR pair.</li>
-                  </ul>
-                </li>
-                <li><strong>Question Marks</strong>: Each main question carries 10 marks.</li>
+                <li><strong>Common Header</strong>: College Name, Branch Name, and Maximum Marks: 40.</li>
+                <li><strong>Question 1 (Subquestions)</strong>: Must contain exactly five subquestions (A, B, C, D, E or a, b, c, d, e).</li>
+                <li><strong>Questions 2 to 7 Presence</strong>: All six main questions (Questions 2, 3, 4, 5, 6, 7) must be present.</li>
+                <li><strong>10 Marks Label Each</strong>: Each question from Questions 2 to 7 must display 10 Marks beside it.</li>
                 <li><strong>Maximum Marks</strong>: 40 (must appear in header).</li>
-                <li><strong>Clean Presentation</strong>: Do not display multiplication calculations or unnecessary marks summaries.</li>
               </ul>
             </div>
 
@@ -503,15 +494,14 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
                 <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Semester Question Paper</h4>
               </div>
               <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 10px 0" }}>
-                Total Marks: 70 | Inline Individual Marks format:
+                Total Marks: 70 | Semester Question Paper Structure:
               </p>
               <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
-                <li><strong>No Marks Column</strong>: Do NOT display a separate Marks column in the question paper table.</li>
-                <li><strong>Inline Individual Marks</strong>: Display individual marks directly beside each question statement.</li>
-                <li><strong>PART A (Short Answer)</strong>: Ten subquestions, each individually showing (2 Marks) (Total: 20 Marks).</li>
-                <li><strong>PART B (Descriptive)</strong>: Five unit-wise questions (Units 1 to 5), each individually showing (10 Marks) (Total: 50 Marks).</li>
+                <li><strong>Common Header</strong>: College Name, Branch Name, and Maximum Marks: 70.</li>
+                <li><strong>PART A (Question 1)</strong>: Question 1 must contain exactly 10 subquestions (A-J or a-j).</li>
+                <li><strong>PART B (Main Questions)</strong>: Part B must contain exactly 10 main questions.</li>
+                <li><strong>10 Marks Label Each</strong>: Every question in Part B must display '10 Marks' beside it.</li>
                 <li><strong>Maximum Marks</strong>: 70 (must appear in header).</li>
-                <li><strong>No Formula Display</strong>: Preserve individual marks presentation without formulas (no 2 × 10 = 20 or 10 × 5 = 50).</li>
               </ul>
             </div>
 
