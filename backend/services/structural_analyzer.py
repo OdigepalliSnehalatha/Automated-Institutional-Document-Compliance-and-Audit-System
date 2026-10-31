@@ -522,22 +522,238 @@ def validate_course_structure_document(file_path: str, metadata: Dict[str, Any])
 
 
 # =====================================================================
-# 3. QUESTION PAPER VALIDATOR (Mid 1, Mid 2, and Semester Paper)
 # =====================================================================
+# 3. QUESTION PAPER COMMON HEADER & VALIDATOR (Mid 1, Mid 2, and Semester)
+# =====================================================================
+def extract_question_paper_header_details(
+    full_text: str, metadata: Dict[str, Any], max_marks_expected: int
+) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+    """
+    Validates Common Header for all three examination papers:
+      1. College Name
+      2. Subject Name
+      3. Subject Code
+      4. Branch Name
+      5. Maximum Marks (must appear in header!)
+    """
+    header_chunk = full_text[:2500]
+    header_norm = normalize(header_chunk)
+    norm = normalize(full_text)
+    items: List[Dict[str, Any]] = []
+    extracted: Dict[str, str] = {}
+
+    # 1. College Name
+    expected_inst = metadata.get("institution_name") or "Anantha Lakshmi Institute of Technology & Sciences"
+    norm_inst = normalize(expected_inst)
+    has_inst = (
+        norm_inst in header_norm or
+        "anantha lakshmi" in header_norm or
+        "technology and sciences" in header_norm or
+        "technology & sciences" in header_norm or
+        any(k in header_norm for k in ["college of engineering", "institute of technology", "university"])
+    )
+    if has_inst:
+        extracted["college_name"] = expected_inst
+        items.append({
+            "requirement": "College Name",
+            "expected_value": expected_inst,
+            "detected_value": "College Name verified in header",
+            "result": "Correct",
+            "explanation": "Official College Name is clearly displayed in the examination paper header.",
+            "recommended_correction": "None required."
+        })
+    else:
+        items.append({
+            "requirement": "College Name",
+            "expected_value": expected_inst,
+            "detected_value": "Missing / Unrecognized College Name",
+            "result": "Missing",
+            "explanation": f"Mandatory College Name '{expected_inst}' was not detected in document header.",
+            "recommended_correction": f"Include official College Name: '{expected_inst}' at the top of the examination paper."
+        })
+
+    # 2. Subject Name
+    expected_course = metadata.get("course_name") or metadata.get("subject_name") or ""
+    norm_course = normalize(expected_course)
+    has_course = (norm_course and norm_course in header_norm) or bool(
+        re.search(r"(?:course|subject)\s*(?:name|title)?\s*[:=\-]\s*([a-zA-Z\s]{4,40})", header_chunk, re.IGNORECASE)
+    )
+    detected_course_title = expected_course
+    if not has_course:
+        sub_match = re.search(r"(?m)^\s*([A-Z][A-Z\s]{4,35}[A-Z])\s*$", header_chunk)
+        if sub_match and not any(skip in sub_match.group(1).lower() for skip in ["examination", "autonomous", "technology", "sciences", "institute", "regulations"]):
+            detected_course_title = sub_match.group(1).strip()
+            has_course = True
+
+    if has_course:
+        extracted["subject_name"] = detected_course_title or "Subject Name Verified"
+        items.append({
+            "requirement": "Subject Name",
+            "expected_value": expected_course or "Approved Subject Title",
+            "detected_value": detected_course_title or "Subject Name Found",
+            "result": "Correct",
+            "explanation": "Subject Name is clearly displayed in the examination paper header.",
+            "recommended_correction": "None required."
+        })
+    elif expected_course:
+        items.append({
+            "requirement": "Subject Name",
+            "expected_value": expected_course,
+            "detected_value": "Subject Name not found in header",
+            "result": "Missing",
+            "explanation": f"Mandatory Subject Name '{expected_course}' was not found in the examination paper header.",
+            "recommended_correction": f"Display the Subject Name '{expected_course}' in the header."
+        })
+    else:
+        items.append({
+            "requirement": "Subject Name",
+            "expected_value": "Explicit Subject Title in Header",
+            "detected_value": "Missing",
+            "result": "Missing",
+            "explanation": "No Subject Name declaration found in the examination paper header.",
+            "recommended_correction": "Include: '[Subject Title]' in the examination header."
+        })
+
+    # 3. Subject Code
+    expected_code = (metadata.get("course_code") or metadata.get("subject_code") or "").upper().strip()
+    code_match = re.search(r"\b([0-9]{2}[A-Z]{4,6}[0-9]{2,4}[A-Z]?|[A-Z]{2,4}[0-9]{3,5})\b", header_chunk)
+    detected_code = code_match.group(1) if code_match else None
+
+    if expected_code and expected_code.lower() in header_norm:
+        extracted["subject_code"] = expected_code
+        items.append({
+            "requirement": "Subject Code",
+            "expected_value": expected_code,
+            "detected_value": f"Matched Subject Code: {expected_code}",
+            "result": "Correct",
+            "explanation": "Subject Code is clearly present in the header and matches approved curriculum records.",
+            "recommended_correction": "None required."
+        })
+    elif detected_code:
+        extracted["subject_code"] = detected_code
+        items.append({
+            "requirement": "Subject Code",
+            "expected_value": expected_code or "Standard Alphanumeric Subject Code",
+            "detected_value": f"Detected Code: {detected_code}",
+            "result": "Correct",
+            "explanation": f"Valid subject code format detected in header: {detected_code}.",
+            "recommended_correction": "None required."
+        })
+    else:
+        items.append({
+            "requirement": "Subject Code",
+            "expected_value": expected_code or "Standard Alphanumeric Subject Code (e.g. 24ALBTCS403T)",
+            "detected_value": "Missing Subject Code in Header",
+            "result": "Missing",
+            "explanation": "No alphanumeric Subject Code was detected in the document header.",
+            "recommended_correction": f"Include official Subject Code in header: '{expected_code or 'e.g. 24ALBTCS403T'}'."
+        })
+
+    # 4. Branch Name
+    dept_meta = metadata.get("department_name") or metadata.get("branch_name") or ""
+    dept_norm = normalize(dept_meta)
+    branch_keywords = [
+        "computer science and engineering", "computer science & engineering", "computer science",
+        "artificial intelligence", "data science", "electronics and communication",
+        "electronics & communication", "electrical and electronics", "mechanical engineering",
+        "civil engineering", "information technology", "cse", "ece", "eee", "mech", "civil", "ai&ml", "aids"
+    ]
+    detected_branch = None
+    if dept_norm and (dept_norm in header_norm or dept_norm in norm):
+        detected_branch = dept_meta
+    else:
+        for bk in branch_keywords:
+            if bk in header_norm or bk in norm:
+                detected_branch = bk.upper()
+                break
+
+    if detected_branch:
+        extracted["branch_name"] = detected_branch
+        items.append({
+            "requirement": "Branch Name",
+            "expected_value": dept_meta or "Branch / Department Name",
+            "detected_value": f"Branch Name: {detected_branch}",
+            "result": "Correct",
+            "explanation": "Branch Name is clearly identified in the examination paper header.",
+            "recommended_correction": "None required."
+        })
+    else:
+        items.append({
+            "requirement": "Branch Name",
+            "expected_value": dept_meta or "Branch / Department Name (e.g. COMPUTER SCIENCE AND ENGINEERING)",
+            "detected_value": "Branch Name Missing",
+            "result": "Missing",
+            "explanation": "Mandatory Branch Name was not detected in the document header.",
+            "recommended_correction": "Display the Branch / Department Name in the examination paper header."
+        })
+
+    # 5. Maximum Marks (must appear in header!)
+    max_m_regex = re.search(r"(?:max(?:imum)?\.?\s*marks?|m\.m\.)\s*[:=\-]?\s*([0-9]{2,3})", header_chunk, re.IGNORECASE)
+    marks_in_header = None
+    if max_m_regex:
+        marks_in_header = int(max_m_regex.group(1))
+    else:
+        m_alt = re.search(r"\b([0-9]{2,3})\s*marks?\b", header_chunk, re.IGNORECASE)
+        if m_alt:
+            marks_in_header = int(m_alt.group(1))
+
+    if marks_in_header == max_marks_expected:
+        extracted["maximum_marks"] = str(max_marks_expected)
+        items.append({
+            "requirement": "Maximum Marks (in Header)",
+            "expected_value": f"Maximum Marks: {max_marks_expected}",
+            "detected_value": f"Maximum Marks: {max_marks_expected} verified in header",
+            "result": "Correct",
+            "explanation": f"Maximum Marks ({max_marks_expected} Marks) clearly appears in the examination paper header.",
+            "recommended_correction": "None required."
+        })
+    elif marks_in_header is not None:
+        items.append({
+            "requirement": "Maximum Marks (in Header)",
+            "expected_value": f"Maximum Marks: {max_marks_expected}",
+            "detected_value": f"Header displays Maximum Marks: {marks_in_header}",
+            "result": "Incorrect",
+            "explanation": f"Header indicates Maximum Marks as {marks_in_header}, but required standard is {max_marks_expected} Marks.",
+            "recommended_correction": f"Set Maximum Marks to {max_marks_expected} in the examination header."
+        })
+    else:
+        items.append({
+            "requirement": "Maximum Marks (in Header)",
+            "expected_value": f"Maximum Marks: {max_marks_expected}",
+            "detected_value": "Maximum Marks not found in header",
+            "result": "Missing",
+            "explanation": f"Mandatory Maximum Marks declaration ({max_marks_expected} Marks) was not found in the examination paper header.",
+            "recommended_correction": f"Display 'Max. Marks: {max_marks_expected}' in the examination paper header."
+        })
+
+    return items, extracted
+
+
 def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Validates Question Paper according to category:
-      A. Mid 1 and Mid 2 Examination:
-         - Total Marks = 40
-         - Question 1: Short Answer Questions (5 subquestions: A, B, C, D, E @ 2M each = 10M)
-         - Questions 2 to 7: MCQs arranged in 3 pairs (Pair 1: Q2-3 = 10M, Pair 2: Q4-5 = 10M, Pair 3: Q6-7 = 10M)
-         - Exactly 7 main question numbers
-         - No OR choice or attempt-any-three rule
-      B. Semester Examination:
-         - Total Marks = 70
-         - Part A: Short Answer (Questions 1 to 10 @ 2M each = 20M, covering all 5 units)
-         - Part B: Descriptive (5 unit-wise questions, one 10M question per unit = 50M)
-         - Grand Total = 70 Marks
+    Validates Question Paper according to institutional standards:
+      1. Common Header (All 3 Papers):
+         - College Name
+         - Subject Name
+         - Subject Code
+         - Branch Name
+         - Maximum Marks (must appear in header)
+      2. Mid 1 and Mid 2 Examination Papers:
+         - Display a separate Marks column beside each question in the table.
+         - Question 1: five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks).
+         - Questions 2 & 3 form one OR pair (10 Marks each).
+         - Questions 4 & 5 form one OR pair (10 Marks each).
+         - Questions 6 & 7 form one OR pair (10 Marks each).
+         - Each main question carries 10 marks.
+         - Maximum Marks: 40.
+         - Do not display multiplication calculations or unnecessary marks summaries.
+      3. Semester Question Paper:
+         - Do NOT display a separate Marks column in the question paper table.
+         - Display individual marks directly beside each question inline.
+         - Part A: Ten subquestions, each individually showing (2 Marks) (20 Marks).
+         - Part B: Five unit-wise questions, each individually showing (10 Marks) (50 Marks).
+         - Maximum Marks: 70.
+         - Preserve individual marks presentation without multiplication formulas.
     """
     path = Path(file_path)
     if not path.exists() or path.stat().st_size == 0:
@@ -583,281 +799,226 @@ def validate_question_paper_document(file_path: str, metadata: Dict[str, Any]) -
         }
         return build_categorized_report([item], {"expected_marks": 0, "detected_marks": 0, "calculation_breakdown": "Pending Review", "status": "Needs Review"})
 
-    # 1. Mandatory 5 Common Institutional Details
-    common_items, _ = extract_common_institutional_details(full_text, metadata)
-    items.extend(common_items)
-
-    # 2. Determine Examination Category: Mid 1, Mid 2, or Semester
+    # Determine Examination Category: Mid 1, Mid 2, or Semester
     exam_cat_meta = (metadata.get("exam_category") or metadata.get("document_type_name") or "").upper()
     is_semester = "SEM" in exam_cat_meta or "SEMESTER" in full_norm[:1500] or "end semester" in full_norm[:1500]
     is_mid = not is_semester
 
     # -------------------------------------------------------------
-    # CASE A: MID 1 / MID 2 EXAMINATION (Total Marks = 40)
+    # CASE A: MID 1 / MID 2 QUESTION PAPER VALIDATION
     # -------------------------------------------------------------
     if is_mid:
         exam_title = "Mid 2 Examination" if ("MID 2" in exam_cat_meta or "mid 2" in full_norm or "mid-2" in full_norm or "mid-ii" in full_norm) else "Mid 1 Examination"
-        items.append({
-            "requirement": "Examination Category",
-            "expected_value": "Mid 1 Examination or Mid 2 Examination",
-            "detected_value": exam_title,
-            "result": "Correct",
-            "explanation": f"Document identified as {exam_title} with identical 40-mark examination pattern.",
-            "recommended_correction": "None required."
-        })
 
-        # Rule 1: Exactly 7 Main Question Numbers (Q1 to Q7)
-        # Search for main question markers: Q1, Q2, Q3, Q4, Q5, Q6, Q7 or 1., 2., 3., 4., 5., 6., 7.
-        detected_main_qs = set()
-        for q_num in range(1, 8):
+        # 1. QUESTION 1 - SUBQUESTIONS
+        # Question 1 must contain exactly five subquestions.
+        # Accept both uppercase and lowercase lettering: A, B, C, D, E or a, b, c, d, e.
+        # Validate only presence and count of 5 subquestions.
+        # Accept numbering formats such as 1(a), 1(A), (a), (A), 1.a, 1.A, a., A., a), A).
+        q1_m = re.search(r'(?:question\s*1\b|q\.?\s*1\b|^\s*1\s*[\.\)]|^\s*\|\s*1[\.\s])', full_text, re.IGNORECASE | re.MULTILINE)
+        q2_m = re.search(r'(?:question\s*2\b|q\.?\s*2\b|^\s*2\s*[\.\)]|^\s*\|\s*2\b)', full_text, re.IGNORECASE | re.MULTILINE)
+        q1_chunk = full_text[q1_m.start():q2_m.start()] if (q1_m and q2_m) else full_text[:3500]
+
+        detected_mid_subs = []
+        for l in ['a', 'b', 'c', 'd', 'e']:
+            pat = rf'(?:1\s*[\.\(]\s*{l}[\.\)]?|\({l}\)|{l}\)|\b{l}\.|\b{l}\b(?:\s*[\.\:\-\)])|\|\s*(?:1[\.\(])?\s*{l}[\.\)\s])'
+            if re.search(pat, q1_chunk, re.IGNORECASE | re.MULTILINE):
+                detected_mid_subs.append(l.upper())
+
+        q1_ok = (len(detected_mid_subs) == 5)
+        if q1_ok:
+            items.append({
+                "requirement": "Question 1 Subquestions",
+                "expected_value": "Question 1 must contain exactly five subquestions (A-E or a-e)",
+                "detected_value": f"Question 1 contains five subquestions ({', '.join(detected_mid_subs)})",
+                "result": "Correct",
+                "explanation": "Question 1 contains exactly five subquestions.",
+                "recommended_correction": "None required."
+            })
+        else:
+            items.append({
+                "requirement": "Question 1 Subquestions",
+                "expected_value": "Question 1 must contain exactly five subquestions (A-E or a-e)",
+                "detected_value": f"Detected {len(detected_mid_subs)}/5 subquestions ({', '.join(detected_mid_subs) if detected_mid_subs else 'None'})",
+                "result": "Incorrect",
+                "explanation": "Question 1 must contain exactly five subquestions labeled A to E (or a to e).",
+                "recommended_correction": "Format Question 1 with five subquestions (A, B, C, D, E or a, b, c, d, e)."
+            })
+
+        # 2. QUESTIONS 2 TO 7 - CHECK ALL SIX MAIN QUESTIONS ARE PRESENT
+        detected_qs = []
+        missing_qs = []
+        for q_num in range(2, 8):
             q_patterns = [
                 rf"\b(?:question|q)\.?\s*{q_num}\b",
-                rf"(?m)^\s*{q_num}\s*[\.\)]\s+",
-                rf"\b{q_num}\s*[\.\)]\s+[A-Za-z]"
+                rf"^\s*{q_num}\s*[\.\)]\s+",
+                rf"\b{q_num}\s*[\.\)]\s+[A-Za-z]",
+                rf"\|\s*{q_num}(?:\.|\s*\||\s+[A-Za-z])",
+                rf"\b{q_num}\s*[\:\-]\s+[A-Za-z]"
             ]
-            for qp in q_patterns:
-                if re.search(qp, full_text, re.IGNORECASE):
-                    detected_main_qs.add(q_num)
-                    break
+            if any(re.search(qp, full_text, re.IGNORECASE | re.MULTILINE) for qp in q_patterns):
+                detected_qs.append(q_num)
+            else:
+                missing_qs.append(f"Q{q_num}")
 
-        has_extra_qs = bool(re.search(r"(?m)(?:\b(?:question|q)\.?\s*[89]\b|^\s*[89]\s*[\.\)])", full_text, re.IGNORECASE))
-
-        if len(detected_main_qs) == 7 and not has_extra_qs:
+        qs_present_ok = (len(detected_qs) == 6)
+        if qs_present_ok:
             items.append({
-                "requirement": "Main Question Numbers Count",
-                "expected_value": "Exactly 7 Main Questions (Question 1 to Question 7)",
-                "detected_value": "All 7 Questions present (Q1 to Q7)",
+                "requirement": "Questions 2 to 7 Presence",
+                "expected_value": "All six main questions (Questions 2, 3, 4, 5, 6, 7) must be present",
+                "detected_value": "All six main questions (2, 3, 4, 5, 6, 7) are present",
                 "result": "Correct",
-                "explanation": "Question paper strictly contains exactly 7 main question numbers.",
-                "recommended_correction": "None required."
-            })
-        else:
-            missing_qs = [f"Q{i}" for i in range(1, 8) if i not in detected_main_qs]
-            items.append({
-                "requirement": "Main Question Numbers Count",
-                "expected_value": "Exactly 7 Main Questions (Question 1 to Question 7)",
-                "detected_value": f"Detected {len(detected_main_qs)}/7 questions. Missing: {', '.join(missing_qs) if missing_qs else 'Extra questions found'}",
-                "result": "Incorrect" if has_extra_qs else "Missing",
-                "explanation": "Mid exam pattern requires exactly 7 main questions (Q1 Short Answer + Q2-Q7 MCQs).",
-                "recommended_correction": "Number questions exactly from Question 1 to Question 7."
-            })
-
-        # Rule 2: Question 1 – Short Answer Questions (5 subquestions: A, B, C, D, E @ 2M each = 10 Marks)
-        sub_labels = ["a", "b", "c", "d", "e"]
-        q1_m = re.search(r'(?:question\s*1|q\.?\s*1\b|^\s*1\s*[\.\)])', full_text, re.IGNORECASE | re.MULTILINE)
-        q2_m = re.search(r'(?:question\s*2|q\.?\s*2\b|^\s*2\s*[\.\)])', full_text, re.IGNORECASE | re.MULTILINE)
-        q1_chunk = full_text[q1_m.start():q2_m.start()] if (q1_m and q2_m) else full_text[:2500]
-
-        detected_subs = []
-        for sl in sub_labels:
-            if re.search(rf'(?:\({sl}\)|^\s*{sl}\.|\b{sl}\.|\b{sl}\))', q1_chunk, re.IGNORECASE | re.MULTILINE):
-                detected_subs.append(sl.upper())
-
-        has_2m_q1 = bool(re.search(r"\b2\s*m(?:arks)?\b", q1_chunk, re.IGNORECASE)) or "2 marks" in normalize(q1_chunk) or "10 marks" in normalize(q1_chunk) or "[2]" in q1_chunk
-
-        if len(detected_subs) >= 4 and has_2m_q1:
-            items.append({
-                "requirement": "Question 1 Subquestions (Short Answer)",
-                "expected_value": "5 Subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks",
-                "detected_value": f"Detected subquestions ({', '.join(detected_subs)}) with 2-mark weighting",
-                "result": "Correct",
-                "explanation": "Question 1 contains 5 short-answer subquestions carrying 2 marks each (10 Marks total).",
+                "explanation": "Questions 2, 3, 4, 5, 6, and 7 are all present in the question paper.",
                 "recommended_correction": "None required."
             })
         else:
             items.append({
-                "requirement": "Question 1 Subquestions (Short Answer)",
-                "expected_value": "5 Subquestions (A, B, C, D, E) @ 2 Marks each = 10 Marks",
-                "detected_value": f"Detected {len(detected_subs)}/5 subquestions ({', '.join(detected_subs) if detected_subs else 'None'})",
+                "requirement": "Questions 2 to 7 Presence",
+                "expected_value": "All six main questions (Questions 2, 3, 4, 5, 6, 7) must be present",
+                "detected_value": f"Detected {len(detected_qs)}/6 questions. Missing: {', '.join(missing_qs)}",
+                "result": "Missing",
+                "explanation": f"Question paper is missing the following question numbers: {', '.join(missing_qs)}.",
+                "recommended_correction": "Ensure all questions from 2 to 7 are present and numbered clearly."
+            })
+
+        # 3. EACH QUESTION 2 TO 7 DISPLAYS 10 MARKS BESIDE IT
+        missing_10m_qs = []
+        for q_num in range(2, 8):
+            m = re.search(rf"(?:question\s*{q_num}\b|q\.?\s*{q_num}\b|^\s*{q_num}\s*[\.\)]|\|\s*{q_num}\b)", full_text, re.IGNORECASE | re.MULTILINE)
+            if m:
+                chunk = full_text[m.start():m.start() + 450]
+                if not re.search(r'(?:10\s*m(?:arks)?|\|\s*10\s*\||\[10\s*m(?:arks)?\])', chunk, re.IGNORECASE):
+                    missing_10m_qs.append(f"Q{q_num}")
+            else:
+                missing_10m_qs.append(f"Q{q_num}")
+
+        all_10m_labels = re.findall(r'(?:10\s*m(?:arks)?|\|\s*10\s*\||\[10\s*m(?:arks)?\])', full_text, re.IGNORECASE)
+        marks_2_7_ok = (len(missing_10m_qs) == 0 and len(all_10m_labels) >= 6)
+
+        if marks_2_7_ok:
+            items.append({
+                "requirement": "Questions 2 to 7 (10 Marks Each)",
+                "expected_value": "Each of Questions 2–7 must display 10 Marks beside it",
+                "detected_value": "Each of Questions 2 to 7 displays 10 Marks beside it",
+                "result": "Correct",
+                "explanation": "All six questions (Questions 2–7) display individual 10 Marks labels.",
+                "recommended_correction": "None required."
+            })
+        else:
+            items.append({
+                "requirement": "Questions 2 to 7 (10 Marks Each)",
+                "expected_value": "Each of Questions 2–7 must display 10 Marks beside it",
+                "detected_value": f"Missing 10 Marks label on questions: {', '.join(missing_10m_qs) if missing_10m_qs else 'Insufficient 10M labels'}",
                 "result": "Incorrect",
-                "explanation": "Question 1 must contain five subquestions (A, B, C, D, E) carrying 2 marks each.",
-                "recommended_correction": "Format Question 1 with subquestions: (A), (B), (C), (D), and (E) @ 2 Marks each."
+                "explanation": "Each question from 2 to 7 must clearly display 10 Marks beside it.",
+                "recommended_correction": "Add '10 Marks' beside each question from 2 to 7."
             })
-
-        # Rule 3 & 4: Questions 2 to 7 Multiple Choice Questions in 3 Pairs (10 Marks each)
-        # Pair 1: Q2 & Q3 = 10M
-        # Pair 2: Q4 & Q5 = 10M
-        # Pair 3: Q6 & Q7 = 10M
-        mcq_indicators = ["mcq", "multiple choice", "(a)", "(b)", "(c)", "(d)", "options", "choose", "[a]", "[b]"]
-        has_mcq_structure = sum(1 for ind in mcq_indicators if ind in full_norm) >= 2 or any(
-            re.search(rf"\b{opt}\s*[\.\)]", full_text) for opt in ["A", "B", "C", "D"]
-        )
-
-        pair1_present = 2 in detected_main_qs and 3 in detected_main_qs
-        pair2_present = 4 in detected_main_qs and 5 in detected_main_qs
-        pair3_present = 6 in detected_main_qs and 7 in detected_main_qs
-
-        # Validate Pair 1 (Q2 and Q3 = 10 Marks)
-        items.append({
-            "requirement": "MCQ Pair 1 (Question 2 & Question 3)",
-            "expected_value": "Two MCQ Questions (Q2 & Q3) with combined value = 10 Marks",
-            "detected_value": "Question 2 and Question 3 verified (Combined 10M)" if pair1_present else "Pair 1 questions missing or incomplete",
-            "result": "Correct" if pair1_present else "Missing",
-            "explanation": "Pair 1 consists of Questions 2 & 3 with a combined total of 10 marks." if pair1_present else "Questions 2 and 3 must both be present with combined 10 marks.",
-            "recommended_correction": "None required." if pair1_present else "Add both Question 2 and Question 3 as MCQ items."
-        })
-
-        # Validate Pair 2 (Q4 and Q5 = 10 Marks)
-        items.append({
-            "requirement": "MCQ Pair 2 (Question 4 & Question 5)",
-            "expected_value": "Two MCQ Questions (Q4 & Q5) with combined value = 10 Marks",
-            "detected_value": "Question 4 and Question 5 verified (Combined 10M)" if pair2_present else "Pair 2 questions missing or incomplete",
-            "result": "Correct" if pair2_present else "Missing",
-            "explanation": "Pair 2 consists of Questions 4 & 5 with a combined total of 10 marks." if pair2_present else "Questions 4 and 5 must both be present with combined 10 marks.",
-            "recommended_correction": "None required." if pair2_present else "Add both Question 4 and Question 5 as MCQ items."
-        })
-
-        # Validate Pair 3 (Q6 and Q7 = 10 Marks)
-        items.append({
-            "requirement": "MCQ Pair 3 (Question 6 & Question 7)",
-            "expected_value": "Two MCQ Questions (Q6 & Q7) with combined value = 10 Marks",
-            "detected_value": "Question 6 and Question 7 verified (Combined 10M)" if pair3_present else "Pair 3 questions missing or incomplete",
-            "result": "Correct" if pair3_present else "Missing",
-            "explanation": "Pair 3 consists of Questions 6 & 7 with a combined total of 10 marks." if pair3_present else "Questions 6 and 7 must both be present with combined 10 marks.",
-            "recommended_correction": "None required." if pair3_present else "Add both Question 6 and Question 7 as MCQ items."
-        })
-
-        # Rule 7: Prohibit OR choice or attempt-any-three rule
-        has_disallowed_or = bool(re.search(r"\b(?:attempt\s*any\s*three|answer\s*any\s*3|either\s+or)\b", full_norm))
-        if not has_disallowed_or:
-            items.append({
-                "requirement": "Compulsory Assessment (No OR Choice)",
-                "expected_value": "All 7 Questions compulsory (No OR choice or attempt-any-three)",
-                "detected_value": "No disallowed 'OR' choice or attempt-any-three rules detected",
-                "result": "Correct",
-                "explanation": "Paper adheres to mandatory institutional policy where all 7 questions are compulsory.",
-                "recommended_correction": "None required."
-            })
-        else:
-            items.append({
-                "requirement": "Compulsory Assessment (No OR Choice)",
-                "expected_value": "All 7 Questions compulsory (No OR choice or attempt-any-three)",
-                "detected_value": "Detected disallowed OR choice / attempt-any-three instruction",
-                "result": "Incorrect",
-                "explanation": "Mid examination format strictly forbids internal choice or attempt-any-three rules.",
-                "recommended_correction": "Remove 'OR' choice and attempt-any-three instructions; all 7 questions must be compulsory."
-            })
-
-        # Rule 8 & 9: Grand Total Marks = 40
-        # Q1 = 10M, Pair 1 = 10M, Pair 2 = 10M, Pair 3 = 10M -> Total = 40M
-        detected_marks = extract_detected_total_marks(full_text) or 40
-        marks_correct = (detected_marks == 40)
-
-        items.append({
-            "requirement": "Total Marks Calculation",
-            "expected_value": "Grand Total = 40 Marks (Q1: 10M + Pair 1: 10M + Pair 2: 10M + Pair 3: 10M)",
-            "detected_value": f"Total Marks: {detected_marks} Marks",
-            "result": "Correct" if marks_correct else "Incorrect",
-            "explanation": f"Grand total marks calculated as {detected_marks} marks (Expected: 40 marks).",
-            "recommended_correction": "None required." if marks_correct else "Ensure total marks scheme strictly equals 40 Marks."
-        })
 
         marks_info = {
-            "expected_marks": 40,
-            "detected_marks": detected_marks,
-            "calculation_breakdown": "Q1 (10M) + Pair 1 [Q2-3] (10M) + Pair 2 [Q4-5] (10M) + Pair 3 [Q6-7] (10M) = 40 Marks",
-            "status": "Correct" if marks_correct and len(detected_main_qs) == 7 else "Incorrect"
+            "expected_marks": "N/A",
+            "detected_marks": "N/A",
+            "calculation_breakdown": "Mid Exam: Question 1 (5 Subquestions) + Questions 2-7 (10 Marks each)",
+            "status": "Correct" if (q1_ok and qs_present_ok and marks_2_7_ok) else "Incorrect"
         }
 
         return build_categorized_report(items, marks_info)
 
     # -------------------------------------------------------------
-    # CASE B: SEMESTER EXAMINATION (Total Marks = 70)
+    # CASE B: SEMESTER QUESTION PAPER VALIDATION
     # -------------------------------------------------------------
     else:
-        items.append({
-            "requirement": "Examination Category",
-            "expected_value": "Semester Examination (Regular / Supplementary)",
-            "detected_value": "Semester Examination Verified",
-            "result": "Correct",
-            "explanation": "Document identified as Semester End Examination paper.",
-            "recommended_correction": "None required."
-        })
+        # 1. PART A - QUESTION 1 CONTAINS 10 SUBQUESTIONS
+        # Accept uppercase and lowercase: A-J or a-j
+        # Accept formats such as 1(a), 1(A), (a), (A), 1.a, 1.A, a., A., a), A)
+        sem_letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        detected_sem_subs = []
+        for l in sem_letters:
+            pat = rf'(?:1\s*[\.\(]\s*{l}[\.\)]?|\({l}\)|{l}\)|\b{l}\.|\b{l}\b(?:\s*[\.\:\-\)])|\|\s*(?:1[\.\(])?\s*{l}[\.\)\s])'
+            if re.search(pat, full_text, re.IGNORECASE | re.MULTILINE):
+                detected_sem_subs.append(l.upper())
 
-        # Rule 1: Part A – Short Answer Questions (Questions 1 to 10 @ 2 Marks each = 20 Marks)
-        has_part_a = "part a" in full_norm or "part-a" in full_norm or "section a" in full_norm
-        part_a_text = extract_section_text(full_text, "part a", ["part b", "part-b", "section b"]) or full_text[:3000]
+        two_m_labels = re.findall(r'\b2\s*m(?:arks)?\b', full_text, re.IGNORECASE)
+        part_a_sub_count = max(len(detected_sem_subs), len(two_m_labels))
+        part_a_ok = (part_a_sub_count >= 10)
 
-        # Count Part A questions: 1 to 10 or 1.a through 1.j
-        part_a_sub_count = len(re.findall(r"\b(?:1\.[a-j]|\([a-j]\)|[a-j]\))\b", normalize(part_a_text)))
-        part_a_num_count = len(re.findall(r"(?m)^\s*(?:[1-9]|10)\s*[\.\)]\s+", part_a_text))
-        part_a_q_count = max(part_a_sub_count, part_a_num_count)
-
-        # Check 2 marks allocation
-        has_2m = "2 marks" in normalize(part_a_text) or "2m" in normalize(part_a_text) or "20 marks" in full_norm or "[2]" in part_a_text
-
-        if has_part_a and (part_a_q_count >= 8 or "10 questions" in full_norm):
+        if part_a_ok:
             items.append({
-                "requirement": "PART A – Short Answer Questions (10 x 2M = 20M)",
-                "expected_value": "10 Questions @ 2 Marks each = 20 Marks covering all 5 Units",
-                "detected_value": f"Part A verified ({part_a_q_count if part_a_q_count > 0 else 10} questions detected @ 2M each)",
+                "requirement": "Part A, Question 1 Subquestions",
+                "expected_value": "Question 1 must contain exactly 10 subquestions (A-J or a-j)",
+                "detected_value": "Part A, Question 1 contains all 10 subquestions",
                 "result": "Correct",
-                "explanation": "Part A contains 10 compulsory short-answer questions carrying 2 marks each (20 marks total).",
+                "explanation": "Question 1 in Part A contains exactly 10 subquestions.",
                 "recommended_correction": "None required."
             })
         else:
             items.append({
-                "requirement": "PART A – Short Answer Questions (10 x 2M = 20M)",
-                "expected_value": "10 Questions @ 2 Marks each = 20 Marks covering all 5 Units",
-                "detected_value": f"Part A incomplete (Detected {part_a_q_count}/10 questions)",
-                "result": "Missing" if not has_part_a else "Incorrect",
-                "explanation": "Semester paper must contain PART A with exactly 10 short questions (2 marks each).",
-                "recommended_correction": "Include: 'PART-A: Answer all 10 questions (10 x 2 = 20 Marks)'."
+                "requirement": "Part A, Question 1 Subquestions",
+                "expected_value": "Question 1 must contain exactly 10 subquestions (A-J or a-j)",
+                "detected_value": f"Detected {part_a_sub_count}/10 subquestions in Part A",
+                "result": "Incorrect",
+                "explanation": "Question 1 in Part A must contain exactly 10 subquestions (A-J or a-j).",
+                "recommended_correction": "Include all 10 subquestions (a through j or A through J) under Question 1 in Part A."
             })
 
-        # Rule 2: Part B – Descriptive Questions (5 Unit-Wise Questions @ 10 Marks each = 50 Marks)
-        has_part_b = "part b" in full_norm or "part-b" in full_norm or "section b" in full_norm
-        part_b_text = extract_section_text(full_text, "part b") or full_text[len(full_text)//3:]
-        part_b_norm = normalize(part_b_text)
+        # 2. PART B - MAIN QUESTIONS COUNT (EXACTLY 10 QUESTIONS)
+        part_b_idx = full_text.find("PART-B") if "PART-B" in full_text else full_text.find("PART B")
+        part_b_text = full_text[part_b_idx:] if part_b_idx != -1 else full_text
 
-        # Check all 5 units in Part B
-        units_in_b = []
-        for u_num, u_label in [(1, "unit 1"), (2, "unit 2"), (3, "unit 3"), (4, "unit 4"), (5, "unit 5"),
-                               (1, "unit i"), (2, "unit ii"), (3, "unit iii"), (4, "unit iv"), (5, "unit v")]:
-            if u_label in part_b_norm or u_label in full_norm:
-                if u_num not in units_in_b:
-                    units_in_b.append(u_num)
+        unit_count = len(re.findall(r'\bUNIT\s*[\-\s]?[IV0-9]+\b', part_b_text, re.IGNORECASE))
+        or_count = len(re.findall(r'\bOR\b', part_b_text))
+        ten_m_labels = re.findall(r'\b10\s*m(?:arks)?\b', part_b_text, re.IGNORECASE)
 
-        has_10m = "10 marks" in part_b_norm or "10m" in part_b_norm or "50 marks" in full_norm or "[10]" in part_b_text
+        if (unit_count == 5 and or_count == 5) or len(ten_m_labels) == 10:
+            part_b_q_count = 10
+        else:
+            part_b_q_count = len(ten_m_labels)
 
-        if has_part_b and len(units_in_b) >= 4 and has_10m:
+        part_b_count_ok = (part_b_q_count == 10)
+        if part_b_count_ok:
             items.append({
-                "requirement": "PART B – Unit-Wise Descriptive Questions (5 x 10M = 50M)",
-                "expected_value": "5 Unit-Wise Questions (Unit 1 to Unit 5), 1 question @ 10M per unit = 50M",
-                "detected_value": f"Part B verified across {len(units_in_b)}/5 units @ 10M each",
+                "requirement": "Part B Main Questions Count",
+                "expected_value": "Part B must contain exactly 10 main questions",
+                "detected_value": "Part B contains exactly 10 main questions",
                 "result": "Correct",
-                "explanation": "Part B provides 5 unit-wise questions carrying 10 marks each (50 marks total).",
+                "explanation": "Part B contains exactly 10 main questions.",
                 "recommended_correction": "None required."
             })
         else:
-            missing_units_b = [f"Unit {u}" for u in range(1, 6) if u not in units_in_b]
             items.append({
-                "requirement": "PART B – Unit-Wise Descriptive Questions (5 x 10M = 50M)",
-                "expected_value": "5 Unit-Wise Questions (Unit 1 to Unit 5), 1 question @ 10M per unit = 50M",
-                "detected_value": f"Detected {len(units_in_b)}/5 units in Part B. Missing: {', '.join(missing_units_b)}",
-                "result": "Missing" if not has_part_b else "Incorrect",
-                "explanation": "Part B must cover all 5 units with one 10-mark question from each unit.",
-                "recommended_correction": "Structure Part B into Units 1 through 5 with one 10-mark question per unit."
+                "requirement": "Part B Main Questions Count",
+                "expected_value": "Part B must contain exactly 10 main questions",
+                "detected_value": f"Detected {part_b_q_count}/10 main questions in Part B",
+                "result": "Incorrect",
+                "explanation": "Part B must contain exactly 10 main questions.",
+                "recommended_correction": "Structure Part B to contain exactly 10 main questions."
             })
 
-        # Rule 3: Grand Total Calculation (Part A = 20M + Part B = 50M = 70 Marks)
-        detected_marks = extract_detected_total_marks(full_text) or 70
-        is_70m = (detected_marks == 70)
-
-        items.append({
-            "requirement": "Semester Paper Total Marks (70 Marks)",
-            "expected_value": "Part A (20 Marks) + Part B (50 Marks) = Grand Total 70 Marks",
-            "detected_value": f"Total Marks: {detected_marks} Marks",
-            "result": "Correct" if is_70m else "Incorrect",
-            "explanation": f"Grand total marks verified as {detected_marks} marks (Expected: 70 marks).",
-            "recommended_correction": "None required." if is_70m else "Ensure total marks scheme strictly equals 70 Marks."
-        })
+        # 3. EACH PART B QUESTION DISPLAYS 10 MARKS BESIDE IT
+        part_b_marks_ok = (len(ten_m_labels) >= 10)
+        if part_b_marks_ok:
+            items.append({
+                "requirement": "Part B Questions (10 Marks Each)",
+                "expected_value": "Every question in Part B must display '10 Marks' beside it",
+                "detected_value": "All 10 main questions in Part B display '10 Marks' beside them",
+                "result": "Correct",
+                "explanation": "Each of the 10 questions in Part B displays individual 10 Marks beside it.",
+                "recommended_correction": "None required."
+            })
+        else:
+            items.append({
+                "requirement": "Part B Questions (10 Marks Each)",
+                "expected_value": "Every question in Part B must display '10 Marks' beside it",
+                "detected_value": f"Detected {len(ten_m_labels)}/10 questions displaying '10 Marks' in Part B",
+                "result": "Incorrect",
+                "explanation": "Every question in Part B must display '10 Marks' beside it.",
+                "recommended_correction": "Add '10 Marks' beside each of the 10 questions in Part B."
+            })
 
         marks_info = {
-            "expected_marks": 70,
-            "detected_marks": detected_marks,
-            "calculation_breakdown": "Part A: 10 x 2M = 20M + Part B: 5 Units x 10M = 50M | Grand Total = 70 Marks",
-            "status": "Correct" if is_70m and has_part_a and has_part_b else "Incorrect"
+            "expected_marks": "N/A",
+            "detected_marks": "N/A",
+            "calculation_breakdown": "Semester Exam: Part A (10 Subquestions) + Part B (10 Main Questions @ 10 Marks each)",
+            "status": "Correct" if (part_a_ok and part_b_count_ok and part_b_marks_ok) else "Incorrect"
         }
 
         return build_categorized_report(items, marks_info)

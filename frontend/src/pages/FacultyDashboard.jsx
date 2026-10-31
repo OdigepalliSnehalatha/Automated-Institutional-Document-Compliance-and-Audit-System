@@ -452,18 +452,66 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-            {/* Question Paper Checklist */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
+            {/* Common Header Card */}
             <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <span style={{ fontSize: "20px" }}>📄</span>
-                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Evaluation Requirements</h4>
+                <span style={{ fontSize: "20px" }}>🏛️</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Common Examination Header</h4>
               </div>
-              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
-                <li><strong>Header</strong>: Institute Name, Semester, Branch, Subject Name & Code, Max Marks, Time.</li>
-                <li><strong>Mid Examination</strong>: Part A must have exactly 5 questions (2 marks each); Part B must have 6 questions (10 marks each).</li>
-                <li><strong>Semester Examination</strong>: Part A must have 10 questions (2M); Part B must have 10 questions (10M).</li>
-                <li><strong>Strict Boolean Decision</strong>: Any missing question number or marks pattern results in instant <code>REJECTED</code>.</li>
+              <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 10px 0" }}>
+                Mandatory header elements required across Mid 1, Mid 2, and Semester Papers:
+              </p>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
+                <li><strong>College Name</strong>: Official institution banner.</li>
+                <li><strong>Subject Name</strong>: Course / Subject title.</li>
+                <li><strong>Subject Code</strong>: Approved alphanumeric subject code.</li>
+                <li><strong>Branch Name</strong>: Department / Branch designation.</li>
+                <li><strong>Maximum Marks</strong>: Must strictly appear in the header area.</li>
+              </ul>
+            </div>
+
+            {/* Mid 1 & Mid 2 Requirements Card */}
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📝</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Mid 1 & Mid 2 Examination Papers</h4>
+              </div>
+              <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 10px 0" }}>
+                Total Marks: 40 | Separate Marks Column layout:
+              </p>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
+                <li><strong>Separate Marks Column</strong>: Display a separate Marks column beside each question in the table.</li>
+                <li><strong>Question 1 (Short Answer)</strong>: Must contain five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks).</li>
+                <li><strong>OR Pairs</strong>:
+                  <ul style={{ paddingLeft: "16px", marginTop: "4px" }}>
+                    <li>Questions 2 and 3 form one OR pair.</li>
+                    <li>Questions 4 and 5 form one OR pair.</li>
+                    <li>Questions 6 and 7 form one OR pair.</li>
+                  </ul>
+                </li>
+                <li><strong>Question Marks</strong>: Each main question carries 10 marks.</li>
+                <li><strong>Maximum Marks</strong>: 40 (must appear in header).</li>
+                <li><strong>Clean Presentation</strong>: Do not display multiplication calculations or unnecessary marks summaries.</li>
+              </ul>
+            </div>
+
+            {/* Semester Question Paper Card */}
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📜</span>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Semester Question Paper</h4>
+              </div>
+              <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 10px 0" }}>
+                Total Marks: 70 | Inline Individual Marks format:
+              </p>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
+                <li><strong>No Marks Column</strong>: Do NOT display a separate Marks column in the question paper table.</li>
+                <li><strong>Inline Individual Marks</strong>: Display individual marks directly beside each question statement.</li>
+                <li><strong>PART A (Short Answer)</strong>: Ten subquestions, each individually showing (2 Marks) (Total: 20 Marks).</li>
+                <li><strong>PART B (Descriptive)</strong>: Five unit-wise questions (Units 1 to 5), each individually showing (10 Marks) (Total: 50 Marks).</li>
+                <li><strong>Maximum Marks</strong>: 70 (must appear in header).</li>
+                <li><strong>No Formula Display</strong>: Preserve individual marks presentation without formulas (no 2 × 10 = 20 or 10 × 5 = 50).</li>
               </ul>
             </div>
 
@@ -471,10 +519,10 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
             <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                 <span style={{ fontSize: "20px" }}>📚</span>
-                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Course Structure Requirements</h4>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Course Structure Requirements</h4>
               </div>
-              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
-                <li><strong>Header</strong>: Institution & Department Heading, Course Name, Course Code.</li>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
+                <li><strong>Header</strong>: College Name, Course Name, Course Code, Academic Year, Semester Name.</li>
                 <li><strong>Curriculum Units</strong>: All 5 structural sections must be present: Unit 1, Unit 2, Unit 3, Unit 4, Unit 5.</li>
                 <li><strong>Topic Sections</strong>: Each unit must be followed by its respective syllabus topic body.</li>
                 <li><strong>Order</strong>: Units must appear in chronological sequential order.</li>
@@ -485,10 +533,10 @@ function FacultyDashboard({ user, activeTab: propActiveTab, onTabChange }) {
             <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                 <span style={{ fontSize: "20px" }}>📑</span>
-                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Question Bank Requirements</h4>
+                <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>Question Bank Requirements</h4>
               </div>
-              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.6", color: "#334155" }}>
-                <li><strong>Header</strong>: College Name, Course Name, Course Code, Semester.</li>
+              <ul style={{ paddingLeft: "18px", fontSize: "13px", lineHeight: "1.7", color: "#334155" }}>
+                <li><strong>Header</strong>: College Name, Course Name, Course Code, Academic Year, Semester Name.</li>
                 <li><strong>Units 1 to 5</strong>: Each unit must contain both Part A (10 x 2M questions) and Part B (10 x 10M questions).</li>
                 <li><strong>Marks Annotation</strong>: Marks pattern must be clearly indicated for each question.</li>
               </ul>

@@ -362,135 +362,36 @@ function Format({ onBack }) {
   const addQuestionPaperRequirements = (targetSubDiv) => {
     const effectiveExamType = targetSubDiv === "Semester Examination" || examType === "Semester Examination"
       ? "Semester Examination"
-      : "Mid Examination";
+      : (targetSubDiv === "Mid 2" || midSubdivision === "Mid 2" ? "Mid 2 Examination" : "Mid 1 Examination");
 
-    const partBQuestionCount = effectiveExamType === "Mid Examination" ? "5" : "10";
+    const isSemester = effectiveExamType === "Semester Examination";
 
-    const questionPaperRequirements = [
-      // -----------------------------------------------------
-      // HEADER
-      // -----------------------------------------------------
-      {
-        requirement_name: "College Header",
-        requirement_type: "required",
-        requirement_value: "Anantha Lakshmi Institute of Technology & Sciences",
-        is_required: true,
-      },
-      {
-        requirement_name: "Semester",
-        requirement_type: "required",
-        requirement_value: "B.Tech Semester",
-        is_required: true,
-      },
-      {
-        requirement_name: "B.Tech",
-        requirement_type: "required",
-        requirement_value: "B.Tech",
-        is_required: true,
-      },
-      {
-        requirement_name: "Examination Type",
-        requirement_type: "required",
-        requirement_value: effectiveExamType,
-        is_required: true,
-      },
-      {
-        requirement_name: "Subject Name",
-        requirement_type: "required",
-        requirement_value: "Subject Name must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Subject Code",
-        requirement_type: "required",
-        requirement_value: "Subject Code must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Branch",
-        requirement_type: "required",
-        requirement_value: "Branch must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Department",
-        requirement_type: "required",
-        requirement_value: "Department must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Time",
-        requirement_type: "required",
-        requirement_value: "Time must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Maximum Marks",
-        requirement_type: "required",
-        requirement_value: "Maximum marks must be present",
-        is_required: true,
-      },
-
-      // -----------------------------------------------------
-      // PART A
-      // -----------------------------------------------------
-      {
-        requirement_name: "Part A",
-        requirement_type: "required",
-        requirement_value: "Part A must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part A Question Count",
-        requirement_type: "question_count",
-        requirement_value: "10",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part A Arrangement",
-        requirement_type: "structure",
-        requirement_value: "Predefined Part A arrangement",
-        is_required: true,
-      },
-
-      // -----------------------------------------------------
-      // PART B
-      // -----------------------------------------------------
-      {
-        requirement_name: "Part B",
-        requirement_type: "required",
-        requirement_value: "Part B must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Part B Question Count",
-        requirement_type: "question_count",
-        requirement_value: partBQuestionCount,
-        is_required: true,
-      },
-      {
-        requirement_name: "Part B Arrangement",
-        requirement_type: "structure",
-        requirement_value: "Predefined Part B arrangement",
-        is_required: true,
-      },
-
-      // -----------------------------------------------------
-      // BODY / FOOTER
-      // -----------------------------------------------------
-      {
-        requirement_name: "Body",
-        requirement_type: "required",
-        requirement_value: "Question paper body must be present",
-        is_required: true,
-      },
-      {
-        requirement_name: "Footer",
-        requirement_type: "required",
-        requirement_value: "Footer must be present",
-        is_required: true,
-      },
-    ];
+    const questionPaperRequirements = isSemester
+      ? [
+          { requirement_name: "College Name", requirement_type: "required", requirement_value: "College Name must appear in the header (e.g. Anantha Lakshmi Institute of Technology & Sciences)", is_required: true },
+          { requirement_name: "Subject Name", requirement_type: "required", requirement_value: "Subject Name must appear in the header", is_required: true },
+          { requirement_name: "Subject Code", requirement_type: "required", requirement_value: "Subject Code must appear in the header", is_required: true },
+          { requirement_name: "Branch Name", requirement_type: "required", requirement_value: "Branch Name must appear in the header", is_required: true },
+          { requirement_name: "Maximum Marks (in Header)", requirement_type: "required", requirement_value: "Maximum Marks: 70 must appear in the header", is_required: true },
+          { requirement_name: "Marks Column Restriction", requirement_type: "structure", requirement_value: "Do NOT display a separate Marks column in the question paper table", is_required: true },
+          { requirement_name: "Inline Individual Marks Presentation", requirement_type: "structure", requirement_value: "Display individual marks directly beside each question (2 Marks for Part A, 10 Marks for Part B)", is_required: true },
+          { requirement_name: "PART A - Short Answer Questions", requirement_type: "question_count", requirement_value: "Ten subquestions, each individually showing (2 Marks) (20 Marks total)", is_required: true },
+          { requirement_name: "PART B - Unit-Wise Descriptive Questions", requirement_type: "structure", requirement_value: "Five unit-wise questions (Units 1 to 5), each individually showing (10 Marks) (50 Marks total)", is_required: true },
+          { requirement_name: "Semester Maximum Marks (70 Marks)", requirement_type: "marks", requirement_value: "Maximum Marks: 70 (Part A: 20 Marks + Part B: 50 Marks, without multiplication formulas)", is_required: true },
+        ]
+      : [
+          { requirement_name: "College Name", requirement_type: "required", requirement_value: "College Name must appear in the header (e.g. Anantha Lakshmi Institute of Technology & Sciences)", is_required: true },
+          { requirement_name: "Subject Name", requirement_type: "required", requirement_value: "Subject Name must appear in the header", is_required: true },
+          { requirement_name: "Subject Code", requirement_type: "required", requirement_value: "Subject Code must appear in the header", is_required: true },
+          { requirement_name: "Branch Name", requirement_type: "required", requirement_value: "Branch Name must appear in the header", is_required: true },
+          { requirement_name: "Maximum Marks (in Header)", requirement_type: "required", requirement_value: "Maximum Marks: 40 must appear in the header", is_required: true },
+          { requirement_name: "Separate Marks Column", requirement_type: "structure", requirement_value: "Display a separate Marks column beside each question in the table", is_required: true },
+          { requirement_name: "Question 1 Subquestions (Short Answer)", requirement_type: "question_count", requirement_value: "Five subquestions (A, B, C, D, E), each carrying 2 marks (10 Marks)", is_required: true },
+          { requirement_name: "OR Pair 1 (Question 2 and Question 3)", requirement_type: "marks", requirement_value: "Questions 2 and 3 form one OR pair; each main question carries 10 marks", is_required: true },
+          { requirement_name: "OR Pair 2 (Question 4 and Question 5)", requirement_type: "marks", requirement_value: "Questions 4 and 5 form one OR pair; each main question carries 10 marks", is_required: true },
+          { requirement_name: "OR Pair 3 (Question 6 and Question 7)", requirement_type: "marks", requirement_value: "Questions 6 and 7 form one OR pair; each main question carries 10 marks", is_required: true },
+          { requirement_name: "Main Question Marks (10 Marks Each)", requirement_type: "marks", requirement_value: "Each main question carries 10 marks (Maximum Marks: 40, without multiplication formulas)", is_required: true },
+        ];
 
     setRequirements(
       questionPaperRequirements.map((item, index) => ({
@@ -499,18 +400,16 @@ function Format({ onBack }) {
       }))
     );
 
-    setFormatName(`Standard ${effectiveExamType} Format`);
+    const maxMarks = isSemester ? 70 : 40;
+    setFormatName(`Standard ${effectiveExamType} Paper Format (Total ${maxMarks} Marks)`);
     setInstructions(
-      `${effectiveExamType}. ` +
-      "The question paper is accepted only when every required structural check passes. Question numbering and academic content are not checked."
+      isSemester
+        ? "Semester Question Paper (Total Marks: 70). Header must display College Name, Subject Name, Subject Code, Branch Name, and Maximum Marks: 70. Do NOT display a separate Marks column in the question paper table. Display individual marks directly beside each question inline. Part A: Ten subquestions, each individually showing (2 Marks). Part B: Five unit-wise questions, each individually showing (10 Marks). Maximum Marks: 70. Preserve individual marks presentation throughout the paper without multiplication formulas."
+        : `${effectiveExamType} Paper (Total Marks: 40). Header must display College Name, Subject Name, Subject Code, Branch Name, and Maximum Marks: 40. Display a separate Marks column beside each question in the table. Question 1 must contain five subquestions (A, B, C, D, E) @ 2 marks each (10 Marks). Questions 2 and 3 form one OR pair. Questions 4 and 5 form one OR pair. Questions 6 and 7 form one OR pair. Each main question carries 10 marks. Maximum Marks: 40. Do not display multiplication calculations or unnecessary marks summaries.`
     );
 
-    setMessage(`Standard ${effectiveExamType} requirements loaded successfully (18 rules).`);
+    setMessage(`Standard ${effectiveExamType} requirements loaded successfully (${questionPaperRequirements.length} rules).`);
   };
-
-  // =========================================================
-  // SAVE FORMAT
-  // =========================================================
 
   const saveFormat = async () => {
     try {
